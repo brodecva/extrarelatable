@@ -9,6 +9,10 @@ public final class Metadata {
 		this.author = author;
 	}
 
+	public Metadata() {
+		this(null, null);
+	}
+	
 	public String getTitle() {
 		return title;
 	}

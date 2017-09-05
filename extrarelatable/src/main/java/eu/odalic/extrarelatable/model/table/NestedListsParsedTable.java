@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.table;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -9,6 +10,56 @@ import com.google.common.collect.ImmutableList;
 import eu.odalic.extrarelatable.util.Matrix;
 
 public final class NestedListsParsedTable implements ParsedTable {
+	
+	/**
+	 * Incrementally, row by row, helps to produce the complete {@link ListsBackedInput}.
+	 *
+	 * @author Jan Váňa
+	 * @author Václav Brodec
+	 *
+	 */
+	public static final class Builder {
+
+	  private final List<String> headers = new ArrayList<>();
+	  private final List<List<String>> rows = new ArrayList<>();
+	  
+	  private Metadata metadata = null;
+
+	  public NestedListsParsedTable build() {
+	    return NestedListsParsedTable.fromRows(headers, rows, metadata);
+	  }
+
+	  public void insertCell(final String value, final int rowIndex, final int columnIndex) {
+	    while (rows.size() <= rowIndex) {
+	      rows.add(new ArrayList<>());
+	    }
+
+	    insertToList(rows.get(rowIndex), value, columnIndex);
+	  }
+
+	  public Builder insertHeader(final String value, final int position) {
+	    insertToList(headers, value, position);
+	    
+	    return this;
+	  }
+
+	  private void insertToList(final List<String> list, final String value, final int position) {
+	    while (list.size() <= position) {
+	      list.add(null);
+	    }
+
+	    list.set(position, value);
+	  }
+	  
+	  public Builder setMetadata(final Metadata metadata) {
+		  checkNotNull(metadata);
+		  
+		  this.metadata = metadata;
+		  
+		  return this;
+	  }
+	}
+
 	private final List<String> header;
 	
 	private final List<List<String>> rows;
@@ -16,8 +67,12 @@ public final class NestedListsParsedTable implements ParsedTable {
 	private final List<List<String>> columns;
 	
 	private final Metadata metadata;
+
+	public static Builder builder() {
+		return new Builder();
+	}
 	
-	public static ParsedTable fromRows(final List<? extends String> header, final List<? extends List<? extends String>> rows, final Metadata metadata) {
+	public static NestedListsParsedTable fromRows(final List<? extends String> header, final List<? extends List<? extends String>> rows, final Metadata metadata) {
 		checkNotNull(header);
 		checkNotNull(rows);
 		checkNotNull(metadata);

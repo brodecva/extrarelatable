@@ -33,8 +33,9 @@ import com.google.common.collect.Sets;
 import eu.odalic.extrarelatable.algorithms.subcontexts.SubcontextCompiler;
 import eu.odalic.extrarelatable.algorithms.subcontexts.SubcontextMatcher;
 import eu.odalic.extrarelatable.input.TableAnalyzer;
-import eu.odalic.extrarelatable.input.TableReader;
+import eu.odalic.extrarelatable.input.TableParser;
 import eu.odalic.extrarelatable.input.TableSlicer;
+import eu.odalic.extrarelatable.input.csv.Format;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
@@ -50,7 +51,8 @@ import eu.odalic.extrarelatable.model.histogram.Partition;
 import eu.odalic.extrarelatable.model.histogram.Subcontext;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
-import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
+import eu.odalic.extrarelatable.model.table.Metadata;
+import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
  * @author Václav Brodec
@@ -68,7 +70,7 @@ public class Baseline {
 
 	@Autowired
 	@Lazy
-	private TableReader tableReader;
+	private TableParser tableReader;
 
 	@Autowired
 	@Lazy
@@ -116,28 +118,27 @@ public class Baseline {
 
 	@Test
 	public void test() throws IOException {
-		fail("Not yet implemented");
-
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path testSetPath = resourcesPath.resolve(SET_SUBPATH);
 
 		final BackgroundKnowledgeGraph.Builder graphBuilder = BackgroundKnowledgeGraph.builder();
 
 		Files.newDirectoryStream(testSetPath).forEach(file -> {
-			final Set<PropertyTree> trees = readFile(file);
+			final Set<PropertyTree> trees = readFile(file, new Format());
 
 			graphBuilder.addAll(trees);
 		});
 		graphBuilder.build();
 		
 		//TODO Process the files.
+		fail("Not yet implemented");
 	}
 
-	private Set<PropertyTree> readFile(final Path input) {
+	private Set<PropertyTree> readFile(final Path input, final Format format) {
 		/* Parse the input file to table. */
-		final NestedListsParsedTable table;
+		final ParsedTable table;
 		try (final InputStream inputStream = Files.newInputStream(input)) {
-			table = tableReader.parse(inputStream);
+			table = tableReader.parse(inputStream, format, new Metadata());
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
