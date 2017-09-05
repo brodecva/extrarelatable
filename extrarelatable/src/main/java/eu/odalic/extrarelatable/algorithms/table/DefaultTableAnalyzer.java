@@ -52,7 +52,7 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 			return row.stream().map(cell -> {
 				if (valueTypeAnalyzer.isEmpty(cell)) {
 					return EmptyValue.INSTANCE;
-				} else if (valueTypeAnalyzer.isNumeric(cell)) {
+				} else if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
 					return NumericValue.of(numericValueParser.parse(cell, forcedLocale));
 				} else {
 					return TextValue.of(cell);

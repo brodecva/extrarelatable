@@ -1,7 +1,8 @@
 package eu.odalic.extrarelatable.algorithms.bag;
 
-import java.util.regex.Pattern;
+import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Locale;
 import javax.annotation.concurrent.Immutable;
 
 import org.springframework.stereotype.Component;
@@ -10,15 +11,28 @@ import org.springframework.stereotype.Component;
 @Component
 public final class DefaultValueTypeAnalyzer implements ValueTypeAnalyzer {
 
-	private static final Pattern NUMBERS_CONTAINED_PATTERN = Pattern.compile("[0-9]+");;
-
+	private final NumericValueParser numericValueParser;
+	
+	public DefaultValueTypeAnalyzer(final NumericValueParser numericValueParser) {
+		checkNotNull(numericValueParser);
+		
+		this.numericValueParser = numericValueParser;
+	}
+	
 	@Override
-	public boolean isNumeric(String value) {
+	public boolean isNumeric(final String value, final Locale locale) {
+		checkNotNull(locale);
 		if (isEmpty(value)) {
 			return false;
 		}
 		
-		return NUMBERS_CONTAINED_PATTERN.matcher(value).matches();
+		try {
+			numericValueParser.parse(value, locale);
+		} catch (final IllegalArgumentException e) {
+			return false;
+		}
+		
+		return true;
 	}
 
 	@Override

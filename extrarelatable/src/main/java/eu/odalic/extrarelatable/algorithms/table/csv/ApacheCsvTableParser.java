@@ -96,6 +96,8 @@ public final class ApacheCsvTableParser implements CsvTableParser {
 			throw new IOException("There are no data rows in the CSV file.");
 		}
 
+		builder.setMetadata(metadata);
+		
 		return builder.build();
 	}
 

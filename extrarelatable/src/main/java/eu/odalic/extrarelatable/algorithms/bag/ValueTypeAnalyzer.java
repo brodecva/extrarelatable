@@ -1,7 +1,9 @@
 package eu.odalic.extrarelatable.algorithms.bag;
 
+import java.util.Locale;
+
 public interface ValueTypeAnalyzer {
-	boolean isNumeric(final String value);
-	
+	boolean isNumeric(String value, Locale locale);
+
 	boolean isEmpty(final String value);
 }

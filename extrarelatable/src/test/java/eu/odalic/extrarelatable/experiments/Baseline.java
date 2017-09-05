@@ -65,7 +65,7 @@ public class Baseline {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.9;
 	private static final String RESOURCES_PATH = "src/test/resources";
-	private static final String SET_SUBPATH = "votes";
+	private static final String SET_SUBPATH = "health";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
 
