@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.model.histogram;
+package eu.odalic.extrarelatable.model.subcontext;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

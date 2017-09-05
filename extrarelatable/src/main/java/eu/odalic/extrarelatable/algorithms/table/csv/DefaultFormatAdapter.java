@@ -1,12 +1,14 @@
 /**
  *
  */
-package eu.odalic.extrarelatable.input.csv;
+package eu.odalic.extrarelatable.algorithms.table.csv;
 
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.csv.CSVFormat;
 import org.springframework.stereotype.Component;
+
+import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
  * <p>

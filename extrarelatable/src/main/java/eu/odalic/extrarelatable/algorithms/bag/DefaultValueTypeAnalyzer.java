@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.types;
+package eu.odalic.extrarelatable.algorithms.bag;
 
 import java.util.regex.Pattern;
 

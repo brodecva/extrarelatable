@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.input.csv;
+package eu.odalic.extrarelatable.algorithms.table.csv;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -17,14 +17,14 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import eu.odalic.extrarelatable.input.TableParser;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
+import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
  * <p>
- * An implementation of the {@link TableParser} handling CSV files and employing
+ * An implementation of the {@link CsvTableParser} handling CSV files and employing
  * Apache Commons CSV library.
  * </p>
  * 
@@ -37,7 +37,7 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  */
 @Immutable
 @Component
-public final class ApacheCsvTableParser implements TableParser {
+public final class ApacheCsvTableParser implements CsvTableParser {
 
 	private final FormatAdapter apacheCsvFormatAdapter;
 

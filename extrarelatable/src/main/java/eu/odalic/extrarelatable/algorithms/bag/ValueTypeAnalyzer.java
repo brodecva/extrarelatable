@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.types;
+package eu.odalic.extrarelatable.algorithms.bag;
 
 public interface ValueTypeAnalyzer {
 	boolean isNumeric(final String value);

@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.input.csv;
+package eu.odalic.extrarelatable.model.table.csv;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

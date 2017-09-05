@@ -1,7 +1,9 @@
-package eu.odalic.extrarelatable.input.csv;
+package eu.odalic.extrarelatable.algorithms.table.csv;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+
+import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
  * Adapter from {@link Format} to {@link CSVFormat}.

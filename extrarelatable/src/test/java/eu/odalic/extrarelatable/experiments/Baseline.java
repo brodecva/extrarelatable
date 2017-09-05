@@ -30,12 +30,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import eu.odalic.extrarelatable.algorithms.subcontexts.SubcontextCompiler;
-import eu.odalic.extrarelatable.algorithms.subcontexts.SubcontextMatcher;
-import eu.odalic.extrarelatable.input.TableAnalyzer;
-import eu.odalic.extrarelatable.input.TableParser;
-import eu.odalic.extrarelatable.input.TableSlicer;
-import eu.odalic.extrarelatable.input.csv.Format;
+
+import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextCompiler;
+import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextMatcher;
+import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;
+import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
+import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
@@ -47,10 +47,11 @@ import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.SharedPairNode;
-import eu.odalic.extrarelatable.model.histogram.Partition;
-import eu.odalic.extrarelatable.model.histogram.Subcontext;
+import eu.odalic.extrarelatable.model.subcontext.Partition;
+import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
+import eu.odalic.extrarelatable.model.table.csv.Format;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
@@ -70,7 +71,7 @@ public class Baseline {
 
 	@Autowired
 	@Lazy
-	private TableParser tableReader;
+	private CsvTableParser tableReader;
 
 	@Autowired
 	@Lazy

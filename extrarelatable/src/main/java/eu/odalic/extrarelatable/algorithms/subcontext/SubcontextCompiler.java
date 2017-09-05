@@ -1,9 +1,9 @@
-package eu.odalic.extrarelatable.algorithms.subcontexts;
+package eu.odalic.extrarelatable.algorithms.subcontext;
 
 import java.util.Set;
 
-import eu.odalic.extrarelatable.model.histogram.Partition;
-import eu.odalic.extrarelatable.model.histogram.Subcontext;
+import eu.odalic.extrarelatable.model.subcontext.Partition;
+import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
 public interface SubcontextCompiler {

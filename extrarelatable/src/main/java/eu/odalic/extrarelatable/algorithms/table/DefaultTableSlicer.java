@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.input;
+package eu.odalic.extrarelatable.algorithms.table;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 
-import eu.odalic.extrarelatable.algorithms.types.ColumnTypeAnalyzer;
 import eu.odalic.extrarelatable.model.table.NestedListsSlicedTable;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;

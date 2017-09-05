@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.input;
+package eu.odalic.extrarelatable.algorithms.table;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -10,7 +10,9 @@ import javax.annotation.concurrent.Immutable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
-import eu.odalic.extrarelatable.algorithms.types.ValueTypeAnalyzer;
+
+import eu.odalic.extrarelatable.algorithms.bag.NumericValueParser;
+import eu.odalic.extrarelatable.algorithms.bag.ValueTypeAnalyzer;
 import eu.odalic.extrarelatable.model.bag.EmptyValue;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;

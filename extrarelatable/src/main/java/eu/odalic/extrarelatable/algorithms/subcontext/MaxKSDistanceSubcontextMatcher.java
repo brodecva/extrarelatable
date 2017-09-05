@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.subcontexts;
+package eu.odalic.extrarelatable.algorithms.subcontext;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -10,8 +10,8 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.springframework.stereotype.Component;
 
-import eu.odalic.extrarelatable.model.histogram.Partition;
-import eu.odalic.extrarelatable.model.histogram.Subcontext;
+import eu.odalic.extrarelatable.model.subcontext.Partition;
+import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 
 @Immutable
 @Component

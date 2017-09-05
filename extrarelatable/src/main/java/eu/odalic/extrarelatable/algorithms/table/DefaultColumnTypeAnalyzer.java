@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.types;
+package eu.odalic.extrarelatable.algorithms.table;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

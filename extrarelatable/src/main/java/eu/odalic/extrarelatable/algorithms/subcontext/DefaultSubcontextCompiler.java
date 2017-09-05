@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.subcontexts;
+package eu.odalic.extrarelatable.algorithms.subcontext;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import java.util.List;
@@ -15,9 +15,9 @@ import com.google.common.collect.ImmutableSet;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
 import eu.odalic.extrarelatable.model.bag.Value;
-import eu.odalic.extrarelatable.model.histogram.NumericCell;
-import eu.odalic.extrarelatable.model.histogram.Partition;
-import eu.odalic.extrarelatable.model.histogram.Subcontext;
+import eu.odalic.extrarelatable.model.subcontext.NumericCell;
+import eu.odalic.extrarelatable.model.subcontext.Partition;
+import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
 @Immutable

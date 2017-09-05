@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.input;
+package eu.odalic.extrarelatable.algorithms.table;
 
 import java.util.Locale;
 
