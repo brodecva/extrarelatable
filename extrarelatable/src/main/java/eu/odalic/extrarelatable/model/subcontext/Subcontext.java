@@ -8,9 +8,7 @@ import java.util.Set;
 import javax.annotation.concurrent.Immutable;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-
+import com.google.common.collect.ImmutableSetMultimap;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.TextValue;
 
@@ -21,7 +19,7 @@ public final class Subcontext {
 
 		private Attribute attribute;
 		private Integer columnIndex;
-		private ImmutableMultimap.Builder<TextValue, NumericCell> partitionsBuilder = ImmutableMultimap.builder();
+		private ImmutableSetMultimap.Builder<TextValue, NumericCell> partitionsBuilder = ImmutableSetMultimap.builder();
 
 		public Builder setAttribute(final Attribute attribute) {
 			checkNotNull(attribute);
@@ -49,7 +47,7 @@ public final class Subcontext {
 		}
 
 		public Subcontext build() {
-			final Multimap<TextValue, NumericCell> partitionsEntryMap = partitionsBuilder.build();
+			final ImmutableSetMultimap<TextValue, NumericCell> partitionsEntryMap = partitionsBuilder.build();
 
 			final Map<TextValue, Partition> partitions = partitionsEntryMap.asMap().entrySet().stream().collect(
 					ImmutableMap.toImmutableMap(e -> e.getKey(), e -> new Partition((Set<NumericCell>) e.getValue())));

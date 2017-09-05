@@ -29,6 +29,7 @@ public final class MaxKSDistanceSubcontextMatcher implements SubcontextMatcher {
 		final double[] inputValues = inputPartition.getDoubleValuesArray();
 		checkArgument(inputValues.length >= MINIMUM_DATA_SIZE);
 
+		boolean found = false;
 		Double maximumDistance = null;
 		Subcontext winner = null;
 		for (final Subcontext candidate : candidates) {
@@ -37,9 +38,10 @@ public final class MaxKSDistanceSubcontextMatcher implements SubcontextMatcher {
 				checkArgument(candidateValues.length >= MINIMUM_DATA_SIZE);
 
 				final double distance = STATISTIC_CALCULATOR.kolmogorovSmirnovStatistic(inputValues, candidateValues);
-				if (distance > maximumDistance) {
+				if ((!found) || (distance > maximumDistance)) {
 					maximumDistance = distance;
 					winner = candidate;
+					found = true;
 				}
 			}
 		}

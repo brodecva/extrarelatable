@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 
+import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
 import eu.odalic.extrarelatable.model.bag.Value;
@@ -67,6 +68,9 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 			
 			builder.put((TextValue) contextColumnValue, new NumericCell(rowIndex, entry.getValue()));
 		}
+		
+		builder.setAttribute(new Attribute(table.getHeaders().get(contextValuesColumnIndex).getText()));
+		builder.setColumnIndex(contextValuesColumnIndex);
 		
 		return builder.build();
 	}
