@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multiset;
@@ -12,6 +14,7 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 
+@Immutable
 public final class PropertyTree {
 	
 	public static abstract class Node {
@@ -41,6 +44,7 @@ public final class PropertyTree {
 		}
 	}
 	
+	@Immutable
 	public static final class RootNode extends Node {
 		private final Label label;
 		
@@ -57,6 +61,7 @@ public final class PropertyTree {
 		}
 	}
 	
+	@Immutable
 	public static final class SharedPairNode extends CommonNode {
 		private final AttributeValuePair pair;
 		
@@ -71,8 +76,6 @@ public final class PropertyTree {
 		public AttributeValuePair getPair() {
 			return pair;
 		}
-		
-		
 	}
 	
 	private final RootNode root;

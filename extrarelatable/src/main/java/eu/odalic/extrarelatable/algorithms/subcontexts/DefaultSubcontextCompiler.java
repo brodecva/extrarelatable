@@ -3,6 +3,9 @@ package eu.odalic.extrarelatable.algorithms.subcontexts;
 import static com.google.common.base.Preconditions.checkArgument;
 import java.util.List;
 import java.util.Map.Entry;
+
+import javax.annotation.concurrent.Immutable;
+
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -17,6 +20,7 @@ import eu.odalic.extrarelatable.model.histogram.Partition;
 import eu.odalic.extrarelatable.model.histogram.Subcontext;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
+@Immutable
 @Component
 public class DefaultSubcontextCompiler implements SubcontextCompiler {
 

@@ -5,14 +5,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableList;
 
 import eu.odalic.extrarelatable.util.Matrix;
 
+@Immutable
 public final class NestedListsParsedTable implements ParsedTable {
 	
 	/**
-	 * Incrementally, row by row, helps to produce the complete {@link ListsBackedInput}.
+	 * <p>Incrementally, row by row, helps to produce the complete {@link ListsBackedInput}.</p>
+	 * 
+	 * <p>Adapted from Odalic.</p>
 	 *
 	 * @author Jan Váňa
 	 * @author Václav Brodec

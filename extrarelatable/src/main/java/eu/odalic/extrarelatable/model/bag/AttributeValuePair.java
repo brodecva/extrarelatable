@@ -2,6 +2,9 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class AttributeValuePair {
 	private final Attribute attribute;
 	private final TextValue value;

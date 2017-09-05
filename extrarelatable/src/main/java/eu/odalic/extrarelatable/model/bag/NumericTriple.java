@@ -2,9 +2,12 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
 
+@Immutable
 public final class NumericTriple {
 	private final Label label;
 	private final Multiset<NumericValue> values;

@@ -1,5 +1,8 @@
 package eu.odalic.extrarelatable.model.table;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class Metadata {
 	private final String title;
 	private final String author;

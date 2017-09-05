@@ -4,12 +4,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableList;
 
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.util.Matrix;
 
+@Immutable
 public final class NestedListsTypedTable implements TypedTable {
 	private final List<Label> header;
 	

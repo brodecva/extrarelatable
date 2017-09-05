@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Value;
 
+@Immutable
 public final class NestedListsSlicedTable implements SlicedTable {
 	
 	private final TypedTable typedTable;

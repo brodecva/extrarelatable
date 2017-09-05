@@ -6,8 +6,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableSet;
 
+@Immutable
 public final class BackgroundKnowledgeGraph implements Iterable<PropertyTree> {
 	
 	public static final class Builder {

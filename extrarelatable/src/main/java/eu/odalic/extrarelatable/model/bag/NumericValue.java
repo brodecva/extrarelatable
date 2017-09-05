@@ -1,5 +1,8 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class NumericValue implements Value {
 	private final double figure;
 

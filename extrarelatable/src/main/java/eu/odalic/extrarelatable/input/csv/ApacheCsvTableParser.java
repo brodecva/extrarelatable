@@ -9,6 +9,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Map;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -21,11 +23,19 @@ import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
- * Default implementation of the {@link CsvInputParser}.
+ * <p>
+ * An implementation of the {@link TableParser} handling CSV files and employing
+ * Apache Commons CSV library.
+ * </p>
+ * 
+ * <p>
+ * Adapted from Odalic.
+ * </p>
  *
  * @author Jan Váňa
  * @author Josef Janoušek
  */
+@Immutable
 @Component
 public final class ApacheCsvTableParser implements TableParser {
 

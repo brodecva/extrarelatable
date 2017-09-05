@@ -2,6 +2,9 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class ColumnHeader {
 	private final int index;
 	private final String text;

@@ -5,6 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.concurrent.Immutable;
+
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.ImmutableList;
 import eu.odalic.extrarelatable.algorithms.types.ValueTypeAnalyzer;
 import eu.odalic.extrarelatable.model.bag.EmptyValue;
@@ -16,6 +20,8 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 import eu.odalic.extrarelatable.model.table.NestedListsTypedTable;
 
+@Immutable
+@Component
 public final class DefaultTableAnalyzer implements TableAnalyzer {
 
 	private final NumericValueParser numericValueParser;

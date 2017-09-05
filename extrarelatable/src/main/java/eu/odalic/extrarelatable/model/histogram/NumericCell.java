@@ -3,8 +3,11 @@ package eu.odalic.extrarelatable.model.histogram;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.annotation.concurrent.Immutable;
+
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 
+@Immutable
 public final class NumericCell {
 	private final int rowIndex;
 	private final NumericValue value;

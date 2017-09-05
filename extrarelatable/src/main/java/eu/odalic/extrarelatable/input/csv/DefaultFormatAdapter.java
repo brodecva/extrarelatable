@@ -6,15 +6,23 @@ package eu.odalic.extrarelatable.input.csv;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.csv.CSVFormat;
+import org.springframework.stereotype.Component;
 
 /**
+ * <p>
  * Default {@link FormatAdapter} implementation.
+ * </p>
+ * 
+ * <p>
+ * Adapted from Odalic.
+ * </p>
  *
  * @author Jan Váňa
  * @author Václav Brodec
  *
  */
 @Immutable
+@Component
 public final class DefaultFormatAdapter implements FormatAdapter {
 
   @Override

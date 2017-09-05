@@ -4,8 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableSet;
 
+@Immutable
 public final class Context {
 	private final Set<ColumnHeader> columnHeaders;
 	private final String tableAauthor;

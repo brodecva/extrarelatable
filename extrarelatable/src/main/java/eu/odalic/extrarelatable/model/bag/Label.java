@@ -2,6 +2,9 @@ package eu.odalic.extrarelatable.model.bag;
 
 import java.util.UUID;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class Label {
 	private final String text;
 	private final String description;

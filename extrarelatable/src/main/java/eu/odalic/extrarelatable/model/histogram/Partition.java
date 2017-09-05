@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 
+@Immutable
 public final class Partition {
 	private final Map<Integer, NumericValue> cells;
 

@@ -1,6 +1,11 @@
 package eu.odalic.extrarelatable.input;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import javax.annotation.concurrent.Immutable;
+
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -9,6 +14,8 @@ import eu.odalic.extrarelatable.model.table.NestedListsSlicedTable;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
+@Immutable
+@Component
 public class DefaultTableSlicer implements TableSlicer {
 
 	private final ColumnTypeAnalyzer columnTypeAnalyzer;
@@ -21,6 +28,10 @@ public class DefaultTableSlicer implements TableSlicer {
 
 	@Override
 	public SlicedTable slice(final double threshold, final TypedTable table) {
+		checkArgument(threshold >= 0);
+		checkArgument(threshold <= 1);
+		checkNotNull(table);
+		
 		final ImmutableSet.Builder<Integer> numericColumnsIndicesBuilder = ImmutableSet.builder();
 		final ImmutableSet.Builder<Integer> textualColumnsIndices = ImmutableSet.builder();
 		

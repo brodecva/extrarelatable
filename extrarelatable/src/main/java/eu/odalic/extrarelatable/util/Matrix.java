@@ -98,4 +98,6 @@ public final class Matrix {
 		
 		return builder.build();
 	}
+	
+	private Matrix() {}
 }

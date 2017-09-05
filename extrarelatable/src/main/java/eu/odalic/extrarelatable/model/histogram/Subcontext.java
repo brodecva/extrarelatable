@@ -5,6 +5,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.concurrent.Immutable;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -12,6 +14,7 @@ import com.google.common.collect.Multimap;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.TextValue;
 
+@Immutable
 public final class Subcontext {
 
 	public static final class Builder {
@@ -56,8 +59,8 @@ public final class Subcontext {
 	}
 
 	private final Map<TextValue, Partition> partitions;
-	private Attribute attribute;
-	private int columnIndex;
+	private final Attribute attribute;
+	private final int columnIndex;
 
 	public static Builder builder() {
 		return new Builder();

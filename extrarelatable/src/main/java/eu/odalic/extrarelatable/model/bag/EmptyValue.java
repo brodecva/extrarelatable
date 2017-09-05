@@ -1,5 +1,8 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public enum EmptyValue implements Value {
 	
 	INSTANCE;

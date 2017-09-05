@@ -6,6 +6,12 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import javax.annotation.concurrent.Immutable;
+
+import org.springframework.stereotype.Component;
+
+@Immutable
+@Component
 public final class DefaultNumericValueParser implements NumericValueParser {
 
 	@Override

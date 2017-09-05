@@ -3,7 +3,6 @@ package eu.odalic.extrarelatable.model.table;
 import java.util.List;
 
 public interface ParsedTable {
-
 	List<String> getHeaders();
 
 	List<List<String>> getRows();
@@ -19,5 +18,4 @@ public interface ParsedTable {
 	List<String> getRow(int index);
 
 	List<String> getColumn(int index);
-
 }
