@@ -47,12 +47,16 @@ public final class DistanceTopKNodesMatcher implements TopKNodesMatcher {
 				final double[] candidateValues = node.getValues().stream().mapToDouble(e -> e.getFigure()).toArray();
 				
 				final double computedDistance = distance.compute(inputValues, candidateValues);
-				final MeasuredNode measuredNode = new MeasuredNode(node, computedDistance, tree.getRoot());
+				final MeasuredNode candidateNode = new MeasuredNode(node, computedDistance, tree.getRoot());
 				
-				if (!winners.offer(measuredNode)) {
-					if (winners.peek().compareTo(measuredNode) > 0) {
+				if (winners.size() < k) {
+					winners.add(candidateNode);
+				} else {
+					final MeasuredNode farthestNode = winners.peek();
+					
+					if (farthestNode.compareTo(candidateNode) > 0) {
 						winners.poll();
-						winners.add(measuredNode);
+						winners.add(candidateNode);
 					}
 				}
 			}
