@@ -3,6 +3,7 @@
  */
 package eu.odalic.extrarelatable.experiments;
 
+import static java.util.function.Function.identity;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -10,10 +11,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -27,17 +31,24 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-
+import eu.odalic.extrarelatable.algorithms.graph.ResultAggregator;
+import eu.odalic.extrarelatable.algorithms.graph.TopKNodesMatcher;
 import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextCompiler;
 import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextMatcher;
 import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;
 import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
+import eu.odalic.extrarelatable.model.annotation.Annotation;
+import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
+import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
@@ -66,8 +77,12 @@ public class Baseline {
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.9;
 	private static final String RESOURCES_PATH = "src/test/resources";
 	private static final String SET_SUBPATH = "health";
+	private static final String LEARN_SUBPATH = "learn";
+	private static final String TEST_SUBPATH = "test";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
+	private static final int TOP_K_NEGHBOURS = 5;
+	private static final int TOP_K_AGGREGATED_RESULTS = 10;
 
 	@Autowired
 	@Lazy
@@ -88,6 +103,18 @@ public class Baseline {
 	@Autowired
 	@Lazy
 	private SubcontextMatcher subcontextMatcher;
+	
+	@Autowired
+	@Lazy
+	private TopKNodesMatcher topKNodesMatcher;
+	
+	@Autowired
+	@Lazy
+	private ResultAggregator labelsResultAggregator;
+	
+	@Autowired
+	@Lazy
+	private ResultAggregator pairsResultAggregator;
 
 	/**
 	 * @throws java.lang.Exception
@@ -120,26 +147,33 @@ public class Baseline {
 	@Test
 	public void test() throws IOException {
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
-		final Path testSetPath = resourcesPath.resolve(SET_SUBPATH);
+		final Path setPath = resourcesPath.resolve(SET_SUBPATH);
+		final Path learnSetPath = setPath.resolve(LEARN_SUBPATH);
+		final Path testSetPath = setPath.resolve(TEST_SUBPATH);
 
 		final BackgroundKnowledgeGraph.Builder graphBuilder = BackgroundKnowledgeGraph.builder();
 
-		Files.newDirectoryStream(testSetPath).forEach(file -> {
+		Files.newDirectoryStream(learnSetPath).forEach(file -> {
 			final Set<PropertyTree> trees = readFile(file, new Format());
 
 			graphBuilder.addAll(trees);
 		});
-		graphBuilder.build();
 		
-		//TODO Process the files.
-		fail("Not yet implemented");
+		final BackgroundKnowledgeGraph graph = graphBuilder.build();
+		
+		Files.newDirectoryStream(testSetPath).forEach(file -> {
+			final Map<Integer, Annotation> columnIndciesToAnnotations = annotateFile(file, new Format(), graph);
+			
+			System.out.println(file);
+			System.out.println(columnIndciesToAnnotations);
+		});
 	}
 
 	private Set<PropertyTree> readFile(final Path input, final Format format) {
 		/* Parse the input file to table. */
 		final ParsedTable table;
 		try (final InputStream inputStream = Files.newInputStream(input)) {
-			table = tableReader.parse(inputStream, format, new Metadata());
+			table = tableReader.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -150,6 +184,8 @@ public class Baseline {
 		/* Determine the column types. */
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
 
+		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
+		
 		/*
 		 * For each numeric column and its set of numeric values compute the
 		 * possible sub-contexts and order them by distance in descending order
@@ -171,7 +207,7 @@ public class Baseline {
 			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
 
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()), children);
-			final PropertyTree tree = new PropertyTree(rootNode);
+			final PropertyTree tree = new PropertyTree(rootNode, context);
 			propertyTreesBuilder.add(tree);
 		}
 
@@ -213,5 +249,47 @@ public class Baseline {
 		}
 
 		return children.build();
+	}
+	
+	private Map<Integer, Annotation> annotateFile(final Path input, final Format format, final BackgroundKnowledgeGraph graph) {
+		/* Parse the input file to table. */
+		final ParsedTable table;
+		try (final InputStream inputStream = Files.newInputStream(input)) {
+			table = tableReader.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		/* Assign data types to each table cell. */
+		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN);
+
+		/* Determine the column types. */
+		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
+
+		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
+		
+		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getNumericColumns().entrySet()) {
+			final int columnIndex = numericColumn.getKey();
+			
+			final List<NumericValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList());
+			
+			final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, numericValues, TOP_K_NEGHBOURS);
+			
+			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getRoot().getLabel(), identity()));
+			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
+			final List<Label> labels = cutOff(labelAggregates);
+			
+			final SetMultimap<AttributeValuePair, MeasuredNode> pairLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPair(), identity()));
+			final SortedSet<AttributeValuePair> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
+			final List<AttributeValuePair> pairs = cutOff(pairAggregates);
+			
+			builder.put(columnIndex, new Annotation(labels, pairs));
+		}
+
+		return builder.build();
+	}
+
+	private <T> List<T> cutOff(final Collection<T> labelAggregates) {
+		return ImmutableList.copyOf(labelAggregates).subList(0,  Math.min(labelAggregates.size(), TOP_K_AGGREGATED_RESULTS));
 	}
 }

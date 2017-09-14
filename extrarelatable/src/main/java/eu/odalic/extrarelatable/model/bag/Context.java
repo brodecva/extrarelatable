@@ -2,31 +2,28 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Set;
-
+import java.util.List;
 import javax.annotation.concurrent.Immutable;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 
 @Immutable
 public final class Context {
-	private final Set<ColumnHeader> columnHeaders;
+	private final List<Label> columnHeaders;
 	private final String tableAauthor;
 	private final String tableTitle;
-	private final Set<AttributeValuePair> attributeValuePairs;
 	
-	public Context(Set<? extends ColumnHeader> columnHeaders, String tableAauthor, String tableTitle,
-			Set<? extends AttributeValuePair> attributeValuePairs) {
+	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle) {
 		checkNotNull(columnHeaders);
-		checkNotNull(attributeValuePairs);
+		checkNotNull(tableAuthor);
+		checkNotNull(tableTitle);
 		
-		this.columnHeaders = ImmutableSet.copyOf(columnHeaders);
-		this.tableAauthor = tableAauthor;
+		this.columnHeaders = ImmutableList.copyOf(columnHeaders);
+		this.tableAauthor = tableAuthor;
 		this.tableTitle = tableTitle;
-		this.attributeValuePairs = ImmutableSet.copyOf(attributeValuePairs);
 	}
 
-	public Set<ColumnHeader> getColumnHeaders() {
+	public List<Label> getColumnHeaders() {
 		return columnHeaders;
 	}
 
@@ -37,16 +34,11 @@ public final class Context {
 	public String getTableTitle() {
 		return tableTitle;
 	}
-
-	public Set<AttributeValuePair> getAttributeValuePairs() {
-		return attributeValuePairs;
-	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + attributeValuePairs.hashCode();
 		result = prime * result + columnHeaders.hashCode();
 		result = prime * result + ((tableAauthor == null) ? 0 : tableAauthor.hashCode());
 		result = prime * result + ((tableTitle == null) ? 0 : tableTitle.hashCode());
@@ -65,9 +57,6 @@ public final class Context {
 			return false;
 		}
 		final Context other = (Context) obj;
-		if (!attributeValuePairs.equals(other.attributeValuePairs)) {
-			return false;
-		}
 		if (!columnHeaders.equals(other.columnHeaders)) {
 			return false;
 		}
@@ -91,6 +80,6 @@ public final class Context {
 	@Override
 	public String toString() {
 		return "Context [columnHeaders=" + columnHeaders + ", tableAauthor=" + tableAauthor + ", tableTitle="
-				+ tableTitle + ", attributeValuePairs=" + attributeValuePairs + "]";
+				+ tableTitle + "]";
 	}
 }

@@ -7,18 +7,25 @@ import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import eu.odalic.extrarelatable.algorithms.distance.Distance;
 import eu.odalic.extrarelatable.model.subcontext.Partition;
 import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 
 @Immutable
 @Component
-public final class MaxKSDistanceSubcontextMatcher implements SubcontextMatcher {
+public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 
-	private static final KolmogorovSmirnovTest STATISTIC_CALCULATOR = new KolmogorovSmirnovTest();
-	private static final int MINIMUM_DATA_SIZE = 2;
+	private final Distance distance;
+	
+	@Autowired
+	public DistanceSubcontextMatcher(final Distance distance) {
+		checkNotNull(distance);
+		
+		this.distance = distance;
+	}
 
 	@Override
 	public Subcontext match(final Set<? extends Subcontext> candidates, final Partition inputPartition) {
@@ -27,7 +34,6 @@ public final class MaxKSDistanceSubcontextMatcher implements SubcontextMatcher {
 		checkArgument(!candidates.isEmpty());
 
 		final double[] inputValues = inputPartition.getDoubleValuesArray();
-		checkArgument(inputValues.length >= MINIMUM_DATA_SIZE);
 
 		boolean found = false;
 		Double maximumDistance = null;
@@ -35,11 +41,10 @@ public final class MaxKSDistanceSubcontextMatcher implements SubcontextMatcher {
 		for (final Subcontext candidate : candidates) {
 			for (final Partition candidatePartition : candidate.getPartitions().values()) {
 				final double[] candidateValues = candidatePartition.getDoubleValuesArray();
-				checkArgument(candidateValues.length >= MINIMUM_DATA_SIZE);
 
-				final double distance = STATISTIC_CALCULATOR.kolmogorovSmirnovStatistic(inputValues, candidateValues);
-				if ((!found) || (distance > maximumDistance)) {
-					maximumDistance = distance;
+				final double computedDistance = distance.compute(inputValues, candidateValues);
+				if ((!found) || (computedDistance > maximumDistance)) {
+					maximumDistance = computedDistance;
 					winner = candidate;
 					found = true;
 				}
