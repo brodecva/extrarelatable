@@ -42,6 +42,6 @@ public class DefaultColumnTypeAnalyzer implements ColumnTypeAnalyzer {
 			}
 		}
 
-		return passingValuesCount / columnValues.size();
+		return ((double) passingValuesCount) / columnValues.size();
 	}
 }

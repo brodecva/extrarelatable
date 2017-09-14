@@ -14,7 +14,7 @@ import com.google.common.collect.SetMultimap;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 
 @Immutable
-@Component
+@Component("averageDistance")
 public class AverageDistanceResultAggregator implements ResultAggregator {
 
 	@Override

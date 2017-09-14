@@ -26,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -82,7 +83,7 @@ public class Baseline {
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
 	private static final int TOP_K_NEGHBOURS = 5;
-	private static final int TOP_K_AGGREGATED_RESULTS = 10;
+	private static final int TOP_K_AGGREGATED_RESULTS = 1;
 
 	@Autowired
 	@Lazy
@@ -110,10 +111,12 @@ public class Baseline {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("majorityVote")
 	private ResultAggregator labelsResultAggregator;
 	
 	@Autowired
 	@Lazy
+	@Qualifier("majorityVote")
 	private ResultAggregator pairsResultAggregator;
 
 	/**
@@ -279,7 +282,7 @@ public class Baseline {
 			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
 			final List<Label> labels = cutOff(labelAggregates);
 			
-			final SetMultimap<AttributeValuePair, MeasuredNode> pairLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPair(), identity()));
+			final SetMultimap<AttributeValuePair, MeasuredNode> pairLevelAggregates = matchingNodes.stream().filter(e -> e.getNode().getPair() != null).collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPair(), identity()));
 			final SortedSet<AttributeValuePair> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
 			final List<AttributeValuePair> pairs = cutOff(pairAggregates);
 			

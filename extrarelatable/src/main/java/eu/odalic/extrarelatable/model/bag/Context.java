@@ -15,8 +15,6 @@ public final class Context {
 	
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle) {
 		checkNotNull(columnHeaders);
-		checkNotNull(tableAuthor);
-		checkNotNull(tableTitle);
 		
 		this.columnHeaders = ImmutableList.copyOf(columnHeaders);
 		this.tableAauthor = tableAuthor;
