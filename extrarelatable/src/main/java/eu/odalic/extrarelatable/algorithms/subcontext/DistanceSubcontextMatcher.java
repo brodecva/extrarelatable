@@ -28,10 +28,19 @@ public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 	}
 
 	@Override
-	public Subcontext match(final Set<? extends Subcontext> candidates, final Partition inputPartition) {
+	public Subcontext match(final Set<? extends Subcontext> candidates, final Partition inputPartition,
+			final double minimumPartitionRelativeSize, final double maximumPartitionRelativeSize, final int minimumPartitionSize) {
 		checkNotNull(candidates);
 		checkNotNull(inputPartition);
 		checkArgument(!candidates.isEmpty());
+		checkArgument(minimumPartitionRelativeSize >= 0);
+		checkArgument(maximumPartitionRelativeSize >= 0);
+		checkArgument(maximumPartitionRelativeSize <= 1);
+		checkArgument(minimumPartitionRelativeSize <= maximumPartitionRelativeSize);
+		checkArgument(minimumPartitionSize >= 0);
+		
+		final int inputPartitionSize = inputPartition.size();
+		checkArgument(inputPartitionSize >= minimumPartitionSize);
 
 		final double[] inputValues = inputPartition.getDoubleValuesArray();
 
@@ -40,6 +49,20 @@ public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 		Subcontext winner = null;
 		for (final Subcontext candidate : candidates) {
 			for (final Partition candidatePartition : candidate.getPartitions().values()) {
+				final int candidatePartitionSize = candidatePartition.size();
+				
+				if (candidatePartitionSize < minimumPartitionRelativeSize * inputPartitionSize) {
+					continue;
+				}
+				
+				if (candidatePartitionSize > maximumPartitionRelativeSize * inputPartitionSize) {
+					continue;
+				}
+				
+				if (candidatePartitionSize < minimumPartitionSize) {
+					continue;
+				}
+				
 				final double[] candidateValues = candidatePartition.getDoubleValuesArray();
 
 				final double computedDistance = distance.compute(inputValues, candidateValues);
@@ -53,5 +76,4 @@ public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 
 		return winner;
 	}
-
 }

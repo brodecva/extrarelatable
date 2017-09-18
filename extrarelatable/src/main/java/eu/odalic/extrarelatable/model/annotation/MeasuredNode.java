@@ -8,29 +8,25 @@ import java.util.UUID;
 import javax.annotation.concurrent.Immutable;
 
 import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
-import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
 
 @Immutable
 public final class MeasuredNode implements Comparable<MeasuredNode> {
 	private final UUID uuid;
 	private final Node node;
 	private final double distance;
-	private final RootNode root;
 	
-	public MeasuredNode(final UUID uuid, final Node node, final double distance, final RootNode root) {
+	public MeasuredNode(final UUID uuid, final Node node, final double distance) {
 		checkNotNull(uuid);
 		checkNotNull(node);
 		checkArgument(distance >= 0);
-		checkNotNull(root);
 		
 		this.uuid = uuid;
 		this.node = node;
 		this.distance = distance;
-		this.root = root;
 	}
 	
-	public MeasuredNode(final Node node, final double distance, final RootNode root) {
-		this(UUID.randomUUID(), node, distance, root);
+	public MeasuredNode(final Node node, final double distance) {
+		this(UUID.randomUUID(), node, distance);
 	}
 
 	public UUID getUuid() {
@@ -43,10 +39,6 @@ public final class MeasuredNode implements Comparable<MeasuredNode> {
 
 	public Node getNode() {
 		return node;
-	}
-
-	public RootNode getRoot() {
-		return root;
 	}
 
 	@Override
@@ -82,11 +74,6 @@ public final class MeasuredNode implements Comparable<MeasuredNode> {
 	}
 
 	@Override
-	public String toString() {
-		return "MeasuredNode [uuid=" + uuid + ", node=" + node + ", distance=" + distance + "]";
-	}
-
-	@Override
 	public int compareTo(final MeasuredNode other) {
 		final int distanceComparison = Double.compare(distance, other.distance);
 		
@@ -95,5 +82,10 @@ public final class MeasuredNode implements Comparable<MeasuredNode> {
 		} else {
 			return distanceComparison;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "MeasuredNode [uuid=" + uuid + ", node=" + node + ", distance=" + distance + "]";
 	}
 }

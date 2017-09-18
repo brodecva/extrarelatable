@@ -1,6 +1,8 @@
 package eu.odalic.extrarelatable.algorithms.subcontext;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -28,13 +30,27 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 	@Override
 	public Set<Subcontext> compile(final Partition partition,
 			final Set<Integer> availableContextColumnIndices, final TypedTable table, final double minimumPartitionRelativeSize,
-			final double maximumPartitionRelativeSize) {
+			final double maximumPartitionRelativeSize, final int minimumPartitionSize) {
+		checkNotNull(partition);
+		checkNotNull(availableContextColumnIndices);
+		checkNotNull(table);
+		checkArgument(minimumPartitionRelativeSize >= 0);
+		checkArgument(maximumPartitionRelativeSize >= 0);
+		checkArgument(maximumPartitionRelativeSize <= 1);
+		checkArgument(minimumPartitionRelativeSize <= maximumPartitionRelativeSize);
+		checkArgument(minimumPartitionSize >= 0);
+		checkArgument(partition.size() >= minimumPartitionSize);
+		
 		final int parentalPartitionSize = partition.size();
 		
 		final ImmutableSet.Builder<Subcontext> subcontextsBuilder = ImmutableSet.builder();
 		for (final Integer availableContextColumnIndex : availableContextColumnIndices) {
 			final Subcontext candidateSubcontext = compile(availableContextColumnIndex, partition,
 					table);
+			if (candidateSubcontext == null) {
+				continue;
+			}
+			
 			final int largestPartitionSize = candidateSubcontext.getLargestPartitionSize();
 			if (largestPartitionSize < minimumPartitionRelativeSize * parentalPartitionSize) {
 				continue;
@@ -42,6 +58,10 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 			
 			final int smallestPartitionSize = candidateSubcontext.getSmallestPartitionSize();
 			if (smallestPartitionSize > maximumPartitionRelativeSize * parentalPartitionSize) {
+				continue;
+			}
+			
+			if (largestPartitionSize < minimumPartitionSize) {
 				continue;
 			}
 
@@ -57,6 +77,7 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 		
 		final Subcontext.Builder builder = Subcontext.builder();
 		final List<Value> contextColumn = table.getColumn(contextValuesColumnIndex);
+		boolean found = false;
 		for (final Entry<Integer, NumericValue> entry : partition.getCells().entrySet()) {
 			final int rowIndex = entry.getKey();
 			checkArgument(rowIndex < contextColumn.size());
@@ -67,7 +88,12 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 			}
 			
 			builder.put((TextValue) contextColumnValue, new NumericCell(rowIndex, entry.getValue()));
+			found = true;
 		}
+		if (!found) {
+			return null;
+		}
+		
 		
 		builder.setAttribute(new Attribute(table.getHeaders().get(contextValuesColumnIndex).getText()));
 		builder.setColumnIndex(contextValuesColumnIndex);

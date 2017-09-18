@@ -17,6 +17,7 @@ import eu.odalic.extrarelatable.algorithms.distance.Distance;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
+import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
 
@@ -42,21 +43,23 @@ public final class DistanceTopKNodesMatcher implements TopKNodesMatcher {
 
 		final PriorityQueue<MeasuredNode> winners = new PriorityQueue<>(k, Comparator.reverseOrder());
 		
-		for (final PropertyTree tree : graph) {
-			for (final Node node : tree) {
-				final double[] candidateValues = node.getValues().stream().mapToDouble(e -> e.getFigure()).toArray();
-				
-				final double computedDistance = distance.compute(inputValues, candidateValues);
-				final MeasuredNode candidateNode = new MeasuredNode(node, computedDistance, tree.getRoot());
-				
-				if (winners.size() < k) {
-					winners.add(candidateNode);
-				} else {
-					final MeasuredNode farthestNode = winners.peek();
+		for (final Property property : graph) {
+			for (final PropertyTree instance : property) {
+				for (final Node node : instance) {
+					final double[] candidateValues = node.getValues().stream().mapToDouble(e -> e.getFigure()).toArray();
 					
-					if (farthestNode.compareTo(candidateNode) > 0) {
-						winners.poll();
+					final double computedDistance = distance.compute(inputValues, candidateValues);
+					final MeasuredNode candidateNode = new MeasuredNode(node, computedDistance);
+					
+					if (winners.size() < k) {
 						winners.add(candidateNode);
+					} else {
+						final MeasuredNode farthestNode = winners.peek();
+						
+						if (farthestNode.compareTo(candidateNode) > 0) {
+							winners.poll();
+							winners.add(candidateNode);
+						}
 					}
 				}
 			}

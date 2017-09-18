@@ -2,13 +2,13 @@ package eu.odalic.extrarelatable.model.graph;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import javax.annotation.concurrent.Immutable;
 
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
@@ -19,46 +19,95 @@ import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 
-@Immutable
 public final class PropertyTree implements Iterable<PropertyTree.Node> {
 	
 	public static abstract class Node {
 		private final Multiset<NumericValue> values;
+		
 		private final Set<CommonNode> children;
 		
-		public Node(final Multiset<? extends NumericValue> values, final Set<? extends CommonNode> children) {
+		public Node(final Multiset<? extends NumericValue> values) {
 			checkNotNull(values);
-			checkNotNull(children);
 			
 			this.values = ImmutableMultiset.copyOf(values);
-			this.children = ImmutableSet.copyOf(children);
+			this.children = new HashSet<>();
 		}
 
 		public Multiset<NumericValue> getValues() {
 			return values;
 		}
 
+		public void addChild(final CommonNode child) {
+			checkNotNull(child);
+			
+			child.setParent(this);
+			this.children.add(child);
+		}
+		
+		public void addChildren(final Set<? extends CommonNode> children) {
+			checkNotNull(children);
+			children.forEach(child -> checkNotNull(child));
+			
+			children.forEach(child -> child.setParent(this));
+			this.children.addAll(children);
+		}
+		 
 		public Set<CommonNode> getChildren() {
-			return children;
+			return Collections.unmodifiableSet(children);
 		}
 		
 		public abstract Label getLabel();
 		
 		public abstract AttributeValuePair getPair();
+		
+		public abstract Set<AttributeValuePair> getPairs();
+		
+		public abstract Node getParent();
+
+		public abstract PropertyTree getPropertyTree();
+		
+		public abstract Property getProperty();
 	}
 	
 	public static abstract class CommonNode extends Node {
-		public CommonNode(final Multiset<? extends NumericValue> values, final Set<? extends CommonNode> children) {
-			super(values, children);
+		private Node parent;
+		
+		public CommonNode(final Multiset<? extends NumericValue> values) {
+			super(values);
+		}
+
+		@Override
+		public Label getLabel() {
+			return parent.getLabel();
+		}
+		
+		@Override
+		public Node getParent() {
+			return parent;
+		}
+
+		public void setParent(final Node parent) {
+			this.parent = parent;
+		}
+		
+		@Override
+		public PropertyTree getPropertyTree() {
+			return parent.getPropertyTree();
+		}
+		
+		@Override
+		public Property getProperty() {
+			return parent.getProperty();
 		}
 	}
 	
-	@Immutable
 	public static final class RootNode extends Node {
 		private final Label label;
 		
-		public RootNode(final Label label, final Multiset<? extends NumericValue> values, final Set<? extends CommonNode> children) {
-			super(values, children);
+		private PropertyTree propertyTree;
+		
+		public RootNode(final Label label, final Multiset<? extends NumericValue> values) {
+			super(values);
 			
 			checkNotNull(label);
 			
@@ -74,14 +123,42 @@ public final class PropertyTree implements Iterable<PropertyTree.Node> {
 		public AttributeValuePair getPair() {
 			return null;
 		}
+		
+		@Override
+		public Set<AttributeValuePair> getPairs() {
+			return ImmutableSet.of();
+		}
+		
+		@Override
+		public PropertyTree getPropertyTree() {
+			return propertyTree;
+		}
+		
+		public void setPropertyTree(PropertyTree propertyTree) {
+			this.propertyTree = propertyTree;
+		}
+
+		@Override
+		public Node getParent() {
+			return null;
+		}
+
+		@Override
+		public Property getProperty() {
+			return propertyTree.getProperty();
+		}
+
+		@Override
+		public String toString() {
+			return "RootNode [label=" + label + "]";
+		}
 	}
 	
-	@Immutable
 	public static final class SharedPairNode extends CommonNode {
 		private final AttributeValuePair pair;
 		
-		public SharedPairNode(final AttributeValuePair pair, final Multiset<? extends NumericValue> values, final Set<? extends CommonNode> children) {
-			super(values, children);
+		public SharedPairNode(final AttributeValuePair pair, final Multiset<? extends NumericValue> values) {
+			super(values);
 			
 			checkNotNull(pair);
 			
@@ -89,20 +166,38 @@ public final class PropertyTree implements Iterable<PropertyTree.Node> {
 		}
 
 		@Override
-		public Label getLabel() {
-			return null;
-		}
-		
-		@Override
 		public AttributeValuePair getPair() {
 			return pair;
+		}
+
+		@Override
+		public Set<AttributeValuePair> getPairs() {
+			final ImmutableSet.Builder<AttributeValuePair> builder = ImmutableSet.builder();
+			
+			Node current = this; 
+			while (current != null) {
+				final AttributeValuePair pair = current.getPair();
+				if (pair != null) {
+					builder.add(pair);
+				}
+				
+				current = current.getParent();
+			}
+			
+			return builder.build();
+		}
+
+		@Override
+		public String toString() {
+			return "SharedPairNode [pair=" + pair + "]";
 		}
 	}
 	
 	private final RootNode root;
 	private final Context context;
+	private Property property;
 
-	public PropertyTree(RootNode root, final Context context) {
+	public PropertyTree(final RootNode root, final Context context) {
 		checkNotNull(root);
 		checkNotNull(context);
 		
@@ -118,6 +213,14 @@ public final class PropertyTree implements Iterable<PropertyTree.Node> {
 		return context;
 	}
 	
+	public Property getProperty() {
+		return property;
+	}
+
+	public void setProperty(final Property property) {
+		this.property = property;
+	}
+
 	@Override
 	public Iterator<Node> iterator() {
 		return new Iterator<Node>() {

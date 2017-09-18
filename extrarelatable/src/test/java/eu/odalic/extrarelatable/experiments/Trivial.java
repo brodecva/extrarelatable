@@ -4,8 +4,8 @@
 package eu.odalic.extrarelatable.experiments;
 
 import static java.util.function.Function.identity;
-import static org.junit.Assert.*;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -55,10 +57,12 @@ import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
+import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.SharedPairNode;
+import eu.odalic.extrarelatable.model.graph.PropertyTreesMergingStrategy;
 import eu.odalic.extrarelatable.model.subcontext.Partition;
 import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
@@ -73,7 +77,7 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
-public class Baseline {
+public class Trivial {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.9;
 	private static final String RESOURCES_PATH = "src/test/resources";
@@ -84,10 +88,12 @@ public class Baseline {
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
 	private static final int TOP_K_NEGHBOURS = 5;
 	private static final int TOP_K_AGGREGATED_RESULTS = 1;
+	private static final int MINIMUM_PARTITION_SIZE = 2;
 
 	@Autowired
 	@Lazy
-	private CsvTableParser tableReader;
+	@Qualifier("automatic")
+	private CsvTableParser csvTableParser;
 
 	@Autowired
 	@Lazy
@@ -112,12 +118,21 @@ public class Baseline {
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
+	private ResultAggregator propertiesResultAggregator;
+	
+	@Autowired
+	@Lazy
+	@Qualifier("majorityVote")
 	private ResultAggregator labelsResultAggregator;
 	
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
 	private ResultAggregator pairsResultAggregator;
+	
+	@Autowired
+	@Lazy
+	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	/**
 	 * @throws java.lang.Exception
@@ -154,36 +169,71 @@ public class Baseline {
 		final Path learnSetPath = setPath.resolve(LEARN_SUBPATH);
 		final Path testSetPath = setPath.resolve(TEST_SUBPATH);
 
-		final BackgroundKnowledgeGraph.Builder graphBuilder = BackgroundKnowledgeGraph.builder();
+		final BackgroundKnowledgeGraph graph = learn(learnSetPath);
+		test(testSetPath, graph);
+	}
+
+
+	private BackgroundKnowledgeGraph learn(final Path learnSetPath) throws IOException {
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		Files.newDirectoryStream(learnSetPath).forEach(file -> {
-			final Set<PropertyTree> trees = readFile(file, new Format());
+			final Set<PropertyTree> trees = readFile(file, null);
 
-			graphBuilder.addAll(trees);
+			graph.addPropertyTrees(trees);
 		});
-		
-		final BackgroundKnowledgeGraph graph = graphBuilder.build();
-		
+		return graph;
+	}
+	
+	private void test(final Path testSetPath, final BackgroundKnowledgeGraph graph) throws IOException {
 		Files.newDirectoryStream(testSetPath).forEach(file -> {
-			final Map<Integer, Annotation> columnIndciesToAnnotations = annotateFile(file, new Format(), graph);
+			final Map<Integer, Annotation> columnIndicesToAnnotations = annotateFile(file, null, graph);
 			
-			System.out.println(file);
-			System.out.println(columnIndciesToAnnotations);
+			System.out.println("File: " + file);
+			columnIndicesToAnnotations.entrySet().forEach(e -> {
+				final Annotation annotation = e.getValue();
+				
+				System.out.println("--------------------------------------------------------------------------------");
+				System.out.println("Index:" + e.getKey());
+				System.out.println("Properties: " + annotation.getProperties().stream().map(property ->
+						property.getInstances().stream().map(instance ->
+							instance.getRoot().getLabel().getText()
+						).collect(Collectors.joining(", "))
+					).collect(Collectors.joining("; "))
+				);
+				System.out.println("Labels: " + annotation.getLabels().stream().map(label ->
+						label.getText()
+					).collect(Collectors.joining(";"))
+				);
+				System.out.println("Pairs: " + annotation.getAttributeValuePairs().stream().map(pairs ->
+						pairs.stream().map(pair ->
+							pair.getAttribute().getName() + ":" + pair.getValue().getText()
+						).collect(Collectors.joining(", "))
+					).collect(Collectors.joining("; "))
+				);
+			});
+			System.out.println("================================================================================");
 		});
 	}
 
 	private Set<PropertyTree> readFile(final Path input, final Format format) {
+		System.out.println("Processing file " + input + "...");
+		
 		/* Parse the input file to table. */
 		final ParsedTable table;
-		try (final InputStream inputStream = Files.newInputStream(input)) {
-			table = tableReader.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
+		}
+		if (table.getHeight() < 2) {
+			return ImmutableSet.of();
 		}
 
 		/* Assign data types to each table cell. */
 		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN);
-
+		
+		
 		/* Determine the column types. */
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
 
@@ -208,9 +258,12 @@ public class Baseline {
 			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			
 			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
-
-			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()), children);
+			
+			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
+			rootNode.addChildren(children);
+			
 			final PropertyTree tree = new PropertyTree(rootNode, context);
+			rootNode.setPropertyTree(tree);
 			propertyTreesBuilder.add(tree);
 		}
 
@@ -219,14 +272,19 @@ public class Baseline {
 
 	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table) {
 		final Set<Subcontext> subcontexts = subcontextCompiler.compile(partition, availableContextColumnIndices, table, MINIMUM_PARTITION_RELATIVE_SIZE,
-				MAXIMUM_PARTITION_RELATIVE_SIZE);
+				MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
 		if (subcontexts.isEmpty()) {
 			return ImmutableSet.of();
 		}
 		
 		final ImmutableSet.Builder<CommonNode> children = ImmutableSet.builder();
 		
-		final Subcontext winningSubcontext = subcontextMatcher.match(subcontexts, partition);
+		final Subcontext winningSubcontext = subcontextMatcher.match(subcontexts, partition, MINIMUM_PARTITION_RELATIVE_SIZE,
+				MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
+		if (winningSubcontext == null) {
+			return ImmutableSet.of();
+		}
+		
 		final Attribute subattribute = winningSubcontext.getAttribute();
 		final int parentalPartitionSize = partition.size();
 		
@@ -239,14 +297,18 @@ public class Baseline {
 			if (subpartitionSize > MAXIMUM_PARTITION_RELATIVE_SIZE * parentalPartitionSize) {
 				continue;
 			}
-			
+			if (subpartitionSize < MINIMUM_PARTITION_SIZE) {
+				continue;
+			}
+
 			final int usedContextColumnIndex = winningSubcontext.getColumnIndex();
 
 			final Set<CommonNode> subchildren = buildChildren(subpartition,
 					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table);
 			
 			final TextValue subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(partition.getValues()), subchildren);
+			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(partition.getValues()));
+			subtree.addChildren(subchildren);
 			
 			children.add(subtree);
 		}
@@ -257,10 +319,13 @@ public class Baseline {
 	private Map<Integer, Annotation> annotateFile(final Path input, final Format format, final BackgroundKnowledgeGraph graph) {
 		/* Parse the input file to table. */
 		final ParsedTable table;
-		try (final InputStream inputStream = Files.newInputStream(input)) {
-			table = tableReader.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
+		}
+		if (table.getHeight() < 2) {
+			throw new IllegalArgumentException("Too small table to annotate!");
 		}
 
 		/* Assign data types to each table cell. */
@@ -278,15 +343,19 @@ public class Baseline {
 			
 			final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, numericValues, TOP_K_NEGHBOURS);
 			
-			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getRoot().getLabel(), identity()));
+			final SetMultimap<Property, MeasuredNode> propertyLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getProperty(), identity()));
+			final SortedSet<Property> propertyAggregates = propertiesResultAggregator.aggregate(propertyLevelAggregates);
+			final List<Property> properties = cutOff(propertyAggregates);
+			
+			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getLabel(), identity()));
 			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
 			final List<Label> labels = cutOff(labelAggregates);
 			
-			final SetMultimap<AttributeValuePair, MeasuredNode> pairLevelAggregates = matchingNodes.stream().filter(e -> e.getNode().getPair() != null).collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPair(), identity()));
-			final SortedSet<AttributeValuePair> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
-			final List<AttributeValuePair> pairs = cutOff(pairAggregates);
+			final SetMultimap<Set<AttributeValuePair>, MeasuredNode> pairLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPairs(), identity()));
+			final SortedSet<Set<AttributeValuePair>> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
+			final List<Set<AttributeValuePair>> pairs = cutOff(pairAggregates);
 			
-			builder.put(columnIndex, new Annotation(labels, pairs));
+			builder.put(columnIndex, new Annotation(properties, labels, pairs));
 		}
 
 		return builder.build();

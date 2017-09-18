@@ -36,7 +36,7 @@ import eu.odalic.extrarelatable.model.table.csv.Format;
  * @author Josef Janoušek
  */
 @Immutable
-@Component
+@Component("apache")
 public final class ApacheCsvTableParser implements CsvTableParser {
 
 	private final FormatAdapter apacheCsvFormatAdapter;

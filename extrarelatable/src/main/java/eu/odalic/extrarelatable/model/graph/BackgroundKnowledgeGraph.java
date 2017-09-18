@@ -3,67 +3,69 @@ package eu.odalic.extrarelatable.model.graph;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.annotation.concurrent.Immutable;
-
-import com.google.common.collect.ImmutableSet;
-
-@Immutable
-public final class BackgroundKnowledgeGraph implements Iterable<PropertyTree> {
+public final class BackgroundKnowledgeGraph implements Iterable<Property> {
 	
-	public static final class Builder {
+	private final PropertyTreesMergingStrategy propertyTreesMergingStrategy;
+	private final Set<Property> properties;
+	
+	public BackgroundKnowledgeGraph(final PropertyTreesMergingStrategy propertyTreesMergingStrategy) {
+		checkNotNull(propertyTreesMergingStrategy);
 		
-		private final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
+		this.propertyTreesMergingStrategy = propertyTreesMergingStrategy;
+		this.properties = new HashSet<>();
+	}
+
+	public void addPropertyTree(final PropertyTree propertyTree) {
+		checkNotNull(propertyTree);
 		
-		public Builder add(final PropertyTree propertyTree) {
-			checkNotNull(propertyTree);
+		final Property property = propertyTreesMergingStrategy.find(propertyTree, properties);
+		if (property == null) {
+			final Property newProperty = new Property();
+			newProperty.add(propertyTree);
 			
-			propertyTreesBuilder.add(propertyTree);
-			
-			return this;
-		}
-		
-		public Builder addAll(final Collection<? extends PropertyTree> propertyTrees) {
-			checkNotNull(propertyTrees);
-			
-			this.propertyTreesBuilder.addAll(propertyTrees);
-			
-			return this;
-		}
-		
-		public BackgroundKnowledgeGraph build() {
-			return new BackgroundKnowledgeGraph(propertyTreesBuilder.build());
+			properties.add(newProperty);
+		} else {
+			property.add(propertyTree);
 		}
 	}
 	
-	private final Set<PropertyTree> propertyTrees;
-
-	public static Builder builder() {
-		return new Builder();
-	}
-	
-	public BackgroundKnowledgeGraph(final Set<? extends PropertyTree> propertyTrees) {
+	public void addPropertyTrees(final Collection<? extends PropertyTree> propertyTrees) {
 		checkNotNull(propertyTrees);
-		
-		this.propertyTrees = ImmutableSet.copyOf(propertyTrees);
+		propertyTrees.forEach(propertyTree -> addPropertyTree(propertyTree));
 	}
-
-	public Set<PropertyTree> getPropertyTrees() {
-		return propertyTrees;
+	
+	public void add(final Property property) {
+		checkNotNull(property);
+		
+		properties.add(property);
+	}
+	
+	public void addAll(final Collection<? extends Property> properties) {
+		checkNotNull(properties);
+		properties.forEach(property -> checkNotNull(property));
+		
+		this.properties.addAll(properties);
+	}
+	
+	public Set<Property> getProperties() {
+		return Collections.unmodifiableSet(properties);
 	}
 
 	@Override
-	public Iterator<PropertyTree> iterator() {
-		return propertyTrees.iterator();
+	public Iterator<Property> iterator() {
+		return properties.iterator();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + propertyTrees.hashCode();
+		result = prime * result + properties.hashCode();
 		return result;
 	}
 
@@ -79,7 +81,7 @@ public final class BackgroundKnowledgeGraph implements Iterable<PropertyTree> {
 			return false;
 		}
 		final BackgroundKnowledgeGraph other = (BackgroundKnowledgeGraph) obj;
-		if (!propertyTrees.equals(other.propertyTrees)) {
+		if (!properties.equals(other.properties)) {
 			return false;
 		}
 		return true;
@@ -87,6 +89,6 @@ public final class BackgroundKnowledgeGraph implements Iterable<PropertyTree> {
 
 	@Override
 	public String toString() {
-		return "BackgroundKnowledgeGraph [propertyTrees=" + propertyTrees + "]";
+		return "BackgroundKnowledgeGraph [properties=" + properties + "]";
 	}
 }
