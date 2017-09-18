@@ -79,15 +79,15 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
 public class BaselineDataGvAt {
 
-	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.9;
+	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;
 	private static final String RESOURCES_PATH = "H:/extrarelatable/test";
 	private static final String SET_SUBPATH = "BaselineDataGvAt";
 	private static final String LEARN_SUBPATH = "learn";
 	private static final String TEST_SUBPATH = "test";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
-	private static final int TOP_K_NEGHBOURS = 5;
-	private static final int TOP_K_AGGREGATED_RESULTS = 1;
+	private static final int TOP_K_NEGHBOURS = 25;
+	private static final int TOP_K_AGGREGATED_RESULTS = 5;
 	private static final int MINIMUM_PARTITION_SIZE = 2;
 
 	@Autowired
@@ -196,13 +196,15 @@ public class BaselineDataGvAt {
 				System.out.println("--------------------------------------------------------------------------------");
 				System.out.println("Index:" + e.getKey());
 				System.out.println("Properties: " + annotation.getProperties().stream().map(property ->
-						property.getInstances().stream().map(instance ->
-							instance.getRoot().getLabel().getText()
-						).collect(Collectors.joining(", "))
+						property.getInstances().stream().map(instance -> {
+							final Label label = instance.getRoot().getLabel(); 
+							
+							return label.getText() + "[" + label.getDescription() + "]:" + instance.getContext().getTableTitle();
+						}).collect(Collectors.joining(", "))
 					).collect(Collectors.joining("; "))
 				);
 				System.out.println("Labels: " + annotation.getLabels().stream().map(label ->
-						label.getText()
+						label.getText() + "[" + label.getDescription() + "]"
 					).collect(Collectors.joining(";"))
 				);
 				System.out.println("Pairs: " + annotation.getAttributeValuePairs().stream().map(pairs ->

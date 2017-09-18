@@ -39,13 +39,19 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 
 	@Override
 	public TypedTable infer(final ParsedTable table, final Locale forcedLocale) {
-		final List<Label> labels = table.getHeaders().stream().map(header -> {
+		final List<String> headers = table.getHeaders();
+		final ImmutableList.Builder<Label> labelsBuilder = ImmutableList.builder();
+		final int headersSize = headers.size();
+		for (int headerIndex = 0; headerIndex < headersSize; headerIndex++) {
+			final String header = headers.get(headerIndex);
+			final String description = String.valueOf(headerIndex);
+			
 			if (valueTypeAnalyzer.isEmpty(header)) {
-				return Label.synthetic();
+				labelsBuilder.add(Label.synthetic(description));
 			} else {
-				return Label.of(header);
+				labelsBuilder.add(Label.of(header, description));
 			}
-		}).collect(ImmutableList.toImmutableList());
+		}
 		
 		final List<List<String>> inputRows = table.getRows();
 		final List<List<Value>> rows = inputRows.stream().map(row -> {
@@ -60,7 +66,7 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 			}).collect(ImmutableList.toImmutableList());
 		}).collect(ImmutableList.toImmutableList());
 		
-		return NestedListsTypedTable.fromRows(labels, rows, table.getMetadata());
+		return NestedListsTypedTable.fromRows(labelsBuilder.build(), rows, table.getMetadata());
 	}
 
 	@Override
