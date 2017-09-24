@@ -44,7 +44,7 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 		final int headersSize = headers.size();
 		for (int headerIndex = 0; headerIndex < headersSize; headerIndex++) {
 			final String header = headers.get(headerIndex);
-			final String description = String.valueOf(headerIndex);
+			final String description = String.valueOf(headerIndex) + "\t" + table.getMetadata().getTitle();
 			
 			if (valueTypeAnalyzer.isEmpty(header)) {
 				labelsBuilder.add(Label.synthetic(description));

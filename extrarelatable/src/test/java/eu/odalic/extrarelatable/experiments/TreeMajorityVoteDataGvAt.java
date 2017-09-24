@@ -38,6 +38,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import eu.odalic.extrarelatable.algorithms.graph.ResultAggregator;
@@ -60,6 +61,7 @@ import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
+import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.SharedPairNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTreesMergingStrategy;
@@ -77,7 +79,7 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
-public class BaselineDataGvAt {
+public class TreeMajorityVoteDataGvAt {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;
 	private static final String RESOURCES_PATH = "H:/extrarelatable/test";
@@ -215,7 +217,7 @@ public class BaselineDataGvAt {
 				System.out.println("Name\tText");
 				System.out.println(annotation.getAttributeValuePairs().stream().map(pairs ->
 						pairs.stream().map(pair ->
-						pair.getAttribute().getName() + "\t" + pair.getValue().getText()
+							pair.getAttribute().getName() + "\t" + pair.getValue().getText()
 						).collect(Collectors.joining("\n"))
 					).collect(Collectors.joining("\n\n"))
 				);
@@ -273,7 +275,7 @@ public class BaselineDataGvAt {
 				continue;
 			}
 			
-			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
+			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable, MINIMUM_PARTITION_RELATIVE_SIZE, MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
 			
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
 			rootNode.addChildren(children);
@@ -286,17 +288,18 @@ public class BaselineDataGvAt {
 		return propertyTreesBuilder.build();
 	}
 
-	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table) {
-		final Set<Subcontext> subcontexts = subcontextCompiler.compile(partition, availableContextColumnIndices, table, MINIMUM_PARTITION_RELATIVE_SIZE,
-				MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
+	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table,
+			final double minimumPartitionRelativeSize, final double maximumPartitionRelativeSize, final int minimumPartitionSize) {
+		final Set<Subcontext> subcontexts = subcontextCompiler.compile(partition, availableContextColumnIndices, table, minimumPartitionRelativeSize,
+				maximumPartitionRelativeSize, minimumPartitionSize);
 		if (subcontexts.isEmpty()) {
 			return ImmutableSet.of();
 		}
 		
 		final ImmutableSet.Builder<CommonNode> children = ImmutableSet.builder();
 		
-		final Subcontext winningSubcontext = subcontextMatcher.match(subcontexts, partition, MINIMUM_PARTITION_RELATIVE_SIZE,
-				MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
+		final Subcontext winningSubcontext = subcontextMatcher.match(subcontexts, partition, minimumPartitionRelativeSize,
+				maximumPartitionRelativeSize, minimumPartitionSize);
 		if (winningSubcontext == null) {
 			return ImmutableSet.of();
 		}
@@ -307,20 +310,21 @@ public class BaselineDataGvAt {
 		for (final Entry<TextValue, Partition> partitionEntry : winningSubcontext.getPartitions().entrySet()) {
 			final Partition subpartition = partitionEntry.getValue();
 			final int subpartitionSize = subpartition.size();
-			if (subpartitionSize < MINIMUM_PARTITION_RELATIVE_SIZE * parentalPartitionSize) {
+			if (subpartitionSize < minimumPartitionRelativeSize * parentalPartitionSize) {
 				continue;
 			}
-			if (subpartitionSize > MAXIMUM_PARTITION_RELATIVE_SIZE * parentalPartitionSize) {
+			if (subpartitionSize > maximumPartitionRelativeSize * parentalPartitionSize) {
 				continue;
 			}
-			if (subpartitionSize < MINIMUM_PARTITION_SIZE) {
+			if (subpartitionSize < minimumPartitionSize) {
 				continue;
 			}
 			
 			final int usedContextColumnIndex = winningSubcontext.getColumnIndex();
 
 			final Set<CommonNode> subchildren = buildChildren(subpartition,
-					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table);
+					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table, minimumPartitionRelativeSize,
+				maximumPartitionRelativeSize, minimumPartitionSize);
 			
 			final TextValue subvalue = partitionEntry.getKey();
 			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(partition.getValues()));
@@ -333,6 +337,8 @@ public class BaselineDataGvAt {
 	}
 	
 	private Map<Integer, Annotation> annotateFile(final Path input, final Format format, final BackgroundKnowledgeGraph graph) {
+		System.out.println("Processing file " + input + "...");
+		
 		/* Parse the input file to table. */
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
@@ -340,34 +346,61 @@ public class BaselineDataGvAt {
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}
+		
 		if (table.getHeight() < 2) {
-			throw new IllegalArgumentException("Too small table to annotate!");
+			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
 		}
 
 		/* Assign data types to each table cell. */
 		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN);
+		if (parsedTable.getHeight() < 2) {
+			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
+		}
 
 		/* Determine the column types. */
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
 
+		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
+		
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
+
+		final Set<Integer> availableContextColumnIndices = slicedTable.getTextualColumns().keySet();
 		
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getNumericColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
+			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
-			final List<NumericValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList());
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			if (partition.size() < MINIMUM_PARTITION_SIZE) {
+				continue;
+			}
 			
-			final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, numericValues, TOP_K_NEGHBOURS);
+			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable, MINIMUM_PARTITION_RELATIVE_SIZE, MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
 			
-			final SetMultimap<Property, MeasuredNode> propertyLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getProperty(), identity()));
+			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
+			rootNode.addChildren(children);
+			
+			final PropertyTree tree = new PropertyTree(rootNode, context);
+			rootNode.setPropertyTree(tree);
+			
+			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder(); 
+			
+			for (final Node node : tree) {
+				final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, node.getValues(), TOP_K_NEGHBOURS);
+				treeMatchingNodesBuilder.addAll(matchingNodes);
+			}
+			
+			final Multiset<MeasuredNode> treeMatchingNodes = treeMatchingNodesBuilder.build();
+			
+			final SetMultimap<Property, MeasuredNode> propertyLevelAggregates = treeMatchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getProperty(), identity()));
 			final SortedSet<Property> propertyAggregates = propertiesResultAggregator.aggregate(propertyLevelAggregates);
 			final List<Property> properties = cutOff(propertyAggregates);
 			
-			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getLabel(), identity()));
+			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = treeMatchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getLabel(), identity()));
 			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
 			final List<Label> labels = cutOff(labelAggregates);
 			
-			final SetMultimap<Set<AttributeValuePair>, MeasuredNode> pairLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPairs(), identity()));
+			final SetMultimap<Set<AttributeValuePair>, MeasuredNode> pairLevelAggregates = treeMatchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPairs(), identity()));
 			final SortedSet<Set<AttributeValuePair>> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
 			final List<Set<AttributeValuePair>> pairs = cutOff(pairAggregates);
 			
@@ -376,7 +409,7 @@ public class BaselineDataGvAt {
 
 		return builder.build();
 	}
-
+	
 	private <T> List<T> cutOff(final Collection<T> labelAggregates) {
 		return ImmutableList.copyOf(labelAggregates).subList(0,  Math.min(labelAggregates.size(), TOP_K_AGGREGATED_RESULTS));
 	}

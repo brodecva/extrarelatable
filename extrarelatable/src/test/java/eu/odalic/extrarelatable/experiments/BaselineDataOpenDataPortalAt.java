@@ -195,23 +195,29 @@ public class BaselineDataOpenDataPortalAt {
 				
 				System.out.println("--------------------------------------------------------------------------------");
 				System.out.println("Index:" + e.getKey());
-				System.out.println("Properties: " + annotation.getProperties().stream().map(property ->
+				System.out.println("Properties:");
+				System.out.println("Text\tIndex\tFile");
+				System.out.println(annotation.getProperties().stream().map(property ->
 						property.getInstances().stream().map(instance -> {
 							final Label label = instance.getRoot().getLabel(); 
 							
-							return label.getText() + "[" + label.getDescription() + "]:" + instance.getContext().getTableTitle();
-						}).collect(Collectors.joining(", "))
-					).collect(Collectors.joining("; "))
+							return label.getText() + "\t" + label.getDescription();
+						}).collect(Collectors.joining("\n"))
+					).collect(Collectors.joining("\n\n"))
 				);
-				System.out.println("Labels: " + annotation.getLabels().stream().map(label ->
-						label.getText() + "[" + label.getDescription() + "]"
-					).collect(Collectors.joining(";"))
+				System.out.println("Labels:");
+				System.out.println("Text\tIndex\tFile");
+				System.out.println(annotation.getLabels().stream().map(label ->
+						label.getText() + "\t" + label.getDescription()
+					).collect(Collectors.joining("\n"))
 				);
-				System.out.println("Pairs: " + annotation.getAttributeValuePairs().stream().map(pairs ->
+				System.out.println("Pairs:");
+				System.out.println("Name\tText");
+				System.out.println(annotation.getAttributeValuePairs().stream().map(pairs ->
 						pairs.stream().map(pair ->
-							pair.getAttribute().getName() + ":" + pair.getValue().getText()
-						).collect(Collectors.joining(", "))
-					).collect(Collectors.joining("; "))
+						pair.getAttribute().getName() + "\t" + pair.getValue().getText()
+						).collect(Collectors.joining("\n"))
+					).collect(Collectors.joining("\n\n"))
 				);
 			});
 			System.out.println("================================================================================");
