@@ -26,6 +26,8 @@ import eu.odalic.extrarelatable.model.table.NestedListsTypedTable;
 @Component
 public final class DefaultTableAnalyzer implements TableAnalyzer {
 
+	private static final int MAXIMUM_PREVIEW_SIZE = 5;
+	
 	private final NumericValueParser numericValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
 	
@@ -44,12 +46,14 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 		final int headersSize = headers.size();
 		for (int headerIndex = 0; headerIndex < headersSize; headerIndex++) {
 			final String header = headers.get(headerIndex);
-			final String description = String.valueOf(headerIndex) + "\t" + table.getMetadata().getTitle();
+			final String tableTitle = table.getMetadata().getTitle();
+			final List<String> column = table.getColumn(headerIndex);
+			final List<List<String>> rows = table.getRows();
 			
 			if (valueTypeAnalyzer.isEmpty(header)) {
-				labelsBuilder.add(Label.synthetic(description));
+				labelsBuilder.add(Label.synthetic(headerIndex, tableTitle, preview(column), headers, preview(rows)));
 			} else {
-				labelsBuilder.add(Label.of(header, description));
+				labelsBuilder.add(Label.of(header, null, false, headerIndex, tableTitle, preview(column), headers, preview(rows)));
 			}
 		}
 		
@@ -67,6 +71,10 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 		}).collect(ImmutableList.toImmutableList());
 		
 		return NestedListsTypedTable.fromRows(labelsBuilder.build(), rows, table.getMetadata());
+	}
+	
+	private static <T> List<T> preview(final List<T> list) {
+		return list.subList(0, Math.min(list.size(), MAXIMUM_PREVIEW_SIZE));
 	}
 
 	@Override
