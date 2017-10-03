@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 
+import eu.odalic.extrarelatable.algorithms.bag.InstantValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.NumericValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.ValueTypeAnalyzer;
 import eu.odalic.extrarelatable.model.bag.EmptyValue;
+//import eu.odalic.extrarelatable.model.bag.InstantValue;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
@@ -29,13 +31,17 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	private static final int MAXIMUM_PREVIEW_SIZE = 5;
 	
 	private final NumericValueParser numericValueParser;
+	@SuppressWarnings("unused")
+	private final InstantValueParser instantValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
 	
-	public DefaultTableAnalyzer(final NumericValueParser numericValueParser, final ValueTypeAnalyzer valueTypeAnalyzer) {
+	public DefaultTableAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser instantValueParser, final ValueTypeAnalyzer valueTypeAnalyzer) {
 		checkNotNull(numericValueParser);
+		checkNotNull(instantValueParser);
 		checkNotNull(valueTypeAnalyzer);
 		
 		this.numericValueParser = numericValueParser;
+		this.instantValueParser = instantValueParser;
 		this.valueTypeAnalyzer = valueTypeAnalyzer;
 	}
 
@@ -62,9 +68,12 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 			return row.stream().map(cell -> {
 				if (valueTypeAnalyzer.isEmpty(cell)) {
 					return EmptyValue.INSTANCE;
+				// TODO: Make it faster before enabling.
+				//} else if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
+				//	return InstantValue.of(instantValueParser.parse(cell, forcedLocale));
 				} else if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
 					return NumericValue.of(numericValueParser.parse(cell, forcedLocale));
-				} else {
+				}  else {
 					return TextValue.of(cell);
 				}
 			}).collect(ImmutableList.toImmutableList());

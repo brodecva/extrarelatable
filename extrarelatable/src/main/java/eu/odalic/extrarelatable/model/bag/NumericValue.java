@@ -32,6 +32,11 @@ public final class NumericValue implements Value {
 	public boolean isTextual() {
 		return false;
 	}
+	
+	@Override
+	public boolean isInstant() {
+		return false;
+	}
 
 	@Override
 	public int hashCode() {

@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,7 @@ import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
+import eu.odalic.extrarelatable.model.annotation.Statistics;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
@@ -88,8 +91,8 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	private static final int TOP_K_NEGHBOURS = 25;
 	private static final int TOP_K_AGGREGATED_RESULTS = 5;
 	private static final int MINIMUM_PARTITION_SIZE = 2;
-	private static final int SAMPLE_SIZE = 5;
-	private static final long SEED = 4;
+	private static final int SAMPLE_SIZE = 10;
+	private static final long SEED = 5;
 
 	@Autowired
 	@Lazy
@@ -119,17 +122,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
-	private ResultAggregator propertiesResultAggregator;
-	
-	@Autowired
-	@Lazy
-	@Qualifier("majorityVote")
 	private ResultAggregator labelsResultAggregator;
-	
-	@Autowired
-	@Lazy
-	@Qualifier("majorityVote")
-	private ResultAggregator pairsResultAggregator;
 	
 	@Autowired
 	@Lazy
@@ -183,21 +176,37 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 			final Map<Integer, Annotation> columnIndicesToAnnotations = annotateTable(parsedTable, graph);
 			
 			System.out.println("File: " + file);
-			System.out.println("First rows: ");
+			System.out.println("Headers: ");
 			System.out.println(parsedTable.getHeaders().stream().collect(Collectors.joining(";")));
+			System.out.println("First rows: ");
 			System.out.println(parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream().map(row -> Joiner.on(";").join(row)).collect(Collectors.joining("\n")));
 			columnIndicesToAnnotations.entrySet().forEach(e -> {
+				final int index = e.getKey();
 				final Annotation annotation = e.getValue();
+				final Map<Label, Statistics> labelsStatistics = annotation.getLabelsStatistics();
 				
 				System.out.println("--------------------------------------------------------------------------------");
-				System.out.println("Index:" + e.getKey());
+				System.out.println("Index:" + index);
+				System.out.println("Header:" + parsedTable.getHeaders().get(index));
 				System.out.println("First values:");
-				System.out.println(parsedTable.getColumn(e.getKey()).subList(0, Math.min(parsedTable.getHeight(), 5)).stream().collect(Collectors.joining("\t")));
+				System.out.println(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5)).stream().collect(Collectors.joining("\t")));
 				System.out.println("Labels:");
-				System.out.println("Text\tIndex\tFile\tFirst values\tFirst rows");
-				System.out.println(annotation.getLabels().stream().map(label ->
-						label.getText() + "\t" + label.getIndex() + "\t"+ label.getFile() + "\t" + label.getFirstValues() + "\t" + label.getFirstRows()
-					).collect(Collectors.joining("\n"))
+				System.out.println("Mean distance\tMedian distance\tOccurence\tRelative occurence\tText\tIndex\tFile\tFirst values\tFirst rows");
+				System.out.println(annotation.getLabels().stream().map(label -> {
+						final Statistics statistics = labelsStatistics.get(label);
+						
+						return Joiner.on("\t").join(
+							statistics.getAverage(),
+							statistics.getMedian(),
+							statistics.getOccurence(),
+							statistics.getRelativeOccurence(),
+							label.getText(),
+							label.getIndex(),
+							label.getFile(),
+							label.getFirstValues(),
+							label.getFirstRows()
+						);
+					}).collect(Collectors.joining("\n"))
 				);
 			});
 			System.out.println("================================================================================");
@@ -375,12 +384,35 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
 			final List<Label> labels = cutOff(labelAggregates);
 			
-			builder.put(columnIndex, new Annotation(ImmutableList.of(), labels, ImmutableList.of()));
+			final Map<Label, Statistics> statistics = getStatistics(labels, labelLevelAggregates);
+			
+			builder.put(columnIndex, Annotation.of(ImmutableList.of(), labels, ImmutableList.of(), ImmutableMap.of(), statistics, ImmutableMap.of()));
 		}
 
 		return builder.build();
 	}
 	
+	private static Map<Label, Statistics> getStatistics(final List<Label> labels,
+			final SetMultimap<Label, MeasuredNode> labelLevelAggregates) {
+		final ImmutableMap.Builder<Label, Statistics> builder = ImmutableMap.builder();
+		for (final Label label : labels) {
+			final Set<MeasuredNode> nodes = labelLevelAggregates.get(label);
+			
+			final double[] distances = nodes.stream().mapToDouble(e -> e.getDistance()).toArray();
+			
+			final double average = new Mean().evaluate(distances);
+			final double median = new Median().evaluate(distances);
+			final int occurence = nodes.size();
+			final double relativeOccurence = occurence / (double) (labelLevelAggregates.size());
+			
+			final Statistics statistics = Statistics.of(average, median, occurence, relativeOccurence);
+			builder.put(label, statistics);
+		}
+		
+		return builder.build();
+	}
+
+
 	private <T> List<T> cutOff(final Collection<T> labelAggregates) {
 		return ImmutableList.copyOf(labelAggregates).subList(0,  Math.min(labelAggregates.size(), TOP_K_AGGREGATED_RESULTS));
 	}

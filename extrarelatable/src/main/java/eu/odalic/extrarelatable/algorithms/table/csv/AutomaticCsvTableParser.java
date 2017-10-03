@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.concurrent.Immutable;
@@ -78,7 +79,7 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 
 		parserSettings.setLineSeparatorDetectionEnabled(true);
 		parserSettings.setDelimiterDetectionEnabled(true);
-		parserSettings.setHeaderExtractionEnabled(true);
+		//parserSettings.setHeaderExtractionEnabled(true);
 		parserSettings.setEmptyValue("");
 		parserSettings.setNullValue("");
 		parserSettings.setMaxCharsPerColumn(-1);
@@ -89,19 +90,38 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 		final CsvParser parser = new CsvParser(parserSettings);
 		parser.parse(reader);
 
-		final String[] headers = rowProcessor.getHeaders();
 		final List<String[]> rows = rowProcessor.getRows();
+		if (rows.isEmpty()) {
+			throw new IllegalArgumentException("Empty table!");
+		}
 		
-		final int maximumCellsPerRow = rows.stream().reduce(0, (u, r) -> Math.max(u, r.length), (u, v) -> Math.max(u, v));
-		final int width = Math.max(headers.length, maximumCellsPerRow);
+		final int width = rows.stream().reduce(0, (u, r) -> Math.max(u, r.length), (u, v) -> Math.max(u, v));
 		
-		final List<String> headersList = toRowList(headers, width);
+		int headerIndex = findHeaderIndex(rows);
+		
+		final String[] headersArray = rows.get(headerIndex);
+		
+		final List<String> headersList = toRowList(headersArray, width);
 		
 		return NestedListsParsedTable.fromRows(
 			headersList,
-			rows.stream().map(row -> toRowList(row, width)).collect(ImmutableList.toImmutableList()),
+			rows.stream().skip(headerIndex + 1).map(row -> toRowList(row, width)).collect(ImmutableList.toImmutableList()),
 			metadata
 		);
+	}
+
+	private static int findHeaderIndex(final List<? extends String[]> rows) {
+		int index = 0;
+		while (index < rows.size()) {
+			final boolean cellsFilled = Arrays.stream(rows.get(0)).allMatch(e -> !e.trim().isEmpty());
+			if (cellsFilled) {
+				return index;
+			}
+			
+			index++;
+		}
+		
+		return 0;
 	}
 
 	private static List<String> toRowList(final String[] rowArray, final int tableWidth) {

@@ -25,4 +25,9 @@ public enum EmptyValue implements Value {
 	public boolean isTextual() {
 		return false;
 	}
+
+	@Override
+	public boolean isInstant() {
+		return false;
+	}
 }

@@ -3,20 +3,20 @@ package eu.odalic.extrarelatable.algorithms.bag;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Locale;
-import javax.annotation.concurrent.Immutable;
-
 import org.springframework.stereotype.Component;
 
-@Immutable
 @Component
 public final class DefaultValueTypeAnalyzer implements ValueTypeAnalyzer {
 
 	private final NumericValueParser numericValueParser;
+	private final InstantValueParser dateValueParser;
 	
-	public DefaultValueTypeAnalyzer(final NumericValueParser numericValueParser) {
+	public DefaultValueTypeAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser dateValueParser) {
 		checkNotNull(numericValueParser);
+		checkNotNull(dateValueParser);
 		
 		this.numericValueParser = numericValueParser;
+		this.dateValueParser = dateValueParser;
 	}
 	
 	@Override
@@ -28,6 +28,22 @@ public final class DefaultValueTypeAnalyzer implements ValueTypeAnalyzer {
 		
 		try {
 			numericValueParser.parse(value, locale);
+		} catch (final IllegalArgumentException e) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public boolean isInstant(final String value, final Locale locale) {
+		checkNotNull(locale);
+		if (isEmpty(value)) {
+			return false;
+		}
+		
+		try {
+			dateValueParser.parse(value, locale);
 		} catch (final IllegalArgumentException e) {
 			return false;
 		}

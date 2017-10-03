@@ -6,4 +6,6 @@ public interface Value {
 	boolean isNumeric();
 	
 	boolean isTextual();
+	
+	boolean isInstant();
 }

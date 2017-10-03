@@ -1,18 +1,24 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import java.time.Instant;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class TextValue implements Value {
-	private final String text;
+public final class InstantValue implements Value {
+	private final Instant instant;
 
-	public static TextValue of(final String text) {
-		return new TextValue(text);
+	public static final InstantValue of(Instant instant) {
+		return new InstantValue(instant);
 	}
 	
-	private TextValue(final String text) {
-		this.text = text;
+	private InstantValue(Instant figure) {
+		this.instant = figure;
 	}	
+	
+	public Instant getinstant() {
+		return instant;
+	}
 
 	@Override
 	public boolean isEmpty() {
@@ -26,11 +32,7 @@ public final class TextValue implements Value {
 
 	@Override
 	public boolean isTextual() {
-		return true;
-	}
-	
-	public String getText() {
-		return text;
+		return false;
 	}
 	
 	@Override
@@ -42,12 +44,12 @@ public final class TextValue implements Value {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
+		result = prime * result + ((instant == null) ? 0 : instant.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -57,12 +59,12 @@ public final class TextValue implements Value {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final TextValue other = (TextValue) obj;
-		if (text == null) {
-			if (other.text != null) {
+		InstantValue other = (InstantValue) obj;
+		if (instant == null) {
+			if (other.instant != null) {
 				return false;
 			}
-		} else if (!text.equals(other.text)) {
+		} else if (!instant.equals(other.instant)) {
 			return false;
 		}
 		return true;
@@ -70,6 +72,6 @@ public final class TextValue implements Value {
 
 	@Override
 	public String toString() {
-		return "TextValue [text=" + text + "]";
+		return "InstantValue [instant=" + instant + "]";
 	}
 }

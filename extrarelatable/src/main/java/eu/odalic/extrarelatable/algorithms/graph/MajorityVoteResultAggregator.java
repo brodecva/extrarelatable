@@ -22,7 +22,7 @@ public class MajorityVoteResultAggregator implements ResultAggregator {
 		final Map<T, Integer> mappedAggregates = levelAggregates.asMap().entrySet().stream()
 				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue().size()));
 		final SortedSet<T> sortedAggregates = ImmutableSortedSet.copyOf(
-				(first, second) -> mappedAggregates.get(first).compareTo(mappedAggregates.get(second)),
+				(first, second) -> mappedAggregates.get(second).compareTo(mappedAggregates.get(first)),
 				mappedAggregates.keySet());
 
 		return sortedAggregates;

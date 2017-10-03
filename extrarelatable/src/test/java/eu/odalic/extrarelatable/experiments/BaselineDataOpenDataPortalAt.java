@@ -371,7 +371,7 @@ public class BaselineDataOpenDataPortalAt {
 			final SortedSet<Set<AttributeValuePair>> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
 			final List<Set<AttributeValuePair>> pairs = cutOff(pairAggregates);
 			
-			builder.put(columnIndex, new Annotation(properties, labels, pairs));
+			builder.put(columnIndex,  Annotation.of(properties, labels, pairs));
 		}
 
 		return builder.build();
