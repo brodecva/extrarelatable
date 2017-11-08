@@ -7,9 +7,9 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class AttributeValuePair {
 	private final Attribute attribute;
-	private final TextValue value;
+	private final Value value;
 	
-	public AttributeValuePair(Attribute attribute, TextValue value) {
+	public AttributeValuePair(Attribute attribute, Value value) {
 		checkNotNull(attribute);
 		checkNotNull(value);
 		
@@ -21,7 +21,7 @@ public final class AttributeValuePair {
 		return attribute;
 	}
 
-	public TextValue getValue() {
+	public Value getValue() {
 		return value;
 	}
 

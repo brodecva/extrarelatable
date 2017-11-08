@@ -5,7 +5,7 @@ import java.time.Instant;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class InstantValue implements Value {
+public final class InstantValue extends AbstractValue {
 	private final Instant instant;
 
 	public static final InstantValue of(Instant instant) {
@@ -16,25 +16,15 @@ public final class InstantValue implements Value {
 		this.instant = figure;
 	}	
 	
-	public Instant getinstant() {
+	public Instant getInstant() {
 		return instant;
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return false;
+	public String getText() {
+		return instant.toString();
 	}
 
-	@Override
-	public boolean isNumeric() {
-		return false;
-	}
-
-	@Override
-	public boolean isTextual() {
-		return false;
-	}
-	
 	@Override
 	public boolean isInstant() {
 		return false;

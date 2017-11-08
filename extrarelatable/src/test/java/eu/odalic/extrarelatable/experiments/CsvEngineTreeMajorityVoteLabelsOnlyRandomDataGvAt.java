@@ -8,11 +8,13 @@ import static java.util.function.Function.identity;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
@@ -32,6 +35,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -58,6 +66,7 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.Type;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
@@ -71,6 +80,9 @@ import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
+import eu.odalic.extrarelatable.services.csvengine.csvclean.CsvCleanService;
+import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfile;
+import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfilerService;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
@@ -80,10 +92,10 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
-public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
+public class CsvEngineTreeMajorityVoteLabelsOnlyRandomDataGvAt {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;
-	private static final String RESOURCES_PATH = "I:/";
+	private static final String RESOURCES_PATH = "H:/";
 	private static final String SET_SUBPATH = "g";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
@@ -92,6 +104,8 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	private static final int MINIMUM_PARTITION_SIZE = 2;
 	private static final int SAMPLE_SIZE = 10;
 	private static final long SEED = 5;
+	private static final String CLEANED_INPUT_FILES_DIRECTORY = "cleaned";
+	private static final String PROFILES_DIRECTORY = "profiles";
 
 	@Autowired
 	@Lazy
@@ -126,6 +140,14 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	@Autowired
 	@Lazy
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
+	
+	@Autowired
+	@Lazy
+	private CsvProfilerService csvProfilerService;
+	
+	@Autowired
+	@Lazy
+	private CsvCleanService csvCleanService;
 
 	@Test
 	public void test() throws IOException {
@@ -134,7 +156,9 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path setPath = resourcesPath.resolve(SET_SUBPATH);
 
-		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath)).collect(Collectors.toCollection(ArrayList::new));
+		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath)).filter(path -> path.toFile().isFile()).collect(Collectors.toCollection(ArrayList::new));
+		
+		Collections.sort(paths);
 		
 		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
 		for (int i = 0; i < SAMPLE_SIZE; i++) {
@@ -148,7 +172,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		
 		final List<Path> learningPaths = paths.stream().filter(e -> !unversionedTestFiles.contains(toUnversionedFileName(e))).collect(ImmutableList.toImmutableList());
 		
-		final BackgroundKnowledgeGraph graph = learn(learningPaths);
+		final BackgroundKnowledgeGraph graph = learn(learningPaths, setPath.resolve(CLEANED_INPUT_FILES_DIRECTORY), setPath.resolve(PROFILES_DIRECTORY));
 		test(testPaths, graph);
 	}
 
@@ -158,11 +182,11 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	}
 
 
-	private BackgroundKnowledgeGraph learn(final Collection<? extends Path> paths) throws IOException {
+	private BackgroundKnowledgeGraph learn(final Collection<? extends Path> paths, final Path cleanedInputFilesDirectory, final Path profilesDirectory) throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
-			final Set<PropertyTree> trees = readFile(file, null);
+			final Set<PropertyTree> trees = readFile(file, cleanedInputFilesDirectory, profilesDirectory);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -212,31 +236,106 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		});
 	}
 
-	private Set<PropertyTree> readFile(final Path input, final Format format) {
+	private Set<PropertyTree> readFile(final Path input, final Path cleanedInputFilesDirectory, final Path profilesDirectory) {
 		System.out.println("Processing file " + input + "...");
+		
+		Path cleanedInput = cleanedInputFilesDirectory.resolve(input.getFileName());
+		final Path failedCleanNotice = cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail");
+		if (cleanedInput.toFile().exists()) {
+			System.out.println("File " + input + " already cleaned.");
+		} else if (failedCleanNotice.toFile().exists()) {
+			System.out.println("Previously failed cleaning attempt for + " + input + ". Using original instead.");
+			
+			cleanedInput = input;
+		} else {
+			try (final InputStream cleanedInputStream = csvCleanService.clean(input.toFile())) {
+				Files.copy(cleanedInputStream, cleanedInput);
+			} catch (final IllegalStateException e) {
+				System.out.println("Failed clean attempt for + " + input + "!");
+				
+				cleanedInput = input;
+				try {
+					cacheFailedCleaning(cleanedInputFilesDirectory, input);
+				} catch (final IOException e1) {
+					throw new RuntimeException("Failed to note failed cleaning for " + input + "!", e);
+				}
+			} catch (final IOException e) {
+				throw new RuntimeException("Failed to clean " + input + "!", e);
+			}
+		}
+		
+		CsvProfile csvProfile = null;
+		final Path profileInput = profilesDirectory.resolve(input.getFileName());
+		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
+		if (profileInput.toFile().exists()) {
+			try {
+				csvProfile = loadProfile(profileInput);
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to load profile for " + input + "!", e);
+			}
+		} else if (failedProfileNotice.toFile().exists()) {
+			System.out.println("Previously failed profiling attempt for " + input + "!");
+			
+			csvProfile = null;
+		} else {
+			try {
+				csvProfile = csvProfilerService.profile(cleanedInput.toFile());
+				
+				try {
+					saveProfile(csvProfile, profileInput);
+				} catch (final IOException e) {
+					throw new RuntimeException("Failed to save profile for " + input + "!", e);
+				}
+			} catch (final IllegalStateException e) {
+				System.out.println("Failed profiling attempt for " + input + "!");
+				
+				csvProfile = null;
+				try {
+					cacheFailedProfiling(profilesDirectory, input);
+				} catch (IOException e1) {
+					throw new RuntimeException("Failed to note failed profiling for " + input + "!", e1);
+				}
+			} catch (final IOException e) {
+				throw new RuntimeException("Failed to profile " + input + "!", e);
+			}
+		}
+		
+		final Format format;
+		if (csvProfile == null) {
+			format = null;
+		} else {
+			format = new Format(Charset.forName(csvProfile.getEncoding()), csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true, csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
+		}
 		
 		/* Parse the input file to table. */
 		final ParsedTable table;
-		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
+		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
 			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
 		} catch (final IOException e) {
-			System.out.println("Failed to parse " + input + "!");
-			e.printStackTrace();
-			return ImmutableSet.of();
+			throw new RuntimeException("Failed to parse " + input + "!", e);
 		}
 		
 		if (table.getHeight() < 2) {
+			System.out.println("Too few rows in " + input + ". Skipping.");
 			return ImmutableSet.of();
 		}
 
 		/* Assign data types to each table cell. */
-		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN);
+		final Map<Integer, Type> hints;
+		if (csvProfile == null) {
+			hints = ImmutableMap.of();
+		} else {
+			final List<Type> types = csvProfile.getTypes();
+			hints = toHints(types);
+		}
+		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN, hints);
 		if (parsedTable.getHeight() < 2) {
+			System.out.println("Too few typed rows in " + input + ". Skipping.");
 			return ImmutableSet.of();
 		}
 
 		/* Determine the column types. */
-		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
+		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable, hints);
 
 		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
 		
@@ -272,6 +371,36 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		}
 
 		return propertyTreesBuilder.build();
+	}
+
+	private void cacheFailedCleaning(Path cleanedInputFilesDirectory, Path input) throws IOException {
+		Files.createFile(cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail"));
+	}
+
+
+	private void cacheFailedProfiling(Path profilesDirectory, Path input) throws IOException {
+		Files.createFile(profilesDirectory.resolve(input.getFileName() + ".fail"));
+	}
+
+
+	private Map<Integer, Type> toHints(final List<? extends Type> types) {
+		return IntStream.range(0, types.size()).mapToObj(i -> Integer.valueOf(i)).collect(ImmutableMap.toImmutableMap(i -> i, i -> types.get(i)));
+	}
+
+	private void saveProfile(final CsvProfile csvProfile, final Path profileInput)
+			throws IOException, JsonGenerationException, JsonMappingException {
+		final ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		mapper.writeValue(profileInput.toFile(), csvProfile);
+	}
+
+
+	private CsvProfile loadProfile(final Path profileInput)
+			throws IOException, JsonParseException, JsonMappingException {
+		final CsvProfile csvProfile;
+		final ObjectMapper mapper = new ObjectMapper();
+		csvProfile = mapper.readValue(profileInput.toFile(), CsvProfile.class);
+		return csvProfile;
 	}
 
 	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table,

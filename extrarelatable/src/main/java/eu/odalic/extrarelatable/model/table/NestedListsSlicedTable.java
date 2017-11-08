@@ -78,12 +78,12 @@ public final class NestedListsSlicedTable implements SlicedTable {
 	}
 
 	@Override
-	public Map<Integer, List<Value>> getNumericColumns() {
+	public Map<Integer, List<Value>> getDataColumns() {
 		return numericColumns;
 	}
 
 	@Override
-	public Map<Integer, List<Value>> getTextualColumns() {
+	public Map<Integer, List<Value>> getContextColumns() {
 		return textualColumns;
 	}
 

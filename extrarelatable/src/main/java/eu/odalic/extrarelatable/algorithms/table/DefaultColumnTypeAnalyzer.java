@@ -25,6 +25,26 @@ public class DefaultColumnTypeAnalyzer implements ColumnTypeAnalyzer {
 	public double isTextual(final int columnIndex, final TypedTable table) {
 		return test(v -> v.isTextual(), columnIndex, table);
 	}
+	
+	@Override
+	public double isInstant(int columnIndex, TypedTable table) {
+		return test(v -> v.isInstant(), columnIndex, table);
+	}
+
+	@Override
+	public double isEntity(int columnIndex, TypedTable table) {
+		return test(v -> v.isEntity(), columnIndex, table);
+	}
+
+	@Override
+	public double isId(int columnIndex, TypedTable table) {
+		return test(v -> v.isId(), columnIndex, table);
+	}
+
+	@Override
+	public double isUnit(int columnIndex, TypedTable table) {
+		return test(v -> v.isUnit(), columnIndex, table);
+	}
 
 	private double test(Predicate<Value> predicate, final int columnIndex, final TypedTable table) {
 		checkArgument(columnIndex >= 0);

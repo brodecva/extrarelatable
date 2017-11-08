@@ -165,6 +165,12 @@
 		    <groupId>org.apache.tika</groupId>
 		    <artifactId>tika-parsers</artifactId>
 		    <version>1.16</version>
+		    <exclusions>
+	            <exclusion>
+	                <groupId>org.apache.cxf</groupId>
+	                <artifactId>cxf-rt-rs-client</artifactId>
+	            </exclusion>
+        	</exclusions>
 		</dependency>
 
 
@@ -174,6 +180,13 @@
 			<artifactId>rdf4j-runtime</artifactId>
 			<version>2.0</version>
 		</dependency>
+
+		<!-- Jersey client -->
+		<dependency>
+		    <groupId>org.glassfish.jersey.core</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>${jersey.version}</version>
+		</dependency>	
 
 		<!-- Jackson -->
 		<dependency>

@@ -3,32 +3,36 @@ package eu.odalic.extrarelatable.model.bag;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class TextValue extends AbstractValue {
-	private final String text;
+public final class IdValue extends AbstractValue {
+	private final String id;
 
-	public static TextValue of(final String text) {
-		return new TextValue(text);
+	public static IdValue of(final String id) {
+		return new IdValue(id);
 	}
 	
-	private TextValue(final String text) {
-		this.text = text;
+	private IdValue(final String id) {
+		this.id = id;
 	}	
 
 	@Override
 	public String getText() {
-		return text;
+		return id;
 	}
 
 	@Override
-	public boolean isTextual() {
+	public boolean isId() {
 		return true;
+	}
+	
+	public String getId() {
+		return id;
 	}
 	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -43,12 +47,12 @@ public final class TextValue extends AbstractValue {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final TextValue other = (TextValue) obj;
-		if (text == null) {
-			if (other.text != null) {
+		final IdValue other = (IdValue) obj;
+		if (id == null) {
+			if (other.id != null) {
 				return false;
 			}
-		} else if (!text.equals(other.text)) {
+		} else if (!id.equals(other.id)) {
 			return false;
 		}
 		return true;
@@ -56,6 +60,6 @@ public final class TextValue extends AbstractValue {
 
 	@Override
 	public String toString() {
-		return "TextValue [text=" + text + "]";
+		return "IdValue [id=" + id + "]";
 	}
 }

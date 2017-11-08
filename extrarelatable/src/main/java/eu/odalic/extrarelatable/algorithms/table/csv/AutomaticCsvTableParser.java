@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 import com.univocity.parsers.common.processor.RowListProcessor;
+import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 
@@ -78,7 +79,18 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 		final CsvParserSettings parserSettings = new CsvParserSettings();
 
 		parserSettings.setLineSeparatorDetectionEnabled(true);
-		parserSettings.setDelimiterDetectionEnabled(true);
+		
+		if (format == null) {
+			parserSettings.setDelimiterDetectionEnabled(true);
+		} else {
+			final CsvFormat csvFormat = new CsvFormat();
+			csvFormat.setDelimiter(format.getDelimiter());
+			csvFormat.setQuote(format.getQuoteCharacter());
+			
+			parserSettings.setFormat(csvFormat);
+			parserSettings.setDelimiterDetectionEnabled(false);
+			parserSettings.setQuoteDetectionEnabled(false);
+		}
 		//parserSettings.setHeaderExtractionEnabled(true);
 		parserSettings.setEmptyValue("");
 		parserSettings.setNullValue("");

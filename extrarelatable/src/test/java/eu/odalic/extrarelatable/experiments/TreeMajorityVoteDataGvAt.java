@@ -55,7 +55,6 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
-import eu.odalic.extrarelatable.model.bag.TextValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
@@ -264,9 +263,9 @@ public class TreeMajorityVoteDataGvAt {
 		 */
 		final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
 
-		final Set<Integer> availableContextColumnIndices = slicedTable.getTextualColumns().keySet();
+		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
 		
-		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getNumericColumns().entrySet()) {
+		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
@@ -307,7 +306,7 @@ public class TreeMajorityVoteDataGvAt {
 		final Attribute subattribute = winningSubcontext.getAttribute();
 		final int parentalPartitionSize = partition.size();
 		
-		for (final Entry<TextValue, Partition> partitionEntry : winningSubcontext.getPartitions().entrySet()) {
+		for (final Entry<Value, Partition> partitionEntry : winningSubcontext.getPartitions().entrySet()) {
 			final Partition subpartition = partitionEntry.getValue();
 			final int subpartitionSize = subpartition.size();
 			if (subpartitionSize < minimumPartitionRelativeSize * parentalPartitionSize) {
@@ -326,7 +325,7 @@ public class TreeMajorityVoteDataGvAt {
 					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table, minimumPartitionRelativeSize,
 				maximumPartitionRelativeSize, minimumPartitionSize);
 			
-			final TextValue subvalue = partitionEntry.getKey();
+			final Value subvalue = partitionEntry.getKey();
 			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(partition.getValues()));
 			subtree.addChildren(subchildren);
 			
@@ -364,9 +363,9 @@ public class TreeMajorityVoteDataGvAt {
 		
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
-		final Set<Integer> availableContextColumnIndices = slicedTable.getTextualColumns().keySet();
+		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
 		
-		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getNumericColumns().entrySet()) {
+		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			

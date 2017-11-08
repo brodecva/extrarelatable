@@ -4,21 +4,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.concurrent.Immutable;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.algorithms.bag.InstantValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.NumericValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.ValueTypeAnalyzer;
 import eu.odalic.extrarelatable.model.bag.EmptyValue;
+import eu.odalic.extrarelatable.model.bag.EntityValue;
+import eu.odalic.extrarelatable.model.bag.IdValue;
+import eu.odalic.extrarelatable.model.bag.InstantValue;
 //import eu.odalic.extrarelatable.model.bag.InstantValue;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.TextValue;
+import eu.odalic.extrarelatable.model.bag.Type;
+import eu.odalic.extrarelatable.model.bag.UnitValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
@@ -31,7 +38,6 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	private static final int MAXIMUM_PREVIEW_SIZE = 5;
 	
 	private final NumericValueParser numericValueParser;
-	@SuppressWarnings("unused")
 	private final InstantValueParser instantValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
 	
@@ -47,6 +53,14 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 
 	@Override
 	public TypedTable infer(final ParsedTable table, final Locale forcedLocale) {
+		return infer(table, forcedLocale, ImmutableMap.of());
+	}
+	
+	@Override
+	public TypedTable infer(final ParsedTable table, final Locale forcedLocale, final Map<? extends Integer, ? extends Type> columnTypeHints) {
+		checkNotNull(table);
+		checkNotNull(columnTypeHints);
+		
 		final List<String> headers = table.getHeaders();
 		final ImmutableList.Builder<Label> labelsBuilder = ImmutableList.builder();
 		final int headersSize = headers.size();
@@ -65,18 +79,56 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 		
 		final List<List<String>> inputRows = table.getRows();
 		final List<List<Value>> rows = inputRows.stream().map(row -> {
-			return row.stream().map(cell -> {
+			final ImmutableList.Builder<Value> builder = ImmutableList.builder();
+			
+			for (int index = 0; index < row.size(); index++) {
+				final String cell = row.get(index);
+				
 				if (valueTypeAnalyzer.isEmpty(cell)) {
-					return EmptyValue.INSTANCE;
-				// TODO: Make it faster before enabling.
-				//} else if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
-				//	return InstantValue.of(instantValueParser.parse(cell, forcedLocale));
-				} else if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
-					return NumericValue.of(numericValueParser.parse(cell, forcedLocale));
-				}  else {
-					return TextValue.of(cell);
+					builder.add(EmptyValue.INSTANCE);
+					continue;
 				}
-			}).collect(ImmutableList.toImmutableList());
+				
+				final Type hint = columnTypeHints.get(index);
+				if (hint != null) {
+					switch (hint) {
+					case TEXT:
+						builder.add(TextValue.of(cell));
+						break;
+					case ID:
+						builder.add(IdValue.of(cell));
+						break;
+					case UNIT:
+						builder.add(UnitValue.of(cell));
+						break;
+					case ENTITY:
+						builder.add(EntityValue.of(cell));
+						break;
+					case NUMERIC:
+						if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
+							builder.add(NumericValue.of(numericValueParser.parse(cell, forcedLocale)));
+							break;
+						}
+					case DATE:
+						if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
+							builder.add(InstantValue.of(instantValueParser.parse(cell, forcedLocale)));
+							break;
+						}
+					default:
+						builder.add(TextValue.of(cell));
+					}
+				} else {
+					/*if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
+						builder.add(InstantValue.of(instantValueParser.parse(cell, forcedLocale)));
+					} else */if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
+						builder.add(NumericValue.of(numericValueParser.parse(cell, forcedLocale)));
+					}  else {
+						builder.add(TextValue.of(cell));
+					}
+				}
+			}
+			
+			return builder.build();
 		}).collect(ImmutableList.toImmutableList());
 		
 		return NestedListsTypedTable.fromRows(labelsBuilder.build(), rows, table.getMetadata());

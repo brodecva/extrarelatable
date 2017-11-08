@@ -3,7 +3,7 @@ package eu.odalic.extrarelatable.model.bag;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class NumericValue implements Value {
+public final class NumericValue extends AbstractValue {
 	private final double figure;
 
 	public static final NumericValue of(double figure) {
@@ -19,23 +19,13 @@ public final class NumericValue implements Value {
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return false;
+	public String getText() {
+		return Double.toString(figure);
 	}
 
 	@Override
 	public boolean isNumeric() {
 		return true;
-	}
-
-	@Override
-	public boolean isTextual() {
-		return false;
-	}
-	
-	@Override
-	public boolean isInstant() {
-		return false;
 	}
 
 	@Override

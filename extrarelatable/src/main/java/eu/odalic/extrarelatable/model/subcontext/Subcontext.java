@@ -10,7 +10,7 @@ import javax.annotation.concurrent.Immutable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import eu.odalic.extrarelatable.model.bag.Attribute;
-import eu.odalic.extrarelatable.model.bag.TextValue;
+import eu.odalic.extrarelatable.model.bag.Value;
 
 @Immutable
 public final class Subcontext {
@@ -19,7 +19,7 @@ public final class Subcontext {
 
 		private Attribute attribute;
 		private Integer columnIndex;
-		private ImmutableSetMultimap.Builder<TextValue, NumericCell> partitionsBuilder = ImmutableSetMultimap.builder();
+		private ImmutableSetMultimap.Builder<Value, NumericCell> partitionsBuilder = ImmutableSetMultimap.builder();
 
 		public Builder setAttribute(final Attribute attribute) {
 			checkNotNull(attribute);
@@ -37,7 +37,7 @@ public final class Subcontext {
 			return this;
 		}
 		
-		public Builder put(final TextValue value, final NumericCell cell) {
+		public Builder put(final Value value, final NumericCell cell) {
 			checkNotNull(value);
 			checkNotNull(cell);
 
@@ -47,16 +47,16 @@ public final class Subcontext {
 		}
 
 		public Subcontext build() {
-			final ImmutableSetMultimap<TextValue, NumericCell> partitionsEntryMap = partitionsBuilder.build();
+			final ImmutableSetMultimap<Value, NumericCell> partitionsEntryMap = partitionsBuilder.build();
 
-			final Map<TextValue, Partition> partitions = partitionsEntryMap.asMap().entrySet().stream().collect(
+			final Map<Value, Partition> partitions = partitionsEntryMap.asMap().entrySet().stream().collect(
 					ImmutableMap.toImmutableMap(e -> e.getKey(), e -> new Partition((Set<NumericCell>) e.getValue())));
 
 			return new Subcontext(attribute, columnIndex, partitions);
 		}
 	}
 
-	private final Map<TextValue, Partition> partitions;
+	private final Map<Value, Partition> partitions;
 	private final Attribute attribute;
 	private final int columnIndex;
 
@@ -64,7 +64,7 @@ public final class Subcontext {
 		return new Builder();
 	}
 
-	public Subcontext(final Attribute attribute, final int columnIndex, final Map<? extends TextValue, ? extends Partition> partitions) {
+	public Subcontext(final Attribute attribute, final int columnIndex, final Map<? extends Value, ? extends Partition> partitions) {
 		checkNotNull(attribute);
 		checkArgument(columnIndex >= 0);
 		checkNotNull(partitions);
@@ -83,7 +83,7 @@ public final class Subcontext {
 		return columnIndex;
 	}
 	
-	public Map<TextValue, Partition> getPartitions() {
+	public Map<Value, Partition> getPartitions() {
 		return partitions;
 	}
 
