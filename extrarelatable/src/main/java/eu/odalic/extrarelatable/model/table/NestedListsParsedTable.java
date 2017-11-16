@@ -82,7 +82,7 @@ public final class NestedListsParsedTable implements ParsedTable {
 		checkNotNull(rows);
 		checkNotNull(metadata);
 		
-		return new NestedListsParsedTable(ImmutableList.copyOf(header), Matrix.copy(rows), Matrix.translate(rows), metadata);
+		return new NestedListsParsedTable(ImmutableList.copyOf(header), Matrix.copy(rows), Matrix.transpose(rows), metadata);
 	}
 	
 	private NestedListsParsedTable(List<String> header, List<List<String>> rows, List<List<String>> columns, Metadata metadata) {

@@ -27,7 +27,7 @@ public final class NestedListsTypedTable implements TypedTable {
 		checkNotNull(rows);
 		checkNotNull(metadata);
 		
-		return new NestedListsTypedTable(ImmutableList.copyOf(header), Matrix.copy(rows), Matrix.translate(rows), metadata);
+		return new NestedListsTypedTable(ImmutableList.copyOf(header), Matrix.copy(rows), Matrix.transpose(rows), metadata);
 	}
 	
 	private NestedListsTypedTable(List<Label> header, List<List<Value>> rows, List<List<Value>> columns, Metadata metadata) {

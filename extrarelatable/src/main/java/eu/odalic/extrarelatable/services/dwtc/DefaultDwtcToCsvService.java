@@ -2,17 +2,19 @@ package eu.odalic.extrarelatable.services.dwtc;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
 
+import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
 
 @Service
@@ -27,7 +29,12 @@ public class DefaultDwtcToCsvService implements DwtcToCsvService {
 			throw new RuntimeException("Failed to read " + input + "!", e);
 		}
 		
-		Files.write(output, Arrays.stream(dataset.getRelation()).map(row -> Joiner.on(",").join(row)).collect(ImmutableList.toImmutableList()), StandardCharsets.UTF_8, StandardOpenOption.WRITE);
+		final List<List<String>> listBackedRelation = Arrays.stream(dataset.getRelation()).map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
+		final List<List<String>> transposedRelation = Matrix.transpose(listBackedRelation);
+		
+		final CsvWriter writer = new CsvWriter(output.toFile(), new CsvWriterSettings());
+		
+		writer.writeRowsAndClose(transposedRelation.stream().map(row -> row.toArray(new String[row.size()])).collect(ImmutableList.toImmutableList()));
 	}
 
 }

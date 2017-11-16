@@ -46,14 +46,31 @@ public final class Matrix {
 
 		return true;
 	}
+	
+	public static <E> boolean isMatrix(final E[][] listOfLists) {
+		checkNotNull(listOfLists);
+		
+		if (listOfLists.length == 0) {
+			return true;
+		}
+
+		final int columnsCount = listOfLists[0].length;
+		for (final E[] list : listOfLists) {
+			if (list.length != columnsCount) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
-	 * Translates the matrix. The result is an immutable list of rows represented as lists.
+	 * Transposes the matrix. The result is an immutable list of rows represented as lists.
 	 * 
 	 * @param matrix rectangular list of lists
 	 * @return translated matrix
 	 */
-	public static <E> List<List<E>> translate(final List<? extends List<? extends E>> matrix) {
+	public static <E> List<List<E>> transpose(final List<? extends List<? extends E>> matrix) {
 		checkNotNull(matrix);
 		checkArgument(isMatrix(matrix));
 		

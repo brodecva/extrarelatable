@@ -58,6 +58,7 @@ import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextMatcher;
 import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;
 import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
+import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 import eu.odalic.extrarelatable.model.annotation.Statistics;
 import eu.odalic.extrarelatable.model.bag.Attribute;
@@ -140,6 +141,9 @@ public class T2Dv2GoldStandard {
 	@Autowired
 	@Lazy
 	private CsvProfilerService csvProfilerService;
+	
+	@Autowired
+	@Lazy
 	private DwtcToCsvService dwtcToCsvService;
 
 	@Test
@@ -164,7 +168,7 @@ public class T2Dv2GoldStandard {
 		final List<Path> learningPaths = paths.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
 		
 		final BackgroundKnowledgeGraph graph = learn(learningPaths, setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY), setPath.resolve(PROFILES_DIRECTORY));
-		test(testPaths, graph);
+		test(testPaths, graph, setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY), setPath.resolve(PROFILES_DIRECTORY));
 	}
 
 
@@ -179,23 +183,11 @@ public class T2Dv2GoldStandard {
 		return graph;
 	}
 	
-	private void test(final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph) throws IOException {
+	private void test(final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory) throws IOException {
 		paths.forEach(file -> {
-			final Dataset dataset;
-			try (final InputStream datasetInputStream = Files.newInputStream(file, StandardOpenOption.READ)) {
-				dataset = webreduce.data.Dataset.fromJson(datasetInputStream);
-			} catch (final IOException e) {
-				throw new RuntimeException("Failed to read " + file + "!", e);
-			}
-			
-			final HeaderPosition headerPosition = dataset.getHeaderPosition();
-			if (headerPosition != HeaderPosition.FIRST_ROW) {
-				System.out.println("File " + file + " has no regular header!");
-			}
-			
-			final ParsedTable parsedTable = NestedListsParsedTable.fromRows(ImmutableList.copyOf(dataset.getRelation()[0]), Arrays.stream(dataset.getRelation(), 1, dataset.getRelation().length).map(e -> ImmutableList.copyOf(e)).collect(ImmutableList.toImmutableList()), new Metadata(file.getFileName().toString(), null));
-			
-			final Map<Integer, Annotation> columnIndicesToAnnotations = annotateTable(parsedTable, graph);
+			final AnnotationResult result = annotateTable(file, graph, convertedInputFilesDirectory, profilesDirectory);
+			final Map<Integer, Annotation> columnIndicesToAnnotations = result.getAnnotations();
+			final ParsedTable parsedTable = result.getParsedTable();
 			
 			System.out.println("File: " + file);
 			System.out.println("Headers: ");
@@ -238,17 +230,108 @@ public class T2Dv2GoldStandard {
 	private Set<PropertyTree> readFile(final Path input, final Path convertedInputFilesDirectory, final Path profilesDirectory) {
 		System.out.println("Processing file " + input + "...");
 		
-		Path convertedInput = convertedInputFilesDirectory.resolve(input.getFileName() + ".csv");
-		if (convertedInput.toFile().exists()) {
-			System.out.println("File " + input + " already converted.");
-		} else {
-			try {
-				dwtcToCsvService.convert(input, convertedInput);
-			} catch (final IOException e) {
-				throw new RuntimeException("Failed to clean " + input + "!", e);
-			}
+		final Path convertedInput = convert(input, convertedInputFilesDirectory);
+		
+		final CsvProfile csvProfile = profile(input, profilesDirectory, convertedInput);
+		
+		/* Parse the input file to table. */
+		final Dataset dataset = parse(input);
+		final HeaderPosition headerPosition = dataset.getHeaderPosition();
+		if (headerPosition != HeaderPosition.FIRST_ROW) {
+			System.out.println("File " + input + " has no regular header!");
+			return ImmutableSet.of();
 		}
 		
+		final ParsedTable table = toParsedTable(dataset);
+		if (table.getHeight() < 2) {
+			System.out.println("Too few rows in " + input + ". Skipping.");
+			return ImmutableSet.of();
+		}
+
+		/* Assign data types to each table cell. */
+		final Map<Integer, Type> hints = getHints(csvProfile);
+		
+		final TypedTable typedTable = tableAnalyzer.infer(table, Locale.GERMAN, hints);
+		if (typedTable.getHeight() < 2) {
+			System.out.println("Too few typed rows in " + input + ". Skipping.");
+			return ImmutableSet.of();
+		}
+
+		/* Determine the column types. */
+		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable, hints);
+
+		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
+		
+		return buildTrees(slicedTable, context);
+	}
+
+
+	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable, final Context context) {
+		/*
+		 * For each numeric column and its set of numeric values compute the
+		 * possible sub-contexts and order them by distance in descending order
+		 * from the set.
+		 * 
+		 * Use the farthest sub-context to partition the set of values into
+		 * nodes and recursively compute the sub-context for them.
+		 */
+		final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
+
+		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
+		
+		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
+			final int columnIndex = numericColumn.getKey();
+			final Label label = slicedTable.getHeaders().get(columnIndex);
+			
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			if (partition.size() < MINIMUM_PARTITION_SIZE) {
+				continue;
+			}
+			
+			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable, MINIMUM_PARTITION_RELATIVE_SIZE, MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
+			
+			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
+			rootNode.addChildren(children);
+			
+			final PropertyTree tree = new PropertyTree(rootNode, context);
+			rootNode.setPropertyTree(tree);
+			propertyTreesBuilder.add(tree);
+		}
+
+		return propertyTreesBuilder.build();
+	}
+
+
+	private Map<Integer, Type> getHints(final CsvProfile csvProfile) {
+		final Map<Integer, Type> hints;
+		if (csvProfile == null) {
+			hints = ImmutableMap.of();
+		} else {
+			final List<Type> types = csvProfile.getTypes();
+			hints = toHints(types);
+		}
+		return hints;
+	}
+
+
+	private ParsedTable toParsedTable(final Dataset dataset) {
+		final ParsedTable table = NestedListsParsedTable.fromRows(ImmutableList.copyOf(dataset.getRelation()[0]), Arrays.stream(dataset.getRelation(), 1, dataset.getRelation().length).map(e -> ImmutableList.copyOf(e)).collect(ImmutableList.toImmutableList()), new Metadata(dataset.getUrl(), null));
+		return table;
+	}
+
+
+	private Dataset parse(final Path input) {
+		final Dataset dataset;
+		try (final InputStream datasetInputStream = Files.newInputStream(input, StandardOpenOption.READ)) {
+			dataset = webreduce.data.Dataset.fromJson(datasetInputStream);
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to read " + input + "!", e);
+		}
+		return dataset;
+	}
+
+
+	private CsvProfile profile(final Path input, final Path profilesDirectory, final Path convertedInput) {
 		CsvProfile csvProfile = null;
 		final Path profileInput = profilesDirectory.resolve(input.getFileName());
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
@@ -284,78 +367,22 @@ public class T2Dv2GoldStandard {
 				throw new RuntimeException("Failed to profile " + input + "!", e);
 			}
 		}
-		
-		/* Parse the input file to table. */
-		final Dataset dataset;
-		try (final InputStream datasetInputStream = Files.newInputStream(input, StandardOpenOption.READ)) {
-			dataset = webreduce.data.Dataset.fromJson(datasetInputStream);
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to read " + input + "!", e);
-		}
-		
-		final HeaderPosition headerPosition = dataset.getHeaderPosition();
-		if (headerPosition != HeaderPosition.FIRST_ROW) {
-			System.out.println("File " + input + " has no regular header!");
-		}
-		
-		final ParsedTable table = NestedListsParsedTable.fromRows(ImmutableList.copyOf(dataset.getRelation()[0]), Arrays.stream(dataset.getRelation(), 1, dataset.getRelation().length).map(e -> ImmutableList.copyOf(e)).collect(ImmutableList.toImmutableList()), null);
-		
-		if (table.getHeight() < 2) {
-			System.out.println("Too few rows in " + input + ". Skipping.");
-			return ImmutableSet.of();
-		}
+		return csvProfile;
+	}
 
-		/* Assign data types to each table cell. */
-		final Map<Integer, Type> hints;
-		if (csvProfile == null) {
-			hints = ImmutableMap.of();
+
+	private Path convert(final Path input, final Path convertedInputFilesDirectory) {
+		Path convertedInput = convertedInputFilesDirectory.resolve(input.getFileName() + ".csv");
+		if (convertedInput.toFile().exists()) {
+			System.out.println("File " + input + " already converted.");
 		} else {
-			final List<Type> types = csvProfile.getTypes();
-			hints = toHints(types);
-		}
-		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN, hints);
-		if (parsedTable.getHeight() < 2) {
-			System.out.println("Too few typed rows in " + input + ". Skipping.");
-			return ImmutableSet.of();
-		}
-
-		/* Determine the column types. */
-		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable, hints);
-
-		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
-		
-		/*
-		 * For each numeric column and its set of numeric values compute the
-		 * possible sub-contexts and order them by distance in descending order
-		 * from the set.
-		 * 
-		 * Use the farthest sub-context to partition the set of values into
-		 * nodes and recursively compute the sub-context for them.
-		 */
-		final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
-
-		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
-		
-		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
-			final int columnIndex = numericColumn.getKey();
-			final Label label = slicedTable.getHeaders().get(columnIndex);
-			
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
-			if (partition.size() < MINIMUM_PARTITION_SIZE) {
-				continue;
+			try {
+				dwtcToCsvService.convert(input, convertedInput);
+			} catch (final IOException e) {
+				throw new RuntimeException("Failed to convert " + input + "!", e);
 			}
-			
-			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable, MINIMUM_PARTITION_RELATIVE_SIZE, MAXIMUM_PARTITION_RELATIVE_SIZE, MINIMUM_PARTITION_SIZE);
-			
-			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
-			rootNode.addChildren(children);
-			
-			final PropertyTree tree = new PropertyTree(rootNode, context);
-			rootNode.setPropertyTree(tree);
-			propertyTreesBuilder.add(tree);
 		}
-
-		return propertyTreesBuilder.build();
+		return convertedInput;
 	}
 
 
@@ -432,22 +459,42 @@ public class T2Dv2GoldStandard {
 		return children.build();
 	}
 	
-	private Map<Integer, Annotation> annotateTable(final ParsedTable table, final BackgroundKnowledgeGraph graph) {
-		if (table.getHeight() < 2) {
-			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
+	private AnnotationResult annotateTable(final Path input, final BackgroundKnowledgeGraph graph, Path convertedInputFilesDirectory, Path profilesDirectory) {
+		final Path convertedInput = convert(input, convertedInputFilesDirectory);
+		
+		final CsvProfile csvProfile = profile(input, profilesDirectory, convertedInput);
+		
+		/* Parse the input file to table. */
+		final Dataset dataset = parse(input);
+		final HeaderPosition headerPosition = dataset.getHeaderPosition();
+		if (headerPosition != HeaderPosition.FIRST_ROW) {
+			throw new IllegalArgumentException("File " + input + " has no regular header!");
+		}
+		
+		final ParsedTable parsedTable = toParsedTable(dataset);
+		if (parsedTable.getHeight() < 2) {
+			throw new IllegalArgumentException("Too few rows in " + input + ". Skipping.");
 		}
 
 		/* Assign data types to each table cell. */
-		final TypedTable parsedTable = tableAnalyzer.infer(table, Locale.GERMAN);
-		if (parsedTable.getHeight() < 2) {
+		final Map<Integer, Type> hints = getHints(csvProfile);
+		
+		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.GERMAN, hints);
+		if (typedTable.getHeight() < 2) {
 			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
 		}
 
 		/* Determine the column types. */
-		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, parsedTable);
+		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable, hints);
 
 		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
 		
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, context));
+	}
+
+
+	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
+			final Context context) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
