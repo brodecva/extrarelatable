@@ -3,6 +3,7 @@ package eu.odalic.extrarelatable.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -114,6 +115,12 @@ public final class Matrix {
 		}
 		
 		return builder.build();
+	}
+	
+	public static <E> List<List<E>> fromArray(final E[][] array) {
+		checkArgument(isMatrix(array));
+		
+		return Arrays.stream(array, 0, array.length).map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
 	}
 	
 	private Matrix() {}

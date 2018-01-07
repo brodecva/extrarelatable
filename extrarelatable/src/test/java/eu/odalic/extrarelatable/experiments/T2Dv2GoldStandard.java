@@ -7,6 +7,7 @@ import static java.util.function.Function.identity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,6 +42,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
@@ -69,6 +71,7 @@ import eu.odalic.extrarelatable.model.bag.NumericValue;
 import eu.odalic.extrarelatable.model.bag.Type;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
+import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
@@ -82,8 +85,10 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfile;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfilerService;
 import eu.odalic.extrarelatable.services.dwtc.DwtcToCsvService;
+import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
 import webreduce.data.HeaderPosition;
+import webreduce.data.TableOrientation;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -96,16 +101,19 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
 public class T2Dv2GoldStandard {
 
+	private static final String FILES_WITHOUT_PROPERTY_PREFIX = "CC-MAIN";
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;
-	private static final String RESOURCES_PATH = "H:/";
-	private static final String SET_SUBPATH = "extended_instance_goldstandard/tables";
+	private static final String RESOURCES_PATH = "C:/Users/brodecva/Documents/Vysoká škola/Diplomová práce/Datasets";
+	private static final String INSTANCE_SUBPATH = "extended_instance_goldstandard";
+	private static final String SET_SUBPATH = "tables";
+	private static final String DECLARED_PROPERTIES_SUBPATH = "properties";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
 	private static final int TOP_K_NEGHBOURS = 25;
 	private static final int TOP_K_AGGREGATED_RESULTS = 5;
 	private static final int MINIMUM_PARTITION_SIZE = 2;
 	private static final int SAMPLE_SIZE = 10;
-	private static final long SEED = 5;
+	private static final long SEED = 6;
 	private static final String PROFILES_DIRECTORY = "profiles";
 	private static final String CONVERTED_INPUT_FILES_DIRECTORY = "csvs";
 
@@ -132,10 +140,16 @@ public class T2Dv2GoldStandard {
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
+	private ResultAggregator propertiesResultAggregator;
+	
+	@Autowired
+	@Lazy
+	@Qualifier("majorityVote")
 	private ResultAggregator labelsResultAggregator;
 	
 	@Autowired
 	@Lazy
+	@Qualifier("propertyUri")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 	
 	@Autowired
@@ -151,45 +165,78 @@ public class T2Dv2GoldStandard {
 		final Random random = new Random(SEED);
 		
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
-		final Path setPath = resourcesPath.resolve(SET_SUBPATH);
+		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
+		
+		final Path setPath = instancePath.resolve(SET_SUBPATH);
+		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
-		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath)).filter(path -> path.toFile().isFile()).collect(Collectors.toCollection(ArrayList::new));
+		final List<Path> files = getFiles(setPath);
 		
-		Collections.sort(paths);
+		final List<Path> testPaths = getTestFiles(random, files);
+		final List<Path> learningPaths = getLearningFiles(files, testPaths);
 		
-		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
-		for (int i = 0; i < SAMPLE_SIZE; i++) {
-			final int removedIndex = random.nextInt(paths.size());
-			
-			testPathsBuilder.add(paths.remove(removedIndex));
-		}
-		final List<Path> testPaths = testPathsBuilder.build();
+		final Path inputFilesPath = setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY);
+		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
 		
-		final List<Path> learningPaths = paths.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
+		final BackgroundKnowledgeGraph graph = learn(learningPaths, inputFilesPath, profilesPath, declaredPropertiesPath);
 		
-		final BackgroundKnowledgeGraph graph = learn(learningPaths, setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY), setPath.resolve(PROFILES_DIRECTORY));
-		test(testPaths, graph, setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY), setPath.resolve(PROFILES_DIRECTORY));
+		test(testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath);
 	}
 
 
-	private BackgroundKnowledgeGraph learn(final Collection<? extends Path> paths, final Path cleanedInputFilesDirectory, final Path profilesDirectory) throws IOException {
+	private ImmutableList<Path> getLearningFiles(final List<Path> files, final List<Path> testPaths) {
+		return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
+	}
+
+
+	private static List<Path> getTestFiles(final Random random, final List<Path> files) {
+		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
+		for (int i = 0; i < SAMPLE_SIZE; i++) {
+			final int removedIndex = random.nextInt(files.size());
+			
+			testPathsBuilder.add(files.remove(removedIndex));
+		}
+		final List<Path> testPaths = testPathsBuilder.build();
+		return testPaths;
+	}
+
+
+	private static List<Path> getFiles(final Path setPath) throws IOException {
+		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath)).filter(path -> path.toFile().isFile() && !path.getFileName().toString().startsWith(FILES_WITHOUT_PROPERTY_PREFIX)).collect(Collectors.toCollection(ArrayList::new));
+		
+		Collections.sort(paths);
+		return paths;
+	}
+
+
+	private BackgroundKnowledgeGraph learn(final Collection<? extends Path> paths, final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath) throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
-			final Set<PropertyTree> trees = readFile(file, cleanedInputFilesDirectory, profilesDirectory);
+			final Set<PropertyTree> trees = learnFile(file, cleanedInputFilesDirectory, profilesDirectory, declaredPropertiesPath);
 
 			graph.addPropertyTrees(trees);
 		});
+		
 		return graph;
 	}
 	
-	private void test(final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory) throws IOException {
+	private void test(final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath) throws IOException {
 		paths.forEach(file -> {
-			final AnnotationResult result = annotateTable(file, graph, convertedInputFilesDirectory, profilesDirectory);
+			System.out.println("File: " + file);
+			
+			final AnnotationResult result;
+			try {
+				result = annotateTable(file, graph, convertedInputFilesDirectory, profilesDirectory, declaredPropertiesPath);
+			} catch (final IllegalArgumentException e) {
+				System.out.println("Error: " + e.getMessage());
+				
+				return;
+			}
+			
 			final Map<Integer, Annotation> columnIndicesToAnnotations = result.getAnnotations();
 			final ParsedTable parsedTable = result.getParsedTable();
 			
-			System.out.println("File: " + file);
 			System.out.println("Headers: ");
 			System.out.println(parsedTable.getHeaders().stream().collect(Collectors.joining(";")));
 			System.out.println("First rows: ");
@@ -197,7 +244,9 @@ public class T2Dv2GoldStandard {
 			columnIndicesToAnnotations.entrySet().forEach(e -> {
 				final int index = e.getKey();
 				final Annotation annotation = e.getValue();
+				
 				final Map<Label, Statistics> labelsStatistics = annotation.getLabelsStatistics();
+				final Map<Property, Statistics> propertiesStatistics = annotation.getPropertiesStatistics();
 				
 				System.out.println("--------------------------------------------------------------------------------");
 				System.out.println("Index:" + index);
@@ -222,12 +271,27 @@ public class T2Dv2GoldStandard {
 						);
 					}).collect(Collectors.joining("\n"))
 				);
+				
+				System.out.println("Properties:");
+				System.out.println("Mean distance\tMedian distance\tOccurence\tRelative occurence\tURI");
+				System.out.println(annotation.getProperties().stream().map(property -> {
+						final Statistics statistics = propertiesStatistics.get(property);
+						
+						return Joiner.on("\t").useForNull("null").join(
+							statistics.getAverage(),
+							statistics.getMedian(),
+							statistics.getOccurence(),
+							statistics.getRelativeOccurence(),
+							property.getUri()
+						);
+					}).collect(Collectors.joining("\n"))
+				);
 			});
 			System.out.println("================================================================================");
 		});
 	}
 
-	private Set<PropertyTree> readFile(final Path input, final Path convertedInputFilesDirectory, final Path profilesDirectory) {
+	private Set<PropertyTree> learnFile(final Path input, final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath) {
 		System.out.println("Processing file " + input + "...");
 		
 		final Path convertedInput = convert(input, convertedInputFilesDirectory);
@@ -251,7 +315,7 @@ public class T2Dv2GoldStandard {
 		/* Assign data types to each table cell. */
 		final Map<Integer, Type> hints = getHints(csvProfile);
 		
-		final TypedTable typedTable = tableAnalyzer.infer(table, Locale.GERMAN, hints);
+		final TypedTable typedTable = tableAnalyzer.infer(table, Locale.US, hints);
 		if (typedTable.getHeight() < 2) {
 			System.out.println("Too few typed rows in " + input + ". Skipping.");
 			return ImmutableSet.of();
@@ -260,13 +324,32 @@ public class T2Dv2GoldStandard {
 		/* Determine the column types. */
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable, hints);
 
-		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
+		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 		
-		return buildTrees(slicedTable, context);
+		return buildTrees(slicedTable, declaredPropertyUris);
 	}
 
 
-	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable, final Context context) {
+	private static Map<Integer, URI> getDeclaredPropertyUris(final Path declaredPropertiesPath, final String tableFileName) {
+		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
+		
+		final String propertiesFileName = fileName + ".csv";
+		
+		final Path propertiesPath = declaredPropertiesPath.resolve(propertiesFileName);
+		
+		if (!propertiesPath.toFile().exists()) {
+			return ImmutableMap.of();
+		}
+		
+		try {
+			return Files.lines(propertiesPath).map(line -> Splitter.on(",").splitToList(line)).collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields.get(3)), fields -> URI.create(fields.get(0))));
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable, final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
 		/*
 		 * For each numeric column and its set of numeric values compute the
 		 * possible sub-contexts and order them by distance in descending order
@@ -293,6 +376,10 @@ public class T2Dv2GoldStandard {
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
 			rootNode.addChildren(children);
 			
+			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+			
+			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle(), declaredPropertyUri);
+			
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
 			propertyTreesBuilder.add(tree);
@@ -314,8 +401,9 @@ public class T2Dv2GoldStandard {
 	}
 
 
-	private ParsedTable toParsedTable(final Dataset dataset) {
-		final ParsedTable table = NestedListsParsedTable.fromRows(ImmutableList.copyOf(dataset.getRelation()[0]), Arrays.stream(dataset.getRelation(), 1, dataset.getRelation().length).map(e -> ImmutableList.copyOf(e)).collect(ImmutableList.toImmutableList()), new Metadata(dataset.getUrl(), null));
+	private static ParsedTable toParsedTable(final Dataset dataset) {
+		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()), new Metadata(dataset.getUrl(), null));
+		
 		return table;
 	}
 
@@ -459,7 +547,7 @@ public class T2Dv2GoldStandard {
 		return children.build();
 	}
 	
-	private AnnotationResult annotateTable(final Path input, final BackgroundKnowledgeGraph graph, Path convertedInputFilesDirectory, Path profilesDirectory) {
+	private AnnotationResult annotateTable(final Path input, final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath) {
 		final Path convertedInput = convert(input, convertedInputFilesDirectory);
 		
 		final CsvProfile csvProfile = profile(input, profilesDirectory, convertedInput);
@@ -479,7 +567,7 @@ public class T2Dv2GoldStandard {
 		/* Assign data types to each table cell. */
 		final Map<Integer, Type> hints = getHints(csvProfile);
 		
-		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.GERMAN, hints);
+		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.US, hints);
 		if (typedTable.getHeight() < 2) {
 			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
 		}
@@ -487,14 +575,14 @@ public class T2Dv2GoldStandard {
 		/* Determine the column types. */
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable, hints);
 
-		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle());
+		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 		
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, context));
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris));
 	}
 
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
-			final Context context) {
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -513,6 +601,10 @@ public class T2Dv2GoldStandard {
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
 			rootNode.addChildren(children);
 			
+			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+			
+			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(), slicedTable.getMetadata().getTitle(), declaredPropertyUri);
+			
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
 			
@@ -525,38 +617,42 @@ public class T2Dv2GoldStandard {
 			
 			final Multiset<MeasuredNode> treeMatchingNodes = treeMatchingNodesBuilder.build();
 			
+			final SetMultimap<Property, MeasuredNode> propertyLevelAggregates = treeMatchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getProperty(), identity()));
+			final SortedSet<Property> propertyAggregates = propertiesResultAggregator.aggregate(propertyLevelAggregates);
+			final List<Property> properties = cutOff(propertyAggregates);
+			
 			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = treeMatchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getLabel(), identity()));
 			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
 			final List<Label> labels = cutOff(labelAggregates);
 			
-			final Map<Label, Statistics> statistics = getStatistics(labels, labelLevelAggregates);
+			final Map<Property, Statistics> propertiesStatistics = getStatistics(properties, propertyLevelAggregates);
+			final Map<Label, Statistics> labelStatistics = getStatistics(labels, labelLevelAggregates);
 			
-			builder.put(columnIndex, Annotation.of(ImmutableList.of(), labels, ImmutableList.of(), ImmutableMap.of(), statistics, ImmutableMap.of()));
+			builder.put(columnIndex, Annotation.of(properties, labels, ImmutableList.of(), propertiesStatistics, labelStatistics, ImmutableMap.of()));
 		}
 
 		return builder.build();
 	}
-	
-	private static Map<Label, Statistics> getStatistics(final List<Label> labels,
-			final SetMultimap<Label, MeasuredNode> labelLevelAggregates) {
-		final ImmutableMap.Builder<Label, Statistics> builder = ImmutableMap.builder();
-		for (final Label label : labels) {
-			final Set<MeasuredNode> nodes = labelLevelAggregates.get(label);
+
+	private static <T> Map<T, Statistics> getStatistics(final Iterable<T> aspects,
+			final SetMultimap<T, ? extends MeasuredNode> aspectLevelAggregates) {
+		final ImmutableMap.Builder<T, Statistics> builder = ImmutableMap.builder();
+		for (final T aspect : aspects) {
+			final Set<? extends MeasuredNode> nodes = aspectLevelAggregates.get(aspect);
 			
 			final double[] distances = nodes.stream().mapToDouble(e -> e.getDistance()).toArray();
 			
 			final double average = new Mean().evaluate(distances);
 			final double median = new Median().evaluate(distances);
 			final int occurence = nodes.size();
-			final double relativeOccurence = occurence / (double) (labelLevelAggregates.size());
+			final double relativeOccurence = occurence / (double) (aspectLevelAggregates.size());
 			
 			final Statistics statistics = Statistics.of(average, median, occurence, relativeOccurence);
-			builder.put(label, statistics);
+			builder.put(aspect, statistics);
 		}
 		
 		return builder.build();
 	}
-
 
 	private <T> List<T> cutOff(final Collection<T> labelAggregates) {
 		return ImmutableList.copyOf(labelAggregates).subList(0,  Math.min(labelAggregates.size(), TOP_K_AGGREGATED_RESULTS));

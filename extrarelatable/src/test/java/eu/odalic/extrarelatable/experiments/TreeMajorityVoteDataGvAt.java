@@ -133,6 +133,7 @@ public class TreeMajorityVoteDataGvAt {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	/**

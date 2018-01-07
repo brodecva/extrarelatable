@@ -1,5 +1,6 @@
 package eu.odalic.extrarelatable.model.table;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
@@ -75,6 +76,21 @@ public final class NestedListsParsedTable implements ParsedTable {
 
 	public static Builder builder() {
 		return new Builder();
+	}
+	
+	public static NestedListsParsedTable fromColumns(final List<? extends List<? extends String>> columns, final Metadata metadata) {
+		checkNotNull(columns);
+		checkNotNull(metadata);
+		
+		final List<List<String>> rowsWithHeader = Matrix.transpose(columns);
+		checkArgument(!rowsWithHeader.isEmpty(), "The table must have at least one row!");
+		
+		final List<String> header = rowsWithHeader.get(0);
+		
+		final int rowsWithHeaderSize = rowsWithHeader.size();
+		final List<List<String>> rows = rowsWithHeader.subList(Math.min(1, rowsWithHeaderSize), rowsWithHeaderSize);
+		
+		return new NestedListsParsedTable(ImmutableList.copyOf(header), Matrix.copy(rows), Matrix.transpose(rows), metadata);
 	}
 	
 	public static NestedListsParsedTable fromRows(final List<? extends String> header, final List<? extends List<? extends String>> rows, final Metadata metadata) {

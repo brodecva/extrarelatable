@@ -17,6 +17,7 @@ public final class DefaultNumericValueParser implements NumericValueParser {
 	@Override
 	public double parse(final String text, final Locale locale) {
 		checkNotNull(text);
+		checkNotNull(locale);
 		
 		final NumberFormat format = NumberFormat.getInstance(locale);
 	    final Number number;

@@ -131,6 +131,7 @@ public class BaselineDataOpenDataPortalAt {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	/**

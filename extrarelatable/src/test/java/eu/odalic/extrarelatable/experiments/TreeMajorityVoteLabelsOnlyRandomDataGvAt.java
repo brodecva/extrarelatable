@@ -125,6 +125,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	@Test

@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("labelText")
 public final class LabelTextPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy {
 
 	@Override

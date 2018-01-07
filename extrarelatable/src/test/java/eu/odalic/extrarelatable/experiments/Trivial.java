@@ -131,6 +131,7 @@ public class Trivial {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	/**

@@ -52,12 +52,12 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	}
 
 	@Override
-	public TypedTable infer(final ParsedTable table, final Locale forcedLocale) {
-		return infer(table, forcedLocale, ImmutableMap.of());
+	public TypedTable infer(final ParsedTable table, final Locale locale) {
+		return infer(table, locale, ImmutableMap.of());
 	}
 	
 	@Override
-	public TypedTable infer(final ParsedTable table, final Locale forcedLocale, final Map<? extends Integer, ? extends Type> columnTypeHints) {
+	public TypedTable infer(final ParsedTable table, final Locale locale, final Map<? extends Integer, ? extends Type> columnTypeHints) {
 		checkNotNull(table);
 		checkNotNull(columnTypeHints);
 		
@@ -105,13 +105,13 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 						builder.add(EntityValue.of(cell));
 						break;
 					case NUMERIC:
-						if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
-							builder.add(NumericValue.of(numericValueParser.parse(cell, forcedLocale)));
+						if (valueTypeAnalyzer.isNumeric(cell, locale)) {
+							builder.add(NumericValue.of(numericValueParser.parse(cell, locale)));
 							break;
 						}
 					case DATE:
-						if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
-							builder.add(InstantValue.of(instantValueParser.parse(cell, forcedLocale)));
+						if (valueTypeAnalyzer.isInstant(cell, locale)) {
+							builder.add(InstantValue.of(instantValueParser.parse(cell, locale)));
 							break;
 						}
 					default:
@@ -120,8 +120,8 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 				} else {
 					/*if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
 						builder.add(InstantValue.of(instantValueParser.parse(cell, forcedLocale)));
-					} else */if (valueTypeAnalyzer.isNumeric(cell, forcedLocale)) {
-						builder.add(NumericValue.of(numericValueParser.parse(cell, forcedLocale)));
+					} else */if (valueTypeAnalyzer.isNumeric(cell, locale)) {
+						builder.add(NumericValue.of(numericValueParser.parse(cell, locale)));
 					}  else {
 						builder.add(TextValue.of(cell));
 					}

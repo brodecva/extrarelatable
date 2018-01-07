@@ -140,6 +140,7 @@ public class CsvEngineTreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 	
 	@Autowired

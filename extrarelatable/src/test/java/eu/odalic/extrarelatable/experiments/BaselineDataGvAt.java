@@ -131,6 +131,7 @@ public class BaselineDataGvAt {
 	
 	@Autowired
 	@Lazy
+	@Qualifier("labelText")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	/**
