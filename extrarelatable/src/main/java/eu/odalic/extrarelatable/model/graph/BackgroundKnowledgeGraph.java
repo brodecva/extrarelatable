@@ -27,6 +27,7 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property> {
 		if (property == null) {
 			final Property newProperty = new Property();
 			newProperty.add(propertyTree);
+			newProperty.setUri(propertyTree.getContext().getDeclaredPropertyUri());
 			
 			properties.add(newProperty);
 		} else {
