@@ -2,10 +2,15 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.UUID;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class AttributeValuePair {
+public final class AttributeValuePair implements Comparable<AttributeValuePair> {
+	
+	private final UUID uuid = UUID.randomUUID();
+	
 	private final Attribute attribute;
 	private final Value value;
 	
@@ -23,19 +28,18 @@ public final class AttributeValuePair {
 
 	public Value getValue() {
 		return value;
-	}
+	}	
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + attribute.hashCode();
-		result = prime * result + value.hashCode();
+		result = prime * result + uuid.hashCode();
 		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -46,17 +50,19 @@ public final class AttributeValuePair {
 			return false;
 		}
 		final AttributeValuePair other = (AttributeValuePair) obj;
-		if (!attribute.equals(other.attribute)) {
-			return false;
-		}
-		if (!value.equals(other.value)) {
+		if (!uuid.equals(other.uuid)) {
 			return false;
 		}
 		return true;
 	}
+	
+	@Override
+	public int compareTo(AttributeValuePair other) {
+		return uuid.compareTo(other.uuid);
+	}
 
 	@Override
 	public String toString() {
-		return "AttributeValuePair [attribute=" + attribute + ", value=" + value + "]";
+		return "AttributeValuePair [uuid=" + uuid + ", attribute=" + attribute + ", value=" + value + "]";
 	}
 }

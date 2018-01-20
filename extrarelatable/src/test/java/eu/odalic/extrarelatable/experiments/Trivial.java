@@ -352,7 +352,7 @@ public class Trivial {
 			final List<Label> labels = cutOff(labelAggregates);
 			
 			final SetMultimap<Set<AttributeValuePair>, MeasuredNode> pairLevelAggregates = matchingNodes.stream().collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getPairs(), identity()));
-			final SortedSet<Set<AttributeValuePair>> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates);
+			final SortedSet<Set<AttributeValuePair>> pairAggregates = pairsResultAggregator.aggregate(pairLevelAggregates, eu.odalic.extrarelatable.util.Sets.comparator());
 			final List<Set<AttributeValuePair>> pairs = cutOff(pairAggregates);
 			
 			builder.put(columnIndex, Annotation.of(properties, labels, pairs));

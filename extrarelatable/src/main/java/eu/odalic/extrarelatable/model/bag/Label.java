@@ -8,7 +8,10 @@ import javax.annotation.concurrent.Immutable;
 import com.google.common.collect.ImmutableList;
 
 @Immutable
-public final class Label {
+public final class Label implements Comparable<Label> {
+	
+	private final UUID uuid = UUID.randomUUID();
+	
 	private final String text;
 	private final String description;
 	private final boolean synthetic;
@@ -75,18 +78,13 @@ public final class Label {
 		return firstRows;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((file == null) ? 0 : file.hashCode());
-		result = prime * result + ((firstRows == null) ? 0 : firstRows.hashCode());
-		result = prime * result + ((headers == null) ? 0 : headers.hashCode());
-		result = prime * result + ((firstValues == null) ? 0 : firstValues.hashCode());
-		result = prime * result + index;
-		result = prime * result + (synthetic ? 1231 : 1237);
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
+		result = prime * result + uuid.hashCode();
 		return result;
 	}
 
@@ -101,61 +99,21 @@ public final class Label {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Label other = (Label) obj;
-		if (description == null) {
-			if (other.description != null) {
-				return false;
-			}
-		} else if (!description.equals(other.description)) {
-			return false;
-		}
-		if (file == null) {
-			if (other.file != null) {
-				return false;
-			}
-		} else if (!file.equals(other.file)) {
-			return false;
-		}
-		if (headers == null) {
-			if (other.headers != null) {
-				return false;
-			}
-		} else if (!headers.equals(other.headers)) {
-			return false;
-		}
-		if (firstRows == null) {
-			if (other.firstRows != null) {
-				return false;
-			}
-		} else if (!firstRows.equals(other.firstRows)) {
-			return false;
-		}
-		if (firstValues == null) {
-			if (other.firstValues != null) {
-				return false;
-			}
-		} else if (!firstValues.equals(other.firstValues)) {
-			return false;
-		}
-		if (index != other.index) {
-			return false;
-		}
-		if (synthetic != other.synthetic) {
-			return false;
-		}
-		if (text == null) {
-			if (other.text != null) {
-				return false;
-			}
-		} else if (!text.equals(other.text)) {
+		final Label other = (Label) obj;
+		if (!uuid.equals(other.uuid)) {
 			return false;
 		}
 		return true;
 	}
+	
+	@Override
+	public int compareTo(Label other) {
+		return uuid.compareTo(other.uuid);
+	}
 
 	@Override
 	public String toString() {
-		return "Label [text=" + text + ", description=" + description + ", synthetic=" + synthetic + ", index=" + index
+		return "Label [uuid=" + uuid + ", text=" + text + ", description=" + description + ", synthetic=" + synthetic + ", index=" + index
 				+ ", file=" + file + ", firstValues=" + firstValues + ", headers=" + headers + ", firstRows=" + firstRows + "]";
 	}
 }

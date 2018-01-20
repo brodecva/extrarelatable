@@ -28,6 +28,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
@@ -55,6 +55,8 @@ import com.univocity.parsers.common.processor.RowListProcessor;
 import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvWriter;
+import com.univocity.parsers.csv.CsvWriterSettings;
 
 import eu.odalic.extrarelatable.algorithms.graph.ResultAggregator;
 import eu.odalic.extrarelatable.algorithms.graph.TopKNodesMatcher;
@@ -104,22 +106,25 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 public class T2Dv2GoldStandard {
 
 	private static final String FILES_WITHOUT_PROPERTY_PREFIX = "CC-MAIN";
-	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;
-	private static final String RESOURCES_PATH = "C:/Users/brodecva/Documents/Vysoká škola/Diplomová práce/Datasets";
+	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
+	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
 	private static final String INSTANCE_SUBPATH = "extended_instance_goldstandard";
 	private static final String SET_SUBPATH = "tables";
 	private static final String DECLARED_PROPERTIES_SUBPATH = "property";
-	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = 0.01;
-	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = 0.99;
-	private static final int TOP_K_NEGHBOURS = 25;
-	private static final int TOP_K_AGGREGATED_RESULTS = 5;
+	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.minimumPartitionRelativeSize", "0.01"));
+	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.maximumPartitionRelativeSize", "0.99"));
+	private static final int TOP_K_NEGHBOURS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.topKNeighbours", "25"));;
+	private static final int TOP_K_AGGREGATED_RESULTS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.topKAggregatedResults", "5"));
 	private static final int MINIMUM_PARTITION_SIZE = 2;
-	private static final int SAMPLE_SIZE = 10;
-	private static final long SEED = 1;
+	private static final double SAMPLE_SIZE_STEP_RATIO = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.sampleSizeStepRatio", "0.1"));
+	private static final long SEED = Long.parseLong(System.getProperty("eu.odalic.extrarelatable.seed", String.valueOf(System.currentTimeMillis())));
 	private static final String PROFILES_DIRECTORY = "profiles";
 	private static final String CONVERTED_INPUT_FILES_DIRECTORY = "csvs";
 	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
 	private static final String SANITIZE_WITH = "_";
+	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
+	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
+	private static final Integer CHOSEN_SAMPLE_INDEX = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndex") == null ? null : Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndex"));
 
 	@Autowired
 	@Lazy
@@ -143,7 +148,7 @@ public class T2Dv2GoldStandard {
 
 	@Autowired
 	@Lazy
-	@Qualifier("majorityVote")
+	@Qualifier("averageDistance")
 	private ResultAggregator propertiesResultAggregator;
 
 	@Autowired
@@ -164,9 +169,88 @@ public class T2Dv2GoldStandard {
 	@Lazy
 	private DwtcToCsvService dwtcToCsvService;
 
+	private TestStatistics.Builder testStatisticsBuilder;
+	
+	@Before
+	public void setUp() {
+		this.testStatisticsBuilder = TestStatistics.builder();
+	}
+	
 	@Test
 	public void test() throws IOException {
+		final CsvWriterSettings csvWriterSettings = new com.univocity.parsers.csv.CsvWriterSettings();
+		final CsvWriter csvWriter = new CsvWriter(System.out, StandardCharsets.UTF_8, csvWriterSettings);
+		
+		final List<TestStatistics> results = new ArrayList<>();
+		
+		if (CHOSEN_SAMPLE_INDEX != null) {
+			final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, CHOSEN_SAMPLE_INDEX);
+			if (testStatistics != null) {
+				results.add(testStatistics);
+			}
+		} else {
+			int sampleSizeIndex = 0;
+			while (true) {
+				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex);
+				if (testStatistics == null) {
+					break;
+				}
+				
+				results.add(testStatistics);
+				sampleSizeIndex++;
+			};
+		}
+		
+		csvWriter.writeRow(
+				"Files",
+				"To learn",
+				"To test",
+				"Learnt",
+				"Tested",
+				"Columns",
+				"Context columns",
+				"Numeric columns to learn",
+				"Learnt numeric columns",
+				"Annotated numeric columns",
+				"Numeric columns to learn without property",
+				"Numeric columns to test without property",
+				"Unique numeric column properties",
+				"Unique numeric column properties learnt",
+				"Unique numeric column properties tested",
+				"Matching",
+				"Missing",
+				"Nonmatching"
+		);
+		for (final TestStatistics testStatistics : results) {
+			csvWriter.writeRow(
+					testStatistics.getFilesCount(),
+					testStatistics.getLearningFilesCount(),
+					testStatistics.getTestFilesCount(),
+					testStatistics.getLearntFiles(),
+					testStatistics.getTestedFiles(),
+					testStatistics.getLearningColumnsCount(),
+					testStatistics.getLearntContextColumnsCount(),
+					testStatistics.getAttemptedLearntNumericColumns(),
+					testStatistics.getLearntNumericColumns(),
+					testStatistics.getAnnotatedNumericColumns(),
+					testStatistics.getNoPropertyLearningNumericColumns(),
+					testStatistics.getNoPropertyTestingNumericColums(),
+					testStatistics.getUniqueProperties(),
+					testStatistics.getUniquePropertiesLearnt(),
+					testStatistics.getUniquePropertiesTested(),
+					testStatistics.getMatchingSolutions(),
+					testStatistics.getMissingSolutions(),
+					testStatistics.getNonmatchingSolutions()
+					);
+		}
+		
+		csvWriter.flush();
+		csvWriter.close();
+	}
+	
+	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex) throws IOException {
 		final Random random = new Random(SEED);
+		testStatisticsBuilder.setSeed(SEED);
 
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
@@ -174,27 +258,55 @@ public class T2Dv2GoldStandard {
 		final Path setPath = instancePath.resolve(SET_SUBPATH);
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
-		final List<Path> files = getFiles(setPath);
+		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
+		testStatisticsBuilder.setFilesCount(files.size());
 
-		final List<Path> testPaths = getTestFiles(random, files);
+		final List<Path> testPaths = getTestFiles(random, sampleSizeStepRatio, sampleSizeIndex, files);
+		if (testPaths == null) {
+			return null;
+		}
+		
+		testStatisticsBuilder.setTestFilesCount(testPaths.size());
+		
 		final List<Path> learningPaths = getLearningFiles(files, testPaths);
+		testStatisticsBuilder.setLearningFilesCount(learningPaths.size());
 
 		final Path inputFilesPath = setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY);
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
+		
+		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
+				declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
 
-		final BackgroundKnowledgeGraph graph = learn(learningPaths, inputFilesPath, profilesPath,
-				declaredPropertiesPath);
-
-		test(testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath);
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+		
+		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
+		
+		csvWriter.writeEmptyRow();
+		csvWriter.writeRow("Finished.");
+		
+		csvWriter.writeEmptyRow();
+		
+		return testStatisticsBuilder.build();
 	}
 
 	private ImmutableList<Path> getLearningFiles(final List<Path> files, final List<Path> testPaths) {
 		return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
 	}
 
-	private static List<Path> getTestFiles(final Random random, final List<Path> files) {
+	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio, final int sampleSizeIndex, final List<Path> files) {
+		final int allFilesSize = files.size();
+		final double sampleSize = allFilesSize - sampleSizeIndex * sampleSizeStepRatio * allFilesSize;
+		if (sampleSize < 0) {
+			return null;
+		}
+		
+		final int wholeSampleSize = (int) sampleSize;
+		
 		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
-		for (int i = 0; i < SAMPLE_SIZE; i++) {
+		for (int i = 0; i < wholeSampleSize; i++) {
 			final int removedIndex = random.nextInt(files.size());
 
 			testPathsBuilder.add(files.remove(removedIndex));
@@ -203,24 +315,27 @@ public class T2Dv2GoldStandard {
 		return testPaths;
 	}
 
-	private static List<Path> getFiles(final Path setPath) throws IOException {
+	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath, final boolean onlyWithProperties) throws IOException {
 		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath))
 				.filter(path -> path.toFile().isFile()
-						&& !path.getFileName().toString().startsWith(FILES_WITHOUT_PROPERTY_PREFIX))
+						&& !path.getFileName().toString().startsWith(FILES_WITHOUT_PROPERTY_PREFIX)
+						&& ((!onlyWithProperties) || getPropertiesPath(declaredPropertiesPath, path.getFileName().toString()) != null)
+				)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		Collections.sort(paths);
 		return paths;
 	}
 
-	private BackgroundKnowledgeGraph learn(final Collection<? extends Path> paths,
-			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath)
+	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final boolean onlyWithProperties)
 			throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
-			final Set<PropertyTree> trees = learnFile(file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath);
+			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
+					declaredPropertiesPath, onlyWithProperties);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -228,32 +343,41 @@ public class T2Dv2GoldStandard {
 		return graph;
 	}
 
-	private void test(final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath)
+	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties)
 			throws IOException {
 		paths.forEach(file -> {
-			System.out.println("File: " + file);
+			csvWriter.writeRow("File:", file);
 
+			final Map<Integer, URI> solution = getSolution(file, declaredPropertiesPath);
+			
 			final AnnotationResult result;
 			try {
-				result = annotateTable(file, graph, convertedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath);
+				result = annotateTable(csvWriter, file, graph, convertedInputFilesDirectory, profilesDirectory,
+						declaredPropertiesPath, onlyWithProperties);
 			} catch (final IllegalArgumentException e) {
-				System.out.println("Error: " + e.getMessage());
+				csvWriter.writeRow("Error:", e.getMessage());
 
 				return;
 			}
 			
-			final Map<Integer, URI> solution = getSolution(file, declaredPropertiesPath);
-			
 			final Map<Integer, Annotation> columnIndicesToAnnotations = result.getAnnotations();
 			final ParsedTable parsedTable = result.getParsedTable();
 
-			System.out.println("Headers: ");
-			System.out.println(parsedTable.getHeaders().stream().collect(Collectors.joining(";")));
-			System.out.println("First rows: ");
-			System.out.println(parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream()
-					.map(row -> Joiner.on(";").join(row)).collect(Collectors.joining("\n")));
+			csvWriter.writeEmptyRow();
+			
+			csvWriter.addValue("Headers:");
+			csvWriter.addValues(parsedTable.getHeaders());
+			csvWriter.writeValuesToRow();
+			
+			csvWriter.writeRow("First rows:");
+			csvWriter.writeRows(
+					parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream()
+					.map(row -> row.toArray()).collect(ImmutableList.toImmutableList())
+			);
+			
+			csvWriter.writeRow("Numeric columns:");
+			
 			columnIndicesToAnnotations.entrySet().forEach(e -> {
 				final int index = e.getKey();
 				final Annotation annotation = e.getValue();
@@ -261,36 +385,55 @@ public class T2Dv2GoldStandard {
 				final Map<Label, Statistics> labelsStatistics = annotation.getLabelsStatistics();
 				final Map<Property, Statistics> propertiesStatistics = annotation.getPropertiesStatistics();
 
-				System.out.println("--------------------------------------------------------------------------------");
-				System.out.println("Index:" + index);
-				System.out.println("Header:" + parsedTable.getHeaders().get(index));
-				System.out.println("First values:");
-				System.out.println(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5))
-						.stream().collect(Collectors.joining("\t")));
-				System.out.println("Labels:");
-				System.out.println(
-						"Mean distance\tMedian distance\tOccurence\tRelative occurence\tText\tIndex\tFile\tFirst values\tFirst rows");
-				System.out.println(annotation.getLabels().stream().map(label -> {
+				csvWriter.writeRow("Index:", index);
+				csvWriter.writeRow("Header:", parsedTable.getHeaders().get(index));
+				
+				csvWriter.addValue("First values:");
+				csvWriter.addValues(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5)));
+				csvWriter.writeValuesToRow();
+				
+				csvWriter.writeRow("Labels:");
+				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "Text", "Index", "File", "First values", "First rows");
+				csvWriter.writeRows(annotation.getLabels().stream().map(label -> {
 					final Statistics statistics = labelsStatistics.get(label);
 
-					return Joiner.on("\t").join(statistics.getAverage(), statistics.getMedian(),
+					return new Object[] { statistics.getAverage(), statistics.getMedian(),
 							statistics.getOccurence(), statistics.getRelativeOccurence(), label.getText(),
-							label.getIndex(), label.getFile(), label.getFirstValues(), label.getFirstRows());
-				}).collect(Collectors.joining("\n")));
+							label.getIndex(), label.getFile(), label.getFirstValues(), label.getFirstRows() };
+				}).collect(ImmutableList.toImmutableList()));
 
-				System.out.println("Properties:");
-				System.out.println("Mean distance\tMedian distance\tOccurence\tRelative occurence\tURI");
-				System.out.println(annotation.getProperties().stream().map(property -> {
+				csvWriter.writeRow("Properties:");
+				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI");
+				csvWriter.writeRows(annotation.getProperties().stream().map(property -> {
 					final Statistics statistics = propertiesStatistics.get(property);
 
-					return Joiner.on("\t").useForNull("null").join(statistics.getAverage(), statistics.getMedian(),
-							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri());
-				}).collect(Collectors.joining("\n")));
+					return new Object[] { statistics.getAverage(), statistics.getMedian(),
+							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri() };
+				}).collect(ImmutableList.toImmutableList()));
 				
-				System.out.println("Solution:");
-				System.out.println(solution.get(index));
+				final URI columnSolution = solution.get(index);
+				csvWriter.writeRow("Solution:", columnSolution);
+				
+				if (columnSolution == null) {
+					testStatisticsBuilder.addMissingSolution();
+				} else {
+					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> columnSolution.equals(uri))) {
+						testStatisticsBuilder.addMatchingSolution();
+					} else {
+						testStatisticsBuilder.addNonmatchingSolution();
+					}
+				}
+				
+				testStatisticsBuilder.addAnnotatedNumericColumn();
+				
+				testStatisticsBuilder.addAnnotatedNumericColumn();
 			});
-			System.out.println("================================================================================");
+			
+			testStatisticsBuilder.addTestedFile();
+			
+			csvWriter.writeEmptyRow();
+			csvWriter.writeEmptyRow();
+			csvWriter.writeEmptyRow();
 		});
 	}
 
@@ -298,25 +441,31 @@ public class T2Dv2GoldStandard {
 		return getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 	}
 
-	private Set<PropertyTree> learnFile(final Path input, final Path convertedInputFilesDirectory,
-			final Path profilesDirectory, final Path declaredPropertiesPath) {
-		System.out.println("Processing file " + input + "...");
+	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory,
+			final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties) {
+		csvWriter.writeRow("Processing file:", input);
 
-		final Path convertedInput = convert(input, convertedInputFilesDirectory);
+		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
 
-		final CsvProfile csvProfile = profile(input, profilesDirectory, convertedInput);
+		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
 
 		/* Parse the input file to table. */
 		final Dataset dataset = parse(input);
 		final HeaderPosition headerPosition = dataset.getHeaderPosition();
 		if (headerPosition != HeaderPosition.FIRST_ROW) {
-			System.out.println("File " + input + " has no regular header!");
+			csvWriter.writeRow("File " + input + " has no regular header!");
+			
+			testStatisticsBuilder.addIrregularHeaderFile();
+			
 			return ImmutableSet.of();
 		}
 
 		final ParsedTable table = toParsedTable(dataset, input.getFileName().toString());
 		if (table.getHeight() < 2) {
-			System.out.println("Too few rows in " + input + ". Skipping.");
+			csvWriter.writeRow("Too few rows in " + input + ". Skipping.");
+			
+			testStatisticsBuilder.addFewRowsFile();
+			
 			return ImmutableSet.of();
 		}
 
@@ -325,7 +474,10 @@ public class T2Dv2GoldStandard {
 
 		final TypedTable typedTable = tableAnalyzer.infer(table, Locale.US, hints);
 		if (typedTable.getHeight() < 2) {
-			System.out.println("Too few typed rows in " + input + ". Skipping.");
+			csvWriter.writeRow("Too few typed rows in " + input + ". Skipping.");
+			
+			testStatisticsBuilder.addFewTypedRowsFile();
+			
 			return ImmutableSet.of();
 		}
 
@@ -336,20 +488,17 @@ public class T2Dv2GoldStandard {
 		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
-		return buildTrees(slicedTable, declaredPropertyUris);
+		Set<PropertyTree> trees = buildTrees(slicedTable, declaredPropertyUris, onlyWithProperties);
+		
+		testStatisticsBuilder.addLearntFile();
+		
+		return trees;
 	}
 
 	private static Map<Integer, URI> getDeclaredPropertyUris(final Path declaredPropertiesPath,
 			final String tableFileName) {
-		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
-
-		final String sanitizedFileName = fileName.replaceAll(CHARACTERS_TO_SANITIZE_REGEX, SANITIZE_WITH);
-
-		final String propertiesFileName = sanitizedFileName + ".csv";
-
-		final Path propertiesPath = declaredPropertiesPath.resolve(propertiesFileName);
-
-		if (!propertiesPath.toFile().exists()) {
+		final Path propertiesPath = getPropertiesPath(declaredPropertiesPath, tableFileName);
+		if (propertiesPath == null) {
 			return ImmutableMap.of();
 		}
 
@@ -379,8 +528,23 @@ public class T2Dv2GoldStandard {
 		}
 	}
 
+	private static Path getPropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
+		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
+
+		final String sanitizedFileName = fileName.replaceAll(CHARACTERS_TO_SANITIZE_REGEX, SANITIZE_WITH);
+
+		final String propertiesFileName = sanitizedFileName + ".csv";
+
+		final Path propertiesPath = declaredPropertiesPath.resolve(propertiesFileName);
+		if (!propertiesPath.toFile().exists()) {
+			return null;
+		}
+		
+		return propertiesPath;
+	}
+
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -390,15 +554,23 @@ public class T2Dv2GoldStandard {
 		 */
 		final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
 
+		testStatisticsBuilder.addLearningColumnsCount(slicedTable.getWidth());
+		
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
+		
+		testStatisticsBuilder.addLearntContextColumnsCount(availableContextColumnIndices.size());
 
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
+			testStatisticsBuilder.addAttemptedLearntNumericColumn();
+			
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
 			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
+				testStatisticsBuilder.addTooSmallNumericColumn();
+				
 				continue;
 			}
 
@@ -409,6 +581,16 @@ public class T2Dv2GoldStandard {
 			rootNode.addChildren(children);
 
 			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+			if (declaredPropertyUri == null) {
+				testStatisticsBuilder.addNoPropertyLearningNumericColumn();
+				
+				if (onlyWithProperties) {
+					continue;
+				}
+			} else {
+				testStatisticsBuilder.addUniqueProperty(declaredPropertyUri);
+				testStatisticsBuilder.addUniquePropertyLearnt(declaredPropertyUri);
+			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
 					slicedTable.getMetadata().getTitle(), declaredPropertyUri);
@@ -416,6 +598,8 @@ public class T2Dv2GoldStandard {
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
 			propertyTreesBuilder.add(tree);
+			
+			testStatisticsBuilder.addLearntNumericColumn();
 		}
 
 		return propertyTreesBuilder.build();
@@ -449,7 +633,7 @@ public class T2Dv2GoldStandard {
 		return dataset;
 	}
 
-	private CsvProfile profile(final Path input, final Path profilesDirectory, final Path convertedInput) {
+	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory, final Path convertedInput) {
 		CsvProfile csvProfile = null;
 		final Path profileInput = profilesDirectory.resolve(input.getFileName());
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
@@ -460,7 +644,7 @@ public class T2Dv2GoldStandard {
 				throw new RuntimeException("Failed to load profile for " + input + "!", e);
 			}
 		} else if (failedProfileNotice.toFile().exists()) {
-			System.out.println("Previously failed profiling attempt for " + input + "!");
+			csvWriter.writeRow("Previously failed profiling attempt for " + input + "!");
 
 			csvProfile = null;
 		} else {
@@ -473,7 +657,7 @@ public class T2Dv2GoldStandard {
 					throw new RuntimeException("Failed to save profile for " + input + "!", e);
 				}
 			} catch (final IllegalStateException e) {
-				System.out.println("Failed profiling attempt for " + input + "!");
+				csvWriter.writeRow("Failed profiling attempt for " + input + "!");
 
 				csvProfile = null;
 				try {
@@ -488,10 +672,10 @@ public class T2Dv2GoldStandard {
 		return csvProfile;
 	}
 
-	private Path convert(final Path input, final Path convertedInputFilesDirectory) {
+	private Path convert(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory) {
 		Path convertedInput = convertedInputFilesDirectory.resolve(input.getFileName() + ".csv");
 		if (convertedInput.toFile().exists()) {
-			System.out.println("File " + input + " already converted.");
+			csvWriter.writeRow("File " + input + " already converted.");
 		} else {
 			try {
 				dwtcToCsvService.convert(input, convertedInput);
@@ -576,11 +760,11 @@ public class T2Dv2GoldStandard {
 		return children.build();
 	}
 
-	private AnnotationResult annotateTable(final Path input, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath) {
-		final Path convertedInput = convert(input, convertedInputFilesDirectory);
+	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input, final BackgroundKnowledgeGraph graph,
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties) {
+		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
 
-		final CsvProfile csvProfile = profile(input, profilesDirectory, convertedInput);
+		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
 
 		/* Parse the input file to table. */
 		final Dataset dataset = parse(input);
@@ -609,11 +793,11 @@ public class T2Dv2GoldStandard {
 		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris));
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, onlyWithProperties));
 	}
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -635,6 +819,16 @@ public class T2Dv2GoldStandard {
 			rootNode.addChildren(children);
 
 			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+			if (declaredPropertyUri == null) {
+				testStatisticsBuilder.addNoPropertyTestingNumericColumn();
+				
+				if (onlyWithProperties) {
+					continue;
+				}
+			} else {
+				testStatisticsBuilder.addUniqueProperty(declaredPropertyUri);
+				testStatisticsBuilder.addUniquePropertyTested(declaredPropertyUri);
+			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
 					slicedTable.getMetadata().getTitle(), declaredPropertyUri);

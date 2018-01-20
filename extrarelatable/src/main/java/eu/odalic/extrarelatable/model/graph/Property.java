@@ -7,8 +7,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.UUID;
 
-public final class Property implements Iterable<PropertyTree> {
+import com.google.common.collect.ComparisonChain;
+
+public final class Property implements Iterable<PropertyTree>, Comparable<Property> {
+	
+	private final UUID uuid = UUID.randomUUID();
 	
 	private URI uri;
 	
@@ -55,8 +60,7 @@ public final class Property implements Iterable<PropertyTree> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((instances == null) ? 0 : instances.hashCode());
-		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+		result = prime * result + uuid.hashCode();
 		return result;
 	}
 
@@ -72,25 +76,22 @@ public final class Property implements Iterable<PropertyTree> {
 			return false;
 		}
 		Property other = (Property) obj;
-		if (instances == null) {
-			if (other.instances != null) {
+		if (uuid == null) {
+			if (other.uuid != null) {
 				return false;
 			}
-		} else if (!instances.equals(other.instances)) {
-			return false;
-		}
-		if (uri == null) {
-			if (other.uri != null) {
-				return false;
-			}
-		} else if (!uri.equals(other.uri)) {
+		} else if (!uuid.equals(other.uuid)) {
 			return false;
 		}
 		return true;
 	}
 
+	public int compareTo(final Property other) {
+		return uuid.compareTo(other.uuid);
+	}
+	
 	@Override
 	public String toString() {
-		return "Property [uri=" + uri + ", instances=" + instances + "]";
+		return "Property [uuid=" + uuid + ", uri=" + uri + ", instances=" + instances + "]";
 	}
 }

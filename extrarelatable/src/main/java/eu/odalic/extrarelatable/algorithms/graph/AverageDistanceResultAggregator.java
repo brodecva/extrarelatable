@@ -1,5 +1,6 @@
 package eu.odalic.extrarelatable.algorithms.graph;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -18,7 +19,13 @@ import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 public class AverageDistanceResultAggregator implements ResultAggregator {
 
 	@Override
-	public <T> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates) {
+	public <T extends Comparable<T>> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates) {
+		return aggregate(levelAggregates, Comparator.naturalOrder());
+	}
+	
+	@Override
+	public <T> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates,
+			final Comparator<? super T> generalKeysComparator) {
 		final Map<T, Double> mappedAggregates = levelAggregates.asMap().entrySet().stream()
 				.collect(
 					ImmutableMap.toImmutableMap(
@@ -30,11 +37,11 @@ public class AverageDistanceResultAggregator implements ResultAggregator {
 						) / e.getValue().size()
 					)
 				);
+		
 		final SortedSet<T> sortedAggregates = ImmutableSortedSet.copyOf(
-				(first, second) -> mappedAggregates.get(first).compareTo(mappedAggregates.get(second)),
+				ResultAggregator.aggregatesComparator(mappedAggregates, generalKeysComparator, Comparator.naturalOrder()),
 				mappedAggregates.keySet());
 
 		return sortedAggregates;
 	}
-
 }
