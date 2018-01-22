@@ -1,10 +1,15 @@
 package eu.odalic.extrarelatable.experiments;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 public final class TestStatistics {
 
@@ -25,12 +30,13 @@ public final class TestStatistics {
 	private int annotatedNumericColumns;
 	private int missingSolutions;
 	private int matchingSolutions;
-	private int nonmatchingSolutions;
+	private Map<Integer, Multiset<URI>> nonmatchingSolutions = new HashMap<>();// HashMultiset.create();
 	private int noPropertyLearningNumericColumns;
 	private int noPropertyTestingNumericColums;
-	private Set<URI> uniqueProperties = new HashSet<>();
-	private Set<URI> uniquePropertiesLearnt = new HashSet<>();
-	private Set<URI> uniquePropertiesTested = new HashSet<>();
+	private Map<Integer, Set<URI>> uniqueProperties = new HashMap<>();
+	private Map<Integer, Set<URI>> uniquePropertiesLearnt = new HashMap<>();
+	private Map<Integer, Set<URI>> uniquePropertiesTested = new HashMap<>();// = new HashSet<>();
+	private int repetitions;
 	
 	public final static class Builder {
 
@@ -49,20 +55,20 @@ public final class TestStatistics {
 			return this;
 		}
 
-		public Builder setFilesCount(int filesCount) {
-			testStatistics.filesCount = filesCount;
+		public Builder addFilesCount(int filesCount) {
+			testStatistics.filesCount += filesCount;
 			
 			return this;
 		}
 
-		public Builder setTestFilesCount(int testFilesCount) {
-			testStatistics.testFilesCount = testFilesCount;
+		public Builder addTestFilesCount(int testFilesCount) {
+			testStatistics.testFilesCount += testFilesCount;
 			
 			return this;
 		}
 
-		public Builder setLearningFilesCount(int learningFilesCount) {
-			testStatistics.learningFilesCount = learningFilesCount;
+		public Builder addLearningFilesCount(int learningFilesCount) {
+			testStatistics.learningFilesCount += learningFilesCount;
 			
 			return this;
 		}
@@ -145,10 +151,10 @@ public final class TestStatistics {
 			return this;				
 		}
 
-		public Builder addNonmatchingSolution() {
-			testStatistics.nonmatchingSolutions++;
+		public Builder addNonmatchingSolution(int repetition, URI columnSolution) {
+			testStatistics.nonmatchingSolutions.get(repetition).add(columnSolution);
 			
-			return this;				
+			return this;
 		}
 
 		public Builder addNoPropertyLearningNumericColumn() {
@@ -163,20 +169,33 @@ public final class TestStatistics {
 			return this;
 		}
 
-		public Builder addUniqueProperty(@Nullable final URI propertyUri) {
-			testStatistics.uniqueProperties.add(propertyUri);
+		public Builder addUniqueProperty(int repetition, @Nullable final URI propertyUri) {
+			testStatistics.uniqueProperties.get(repetition).add(propertyUri);
 			
 			return this;
 		}
 
-		public Builder addUniquePropertyLearnt(URI propertyUri) {
-			testStatistics.uniquePropertiesLearnt.add(propertyUri);
+		public Builder addUniquePropertyLearnt(int repetition, URI propertyUri) {
+			testStatistics.uniquePropertiesLearnt.get(repetition).add(propertyUri);
 			
 			return this;
 		}
 
-		public Builder addUniquePropertyTested(URI propertyUri) {
-			testStatistics.uniquePropertiesTested.add(propertyUri);
+		public Builder addUniquePropertyTested(int repetition, URI propertyUri) {
+			testStatistics.uniquePropertiesTested.get(repetition).add(propertyUri);
+			
+			return this;
+		}
+
+		public Builder setRepetitions(int repetitions) {
+			testStatistics.repetitions = repetitions;
+			
+			for (int repetition = 0; repetition < repetitions; repetition++) {
+				testStatistics.uniquePropertiesLearnt.put(repetition, new HashSet<>());
+				testStatistics.uniquePropertiesTested.put(repetition, new HashSet<>());
+				testStatistics.uniqueProperties.put(repetition, new HashSet<>());
+				testStatistics.nonmatchingSolutions.put(repetition, HashMultiset.create());
+			}
 			
 			return this;
 		}
@@ -193,91 +212,104 @@ public final class TestStatistics {
 		return seed;
 	}
 
-	public int getFilesCount() {
-		return filesCount;
+	public double getFilesCount() {
+		return filesCount / (double) repetitions;
 	}
 
-	public int getTestFilesCount() {
-		return testFilesCount;
+	public double getTestFilesCount() {
+		return testFilesCount / (double) repetitions;
 	}
 
-	public int getLearningFilesCount() {
-		return learningFilesCount;
+	public double getLearningFilesCount() {
+		return learningFilesCount / (double) repetitions;
 	}
 
-	public int getIrregularHeaderFiles() {
-		return irregularHeaderFiles;
+	public double getIrregularHeaderFiles() {
+		return irregularHeaderFiles / (double) repetitions;
 	}
 
-	public int getFewRowsFiles() {
-		return fewRowsFiles;
+	public double getFewRowsFiles() {
+		return fewRowsFiles / (double) repetitions;
 	}
 
-	public int getFewTypedRowsFiles() {
-		return fewTypedRowsFiles;
+	public double getFewTypedRowsFiles() {
+		return fewTypedRowsFiles / (double) repetitions;
 	}
 
-	public int getLearntFiles() {
-		return learntFiles;
+	public double getLearntFiles() {
+		return learntFiles / (double) repetitions;
 	}
 
-	public int getLearningColumnsCount() {
-		return learningColumnsCount;
+	public double getLearningColumnsCount() {
+		return learningColumnsCount / (double) repetitions;
 	}
 
-	public int getLearntContextColumnsCount() {
-		return learntContextColumnsCount;
+	public double getLearntContextColumnsCount() {
+		return learntContextColumnsCount / (double) repetitions;
 	}
 
-	public int getLearntNumericColumns() {
-		return learntNumericColumns;
+	public double getLearntNumericColumns() {
+		return learntNumericColumns / (double) repetitions;
 	}
 
-	public int getAttemptedLearntNumericColumns() {
-		return attemptedLearntNumericColumns;
+	public double getAttemptedLearntNumericColumns() {
+		return attemptedLearntNumericColumns / (double) repetitions;
 	}
 
-	public int getTooSmallNumericColumns() {
-		return tooSmallNumericColumns;
+	public double getTooSmallNumericColumns() {
+		return tooSmallNumericColumns / (double) repetitions;
 	}
 
-	public int getTestedFiles() {
-		return testedFiles;
+	public double getTestedFiles() {
+		return testedFiles / (double) repetitions;
 	}
 
-	public int getAnnotatedNumericColumns() {
-		return annotatedNumericColumns;
+	public double getAnnotatedNumericColumns() {
+		return annotatedNumericColumns / (double) repetitions;
 	}
 
-	public int getMissingSolutions() {
-		return missingSolutions;
+	public double getMissingSolutions() {
+		return missingSolutions / (double) repetitions;
 	}
 
-	public int getMatchingSolutions() {
-		return matchingSolutions;
+	public double getMatchingSolutions() {
+		return matchingSolutions / (double) repetitions;
 	}
 
-	public int getNonmatchingSolutions() {
-		return nonmatchingSolutions;
+	public double getNonmatchingSolutions() {
+		return nonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
 	}
 
-	public int getNoPropertyLearningNumericColumns() {
-		return noPropertyLearningNumericColumns;
+	public double getNoPropertyLearningNumericColumns() {
+		return noPropertyLearningNumericColumns / (double) repetitions;
 	}
 
-	public int getNoPropertyTestingNumericColums() {
-		return noPropertyTestingNumericColums;
+	public double getNoPropertyTestingNumericColums() {
+		return noPropertyTestingNumericColums / (double) repetitions;
 	}
 
-	public Set<URI> getUniqueProperties() {
-		return uniqueProperties;
+	public double getUniqueProperties() {
+		return uniqueProperties.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
 	}
 
-	public Set<URI> getUniquePropertiesLearnt() {
-		return uniquePropertiesLearnt;
+	public double getUniquePropertiesLearnt() {
+		return uniquePropertiesLearnt.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
 	}
 
-	public Set<URI> getUniquePropertiesTested() {
-		return uniquePropertiesTested;
+	public double getUniquePropertiesTested() {
+		return uniquePropertiesTested.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+	}
+
+	public double getNonmatchingAvailableSolutions() {
+		int nonmatchingAvailableSum = 0;
+		
+		for (int repetition = 0; repetition < repetitions; repetition++) {
+			final Multiset<URI> nonmatchingAvailable = HashMultiset.create(nonmatchingSolutions.get(repetition));
+			nonmatchingAvailable.retainAll(uniquePropertiesLearnt.get(repetition));
+			
+			nonmatchingAvailableSum += nonmatchingAvailable.size();
+		}
+				
+		return nonmatchingAvailableSum / (double) repetitions;
 	}
 }

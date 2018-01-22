@@ -42,11 +42,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -124,7 +127,12 @@ public class T2Dv2GoldStandard {
 	private static final String SANITIZE_WITH = "_";
 	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
 	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
-	private static final Integer CHOSEN_SAMPLE_INDEX = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndex") == null ? null : Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndex"));
+	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices") == null ? null : Splitter.on(",").splitToList(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices")).stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
+	private static final int TEST_REPETITIONS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
+	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.of(
+		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
+		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear")
+	);
 
 	@Autowired
 	@Lazy
@@ -153,11 +161,6 @@ public class T2Dv2GoldStandard {
 
 	@Autowired
 	@Lazy
-	@Qualifier("majorityVote")
-	private ResultAggregator labelsResultAggregator;
-
-	@Autowired
-	@Lazy
 	@Qualifier("propertyUri")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
@@ -183,15 +186,19 @@ public class T2Dv2GoldStandard {
 		
 		final List<TestStatistics> results = new ArrayList<>();
 		
-		if (CHOSEN_SAMPLE_INDEX != null) {
-			final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, CHOSEN_SAMPLE_INDEX);
-			if (testStatistics != null) {
-				results.add(testStatistics);
+		if (CHOSEN_SAMPLES_INDICES != null) {
+			for (final int sampleSizeIndex : CHOSEN_SAMPLES_INDICES) {
+				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex, TEST_REPETITIONS);
+				csvWriter.flush();
+				if (testStatistics != null) {
+					results.add(testStatistics);
+				}
 			}
 		} else {
 			int sampleSizeIndex = 0;
 			while (true) {
-				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex);
+				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex, TEST_REPETITIONS);
+				csvWriter.flush();
 				if (testStatistics == null) {
 					break;
 				}
@@ -219,7 +226,8 @@ public class T2Dv2GoldStandard {
 				"Unique numeric column properties tested",
 				"Matching",
 				"Missing",
-				"Nonmatching"
+				"Nonmatching",
+				"Nonmatching available"
 		);
 		for (final TestStatistics testStatistics : results) {
 			csvWriter.writeRow(
@@ -240,7 +248,8 @@ public class T2Dv2GoldStandard {
 					testStatistics.getUniquePropertiesTested(),
 					testStatistics.getMatchingSolutions(),
 					testStatistics.getMissingSolutions(),
-					testStatistics.getNonmatchingSolutions()
+					testStatistics.getNonmatchingSolutions(),
+					testStatistics.getNonmatchingAvailableSolutions()
 					);
 		}
 		
@@ -248,10 +257,27 @@ public class T2Dv2GoldStandard {
 		csvWriter.close();
 	}
 	
-	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex) throws IOException {
+	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex, final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
 		testStatisticsBuilder.setSeed(SEED);
+		
+		testStatisticsBuilder.setRepetitions(repetitions);
 
+		for (int repetition = 0; repetition < repetitions; repetition++) {
+			final boolean succeeded = testSample(csvWriter, sampleSizeStepRatio, sampleSizeIndex, random, repetition);
+			
+			if (!succeeded) {
+				return null;
+			}
+		}
+		
+		csvWriter.writeEmptyRow();
+		csvWriter.writeRow("Finished all sample repetitions.");
+		
+		return testStatisticsBuilder.build();
+	}
+	
+	private boolean testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex, final Random random, final int repetition) throws IOException {
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
 
@@ -259,37 +285,37 @@ public class T2Dv2GoldStandard {
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
 		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
-		testStatisticsBuilder.setFilesCount(files.size());
+		testStatisticsBuilder.addFilesCount(files.size());
 
 		final List<Path> testPaths = getTestFiles(random, sampleSizeStepRatio, sampleSizeIndex, files);
 		if (testPaths == null) {
-			return null;
+			return false;
 		}
 		
-		testStatisticsBuilder.setTestFilesCount(testPaths.size());
+		testStatisticsBuilder.addTestFilesCount(testPaths.size());
 		
 		final List<Path> learningPaths = getLearningFiles(files, testPaths);
-		testStatisticsBuilder.setLearningFilesCount(learningPaths.size());
+		testStatisticsBuilder.addLearningFilesCount(learningPaths.size());
 
 		final Path inputFilesPath = setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY);
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
 		
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
-				declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
+				declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition);
 
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		
-		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
+		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition);
 		
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
 		
 		csvWriter.writeEmptyRow();
 		
-		return testStatisticsBuilder.build();
+		return true;
 	}
 
 	private ImmutableList<Path> getLearningFiles(final List<Path> files, final List<Path> testPaths) {
@@ -329,13 +355,13 @@ public class T2Dv2GoldStandard {
 
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final boolean onlyWithProperties)
+			final boolean onlyWithProperties, final int repetition)
 			throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath, onlyWithProperties);
+					declaredPropertiesPath, onlyWithProperties, repetition);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -344,7 +370,8 @@ public class T2Dv2GoldStandard {
 	}
 
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties)
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties,
+			final int repetition)
 			throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
@@ -354,7 +381,7 @@ public class T2Dv2GoldStandard {
 			final AnnotationResult result;
 			try {
 				result = annotateTable(csvWriter, file, graph, convertedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath, onlyWithProperties);
+						declaredPropertiesPath, onlyWithProperties, repetition);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
@@ -382,7 +409,6 @@ public class T2Dv2GoldStandard {
 				final int index = e.getKey();
 				final Annotation annotation = e.getValue();
 
-				final Map<Label, Statistics> labelsStatistics = annotation.getLabelsStatistics();
 				final Map<Property, Statistics> propertiesStatistics = annotation.getPropertiesStatistics();
 
 				csvWriter.writeRow("Index:", index);
@@ -392,16 +418,6 @@ public class T2Dv2GoldStandard {
 				csvWriter.addValues(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5)));
 				csvWriter.writeValuesToRow();
 				
-				csvWriter.writeRow("Labels:");
-				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "Text", "Index", "File", "First values", "First rows");
-				csvWriter.writeRows(annotation.getLabels().stream().map(label -> {
-					final Statistics statistics = labelsStatistics.get(label);
-
-					return new Object[] { statistics.getAverage(), statistics.getMedian(),
-							statistics.getOccurence(), statistics.getRelativeOccurence(), label.getText(),
-							label.getIndex(), label.getFile(), label.getFirstValues(), label.getFirstRows() };
-				}).collect(ImmutableList.toImmutableList()));
-
 				csvWriter.writeRow("Properties:");
 				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI");
 				csvWriter.writeRows(annotation.getProperties().stream().map(property -> {
@@ -417,10 +433,10 @@ public class T2Dv2GoldStandard {
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();
 				} else {
-					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> columnSolution.equals(uri))) {
+					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> isAcceptableFor(uri, columnSolution))) {
 						testStatisticsBuilder.addMatchingSolution();
 					} else {
-						testStatisticsBuilder.addNonmatchingSolution();
+						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution);
 					}
 				}
 				
@@ -437,12 +453,20 @@ public class T2Dv2GoldStandard {
 		});
 	}
 
+	private boolean isAcceptableFor(final URI first, final URI second) {
+		return first.equals(second) || (
+			IS_ACCEPTABLE_FOR_PAIRS.get(first) != null &&
+			IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second)
+		);
+	}
+
 	private static Map<Integer, URI> getSolution(final Path input, final Path declaredPropertiesPath) {
 		return getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 	}
 
 	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory,
-			final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties) {
+			final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties,
+			final int repetition) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
@@ -488,7 +512,7 @@ public class T2Dv2GoldStandard {
 		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
-		Set<PropertyTree> trees = buildTrees(slicedTable, declaredPropertyUris, onlyWithProperties);
+		Set<PropertyTree> trees = buildTrees(slicedTable, declaredPropertyUris, onlyWithProperties, repetition);
 		
 		testStatisticsBuilder.addLearntFile();
 		
@@ -544,7 +568,7 @@ public class T2Dv2GoldStandard {
 	}
 
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties) {
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties, final int repetition) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -588,8 +612,8 @@ public class T2Dv2GoldStandard {
 					continue;
 				}
 			} else {
-				testStatisticsBuilder.addUniqueProperty(declaredPropertyUri);
-				testStatisticsBuilder.addUniquePropertyLearnt(declaredPropertyUri);
+				testStatisticsBuilder.addUniqueProperty(repetition, declaredPropertyUri);
+				testStatisticsBuilder.addUniquePropertyLearnt(repetition, declaredPropertyUri);
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
@@ -761,7 +785,8 @@ public class T2Dv2GoldStandard {
 	}
 
 	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties) {
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final boolean onlyWithProperties, final int repetition) {
 		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
@@ -793,11 +818,12 @@ public class T2Dv2GoldStandard {
 		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, onlyWithProperties));
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, onlyWithProperties, repetition));
 	}
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties) {
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties,
+			final int repetition) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -826,8 +852,8 @@ public class T2Dv2GoldStandard {
 					continue;
 				}
 			} else {
-				testStatisticsBuilder.addUniqueProperty(declaredPropertyUri);
-				testStatisticsBuilder.addUniquePropertyTested(declaredPropertyUri);
+				testStatisticsBuilder.addUniqueProperty(repetition, declaredPropertyUri);
+				testStatisticsBuilder.addUniquePropertyTested(repetition, declaredPropertyUri);
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
@@ -852,16 +878,10 @@ public class T2Dv2GoldStandard {
 					.aggregate(propertyLevelAggregates);
 			final List<Property> properties = cutOff(propertyAggregates);
 
-			final SetMultimap<Label, MeasuredNode> labelLevelAggregates = treeMatchingNodes.stream()
-					.collect(ImmutableSetMultimap.toImmutableSetMultimap(e -> e.getNode().getLabel(), identity()));
-			final SortedSet<Label> labelAggregates = labelsResultAggregator.aggregate(labelLevelAggregates);
-			final List<Label> labels = cutOff(labelAggregates);
-
 			final Map<Property, Statistics> propertiesStatistics = getStatistics(properties, propertyLevelAggregates);
-			final Map<Label, Statistics> labelStatistics = getStatistics(labels, labelLevelAggregates);
 
-			builder.put(columnIndex, Annotation.of(properties, labels, ImmutableList.of(), propertiesStatistics,
-					labelStatistics, ImmutableMap.of()));
+			builder.put(columnIndex, Annotation.of(properties, ImmutableList.of(), ImmutableList.of(), propertiesStatistics,
+					ImmutableMap.of(), ImmutableMap.of()));
 		}
 
 		return builder.build();
