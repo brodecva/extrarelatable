@@ -133,6 +133,8 @@ public class T2Dv2GoldStandard {
 		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
 		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear")
 	);
+	private static final double VALUES_WEIGHT = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
+	private static final Set<URI> STOP_PROPERTIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
 
 	@Autowired
 	@Lazy
@@ -397,6 +399,10 @@ public class T2Dv2GoldStandard {
 			csvWriter.addValues(parsedTable.getHeaders());
 			csvWriter.writeValuesToRow();
 			
+			csvWriter.addValue("Declared properties:");
+			csvWriter.addValues(solution);
+			csvWriter.writeValuesToRow();
+			
 			csvWriter.writeRow("First rows:");
 			csvWriter.writeRows(
 					parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream()
@@ -419,12 +425,12 @@ public class T2Dv2GoldStandard {
 				csvWriter.writeValuesToRow();
 				
 				csvWriter.writeRow("Properties:");
-				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI");
+				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI", "Context properties");
 				csvWriter.writeRows(annotation.getProperties().stream().map(property -> {
 					final Statistics statistics = propertiesStatistics.get(property);
 
 					return new Object[] { statistics.getAverage(), statistics.getMedian(),
-							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri() };
+							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property)};
 				}).collect(ImmutableList.toImmutableList()));
 				
 				final URI columnSolution = solution.get(index);
@@ -451,6 +457,11 @@ public class T2Dv2GoldStandard {
 			csvWriter.writeEmptyRow();
 			csvWriter.writeEmptyRow();
 		});
+	}
+
+	private static Set<URI> getContextProperties(final Property property) {
+		return property.getInstances().stream().map(
+				i -> i.getContext().getDeclaredContextColumnProperties().values()).flatMap(e -> e.stream()).collect(ImmutableSet.toImmutableSet());
 	}
 
 	private boolean isAcceptableFor(final URI first, final URI second) {
@@ -617,7 +628,7 @@ public class T2Dv2GoldStandard {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri);
+					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -857,7 +868,7 @@ public class T2Dv2GoldStandard {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri);
+					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -865,8 +876,7 @@ public class T2Dv2GoldStandard {
 			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder();
 
 			for (final Node node : tree) {
-				final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, node.getValues(),
-						TOP_K_NEGHBOURS);
+				final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, node, VALUES_WEIGHT, TOP_K_NEGHBOURS);
 				treeMatchingNodesBuilder.addAll(matchingNodes);
 			}
 
@@ -885,6 +895,13 @@ public class T2Dv2GoldStandard {
 		}
 
 		return builder.build();
+	}
+
+	private Map<Integer, URI> getMeaningfulContextProperties(
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
+		return declaredPropertyUris.entrySet().stream().filter(
+				e -> !STOP_PROPERTIES.contains(e.getValue())
+			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
 	private static <T> Map<T, Statistics> getStatistics(final Iterable<T> aspects,
@@ -907,8 +924,8 @@ public class T2Dv2GoldStandard {
 		return builder.build();
 	}
 
-	private <T> List<T> cutOff(final Collection<T> labelAggregates) {
-		return ImmutableList.copyOf(labelAggregates).subList(0,
-				Math.min(labelAggregates.size(), TOP_K_AGGREGATED_RESULTS));
+	private <T> List<T> cutOff(final Collection<T> aggregates) {
+		return ImmutableList.copyOf(aggregates).subList(0,
+				Math.min(aggregates.size(), TOP_K_AGGREGATED_RESULTS));
 	}
 }
