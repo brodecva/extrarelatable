@@ -5,7 +5,6 @@ package eu.odalic.extrarelatable.services.csvengine.csvprofiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -77,9 +76,5 @@ public final class DefaultCsvProfilerService implements CsvProfilerService {
 
 	private static boolean isSuccessful(final Response response) {
 		return response.getStatusInfo().getFamily() == Family.SUCCESSFUL;
-	}
-	
-	public static void main(final String[] args) throws IOException {
-		System.out.println(new DefaultCsvProfilerService().profile(Paths.get("H:/g/cleaned/httpckan.data.ktn.gv.atstoragef20130920T093A193A35.720Zlandtagswahlen2013.csv").toFile())); // TODO: Remove.
 	}
 }

@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.common.collect.ComparisonChain;
-
 public final class Property implements Iterable<PropertyTree>, Comparable<Property> {
 	
 	private final UUID uuid = UUID.randomUUID();

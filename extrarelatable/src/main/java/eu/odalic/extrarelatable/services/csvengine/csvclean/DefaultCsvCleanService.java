@@ -6,8 +6,6 @@ package eu.odalic.extrarelatable.services.csvengine.csvclean;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -19,7 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -78,9 +75,5 @@ public final class DefaultCsvCleanService implements CsvCleanService {
 
 	private static boolean isSuccessful(final Response response) {
 		return response.getStatusInfo().getFamily() == Family.SUCCESSFUL;
-	}
-	
-	public static void main(final String[] args) throws IOException {
-		System.out.println(IOUtils.toString(new DefaultCsvCleanService().clean(Paths.get("H:/g/httpckan.data.ktn.gv.atstoragef20130925T143A033A23.050Znationalratswahl2008.csv").toFile()), StandardCharsets.UTF_8)); // TODO: Remove.
 	}
 }
