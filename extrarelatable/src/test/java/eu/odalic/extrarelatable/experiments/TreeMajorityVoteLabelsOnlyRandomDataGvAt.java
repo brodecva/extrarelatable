@@ -219,7 +219,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		/* Parse the input file to table. */
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
-			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, null));
 		} catch (final IOException e) {
 			System.out.println("Failed to parse " + input + "!");
 			e.printStackTrace();
@@ -328,7 +328,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 		
 		/* Parse the input file to table. */
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(input))) {
-			return csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+			return csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, null));
 		} catch (final IOException e) {
 			throw new RuntimeException(e);
 		}

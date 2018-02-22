@@ -10,7 +10,9 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.concurrent.Immutable;
+import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
@@ -31,12 +33,27 @@ import jersey.repackaged.com.google.common.collect.ImmutableList;
 @Component
 public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatcher {
 	
-	private final Distance distance;
+	public static final int INITIAL_DEFAULT_K = Integer.MAX_VALUE;
+	public static final double INITIAL_DEFAULT_VALUES_WEIGHT = 0.5d;
 	
-	public ContextAwareDistanceTopKNodesMatcher(final Distance distance) {
+	private final Distance distance;
+	private final double defaultValuesWeight;
+	private final int defaultK;
+	
+	@Inject
+	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight?:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.valuesWeight?:2147483647}") final int defaultK) {
 		checkNotNull(distance);
+		checkArgument(defaultValuesWeight >= 0, "The default values weight must be at least zero!");
+		checkArgument(defaultValuesWeight <= 1, "The default values weight can be at most one!");
+		checkArgument(defaultK >= 1, "The k must be at least one!");
 		
 		this.distance = distance;
+		this.defaultValuesWeight = defaultValuesWeight;
+		this.defaultK = defaultK;
+	}
+	
+	public ContextAwareDistanceTopKNodesMatcher(final Distance distance) {
+		this(distance, INITIAL_DEFAULT_VALUES_WEIGHT, INITIAL_DEFAULT_K);
 	}
 
 	@Override
@@ -99,5 +116,15 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 		}
 
 		return ImmutableSortedSet.copyOf(winners);
+	}
+
+	@Override
+	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Node matchedNode) {
+		return match(graph, matchedNode, defaultValuesWeight, defaultK);
+	}
+
+	@Override
+	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Collection<? extends NumericValue> values) {
+		return match(graph, values, defaultK);
 	}
 }

@@ -318,7 +318,7 @@ public class CsvEngineTreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format) {
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
-			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null));
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, null));
 		} catch (final IOException e) {
 			throw new RuntimeException("Failed to parse " + input + "!", e);
 		}

@@ -8,6 +8,10 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 
 public interface TableSlicer {
 	SlicedTable slice(double threshold, TypedTable table);
+	
+	SlicedTable slice(TypedTable table);
 
 	SlicedTable slice(double threshold, TypedTable table, Map<? extends Integer, ? extends Type> columnTypeHints);
+	
+	SlicedTable slice(TypedTable table, Map<? extends Integer, ? extends Type> columnTypeHints);
 }

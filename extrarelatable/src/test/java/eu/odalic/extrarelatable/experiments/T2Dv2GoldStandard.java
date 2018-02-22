@@ -653,7 +653,7 @@ public class T2Dv2GoldStandard {
 
 	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName) {
 		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
-				new Metadata(fileName, dataset.getUrl()));
+				new Metadata(fileName, dataset.getUrl(), null));
 
 		return table;
 	}

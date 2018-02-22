@@ -5,8 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
-import javax.annotation.concurrent.Immutable;
+import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
@@ -17,16 +18,28 @@ import eu.odalic.extrarelatable.model.table.NestedListsSlicedTable;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
-@Immutable
 @Component
 public class DefaultTableSlicer implements TableSlicer {
 
+	private static final double RECOMMENDED_DEFAULT_THRESHOLD = 0.6d;
+	
 	private final ColumnTypeAnalyzer columnTypeAnalyzer;
 	
-	public DefaultTableSlicer(final ColumnTypeAnalyzer columnTypeAnalyzer) {
+	private final double defaultThreshold;
+	
+	@Inject
+	public DefaultTableSlicer(final ColumnTypeAnalyzer columnTypeAnalyzer,
+			@Value("${eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold?:0.6}") final double defaultThreshold) {
 		checkNotNull(columnTypeAnalyzer);
+		checkArgument(defaultThreshold > 0);
+		checkArgument(defaultThreshold <= 1);
 		
 		this.columnTypeAnalyzer = columnTypeAnalyzer;
+		this.defaultThreshold = defaultThreshold;
+	}
+	
+	public DefaultTableSlicer(final ColumnTypeAnalyzer columnTypeAnalyzer) {
+		this(columnTypeAnalyzer, RECOMMENDED_DEFAULT_THRESHOLD);
 	}
 
 	@Override
@@ -100,4 +113,17 @@ public class DefaultTableSlicer implements TableSlicer {
 		return NestedListsSlicedTable.of(table, dataColumnsIndicesBuilder.build(), contextColumnsIndices.build());
 	}
 
+	public double getDefaultThreshold() {
+		return defaultThreshold;
+	}
+
+	@Override
+	public SlicedTable slice(TypedTable table) {
+		return slice(defaultThreshold, table);
+	}
+
+	@Override
+	public SlicedTable slice(TypedTable table, Map<? extends Integer, ? extends Type> columnTypeHints) {
+		return slice(defaultThreshold, table, columnTypeHints);
+	}
 }

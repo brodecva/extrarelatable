@@ -1,19 +1,26 @@
 package eu.odalic.extrarelatable.model.table;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class Metadata {
+public final class Metadata implements Serializable {
+	
+	private static final long serialVersionUID = -8245805148358617046L;
+	
 	private final String title;
 	private final String author;
+	private final String languageTag;
 	
-	public Metadata(String title, String author) {
+	public Metadata(final String title, final String author, final String languageTag) {
 		this.title = title;
 		this.author = author;
+		this.languageTag = languageTag;
 	}
 
 	public Metadata() {
-		this(null, null);
+		this(null, null, null);
 	}
 	
 	public String getTitle() {
@@ -24,11 +31,16 @@ public final class Metadata {
 		return author;
 	}
 
+	public String getLanguageTag() {
+		return languageTag;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
+		result = prime * result + ((languageTag == null) ? 0 : languageTag.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}
@@ -44,12 +56,19 @@ public final class Metadata {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final Metadata other = (Metadata) obj;
+		Metadata other = (Metadata) obj;
 		if (author == null) {
 			if (other.author != null) {
 				return false;
 			}
 		} else if (!author.equals(other.author)) {
+			return false;
+		}
+		if (languageTag == null) {
+			if (other.languageTag != null) {
+				return false;
+			}
+		} else if (!languageTag.equals(other.languageTag)) {
 			return false;
 		}
 		if (title == null) {
@@ -64,6 +83,6 @@ public final class Metadata {
 
 	@Override
 	public String toString() {
-		return "Metadata [title=" + title + ", author=" + author + "]";
+		return "Metadata [title=" + title + ", author=" + author + ", languageTag=" + languageTag + "]";
 	}
 }

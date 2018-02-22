@@ -240,7 +240,7 @@ public final class Format implements Serializable {
 
 	@Override
 	public String toString() {
-		return "CsvConfiguration [charset=" + this.charset + ", delimiter=" + this.delimiter + ", emptyLinesIgnored="
+		return "Format [charset=" + this.charset + ", delimiter=" + this.delimiter + ", emptyLinesIgnored="
 				+ this.emptyLinesIgnored + ", quoteCharacter=" + this.quoteCharacter + ", escapeCharacter="
 				+ this.escapeCharacter + ", commentMarker=" + this.commentMarker + ", lineSeparator="
 				+ this.lineSeparator + "]";

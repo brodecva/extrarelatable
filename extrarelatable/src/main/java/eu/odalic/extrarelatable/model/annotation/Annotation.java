@@ -24,13 +24,13 @@ public final class Annotation {
 
 	private final Map<Property, Statistics> propertiesStatistics;
 	private final Map<Label, Statistics> labelsStatistics;
-	private final Map<AttributeValuePair, Statistics> pairsStatistics;
+	private final Map<Set<AttributeValuePair>, Statistics> pairsStatistics;
 
 	public static Annotation of(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs,
 			final Map<? extends Property, ? extends Statistics> propertiesStatistics,
 			final Map<? extends Label, ? extends Statistics> labelsStatistics,
-			final Map<? extends AttributeValuePair, ? extends Statistics> pairsStatistics) {
+			final Map<? extends Set<? extends AttributeValuePair>, ? extends Statistics> pairsStatistics) {
 		return new Annotation(properties, labels, attributeValuePairs, propertiesStatistics, labelsStatistics, pairsStatistics);
 	}
 	
@@ -43,7 +43,7 @@ public final class Annotation {
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs,
 			final Map<? extends Property, ? extends Statistics> propertiesStatistics,
 			final Map<? extends Label, ? extends Statistics> labelsStatistics,
-			final Map<? extends AttributeValuePair, ? extends Statistics> pairsStatistics) {
+			final Map<? extends Set<? extends AttributeValuePair>, ? extends Statistics> pairsStatistics) {
 		checkNotNull(properties);
 		checkNotNull(labels);
 		checkNotNull(attributeValuePairs);
@@ -54,7 +54,9 @@ public final class Annotation {
 				.collect(ImmutableList.toImmutableList());
 		this.propertiesStatistics = ImmutableMap.copyOf(propertiesStatistics);
 		this.labelsStatistics = ImmutableMap.copyOf(labelsStatistics);
-		this.pairsStatistics = ImmutableMap.copyOf(pairsStatistics);
+		this.pairsStatistics = pairsStatistics.entrySet().stream().collect(
+			ImmutableMap.toImmutableMap(e -> ImmutableSet.copyOf(e.getKey()), e -> e.getValue())
+		);
 	}
 
 	public List<Property> getProperties() {
@@ -77,7 +79,7 @@ public final class Annotation {
 		return labelsStatistics;
 	}
 
-	public Map<AttributeValuePair, Statistics> getPairsStatistics() {
+	public Map<Set<AttributeValuePair>, Statistics> getPairsStatistics() {
 		return pairsStatistics;
 	}
 
