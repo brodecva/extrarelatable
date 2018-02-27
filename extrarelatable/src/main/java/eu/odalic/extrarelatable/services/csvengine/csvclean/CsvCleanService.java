@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 public interface CsvCleanService {
 	/**
-	 * Cleans the the CSV file.
+	 * Cleans the CSV file.
 	 * 
 	 * @param file file
 	 * @return cleaned input stream

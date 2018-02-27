@@ -16,7 +16,7 @@ import eu.odalic.extrarelatable.util.Matrix;
 public final class NestedListsParsedTable implements ParsedTable {
 	
 	/**
-	 * <p>Incrementally, row by row, helps to produce the complete {@link ListsBackedInput}.</p>
+	 * <p>Incrementally, row by row, helps to produce the complete {@link ParsedTableValue}.</p>
 	 * 
 	 * <p>Adapted from Odalic.</p>
 	 *

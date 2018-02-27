@@ -9,9 +9,9 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
 
 public interface CsvTableParser {
-	ParsedTable parse(final String content, final Format format, Metadata metadata) throws IOException;
+	ParsedTable parse(String content, Format format, Metadata metadata) throws IOException;
 
-	ParsedTable parse(final Reader reader, final Format format, Metadata metadata) throws IOException;
+	ParsedTable parse(Reader reader, Format format, Metadata metadata) throws IOException;
 
-	ParsedTable parse(final InputStream stream, final Format format, Metadata metadata) throws IOException;
+	ParsedTable parse(InputStream stream, Format format, Metadata metadata) throws IOException;
 }

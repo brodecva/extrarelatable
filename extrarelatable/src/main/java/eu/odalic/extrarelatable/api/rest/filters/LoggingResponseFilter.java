@@ -19,17 +19,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public final class LoggingResponseFilter implements ContainerResponseFilter {
 
-  private static final Logger logger = LoggerFactory.getLogger(LoggingResponseFilter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoggingResponseFilter.class);
 
   @Override
   public void filter(final ContainerRequestContext requestContext,
       final ContainerResponseContext responseContext) throws IOException {
     final String method = requestContext.getMethod();
 
-    logger.debug("Requesting " + method + " for path " + requestContext.getUriInfo().getPath());
+    LOGGER.debug("Requesting " + method + " for path " + requestContext.getUriInfo().getPath());
     final Object entity = responseContext.getEntity();
     if (entity != null) {
-      logger.debug("Reply "
+      LOGGER.debug("Reply "
           + new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(entity));
     }
   }

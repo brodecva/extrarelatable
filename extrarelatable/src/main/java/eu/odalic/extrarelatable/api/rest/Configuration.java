@@ -17,7 +17,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 import eu.odalic.extrarelatable.api.rest.filters.CorsResponseFilter;
 import eu.odalic.extrarelatable.api.rest.filters.LoggingResponseFilter;
-import eu.odalic.extrarelatable.api.rest.resources.ControlResource;
+import eu.odalic.extrarelatable.api.rest.resources.GraphResource;
 import eu.odalic.extrarelatable.api.rest.resources.WelcomeResource;
 
 /**
@@ -40,7 +40,7 @@ public final class Configuration extends ResourceConfig {
 
     // Resources registration
     register(WelcomeResource.class);
-    register(ControlResource.class);
+    register(GraphResource.class);
 
     // Filters registration
     register(RequestContextFilter.class);

@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 public final class WelcomeResource {
 
   private static final String WELCOME_PAGE_CONTENT =
-      "<html>" + "<title>Odalic REST API</title>" + "<body>"
-          + "<h1>Odalic REST API is working!</h1>" + "<p>For more information about Odalic visit "
+      "<html>" + "<title>Odalic Extrarelatable REST API</title>" + "<body>"
+          + "<h1>Odalic Extrarelatable REST API is working!</h1>" + "<p>For more information about Odalic visit "
           + "<a href=\"https://github.com/odalic\">the project GitHub page.</a>" + "</p>"
           + "</body>" + "</html>";
 

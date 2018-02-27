@@ -1,5 +1,10 @@
 package eu.odalic.extrarelatable.model.annotation;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import eu.odalic.extrarelatable.api.rest.adapters.StatisticsAdapter;
+
+@XmlJavaTypeAdapter(StatisticsAdapter.class)
 public final class Statistics {
 	private final Double average;
 	private final Double median;

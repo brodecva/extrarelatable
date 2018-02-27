@@ -4,10 +4,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import com.google.common.collect.ImmutableMap;
 
+import eu.odalic.extrarelatable.api.rest.adapters.AnnotationResultAdapter;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
+@XmlJavaTypeAdapter(AnnotationResultAdapter.class)
 public class AnnotationResult {
 	private final ParsedTable parsedTable;
 	

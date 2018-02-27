@@ -9,6 +9,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
+
+@XmlJavaTypeAdapter(PropertyAdapter.class)
 public final class Property implements Iterable<PropertyTree>, Comparable<Property> {
 	
 	private final UUID uuid = UUID.randomUUID();

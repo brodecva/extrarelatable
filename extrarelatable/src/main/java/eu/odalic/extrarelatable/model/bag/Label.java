@@ -4,10 +4,14 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.google.common.collect.ImmutableList;
 
+import eu.odalic.extrarelatable.api.rest.adapters.LabelAdapter;
+
 @Immutable
+@XmlJavaTypeAdapter(LabelAdapter.class)
 public final class Label implements Comparable<Label> {
 	
 	private final UUID uuid = UUID.randomUUID();

@@ -3,8 +3,12 @@ package eu.odalic.extrarelatable.model.table;
 import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import eu.odalic.extrarelatable.api.rest.adapters.MetadataAdapter;
 
 @Immutable
+@XmlJavaTypeAdapter(MetadataAdapter.class)
 public final class Metadata implements Serializable {
 	
 	private static final long serialVersionUID = -8245805148358617046L;

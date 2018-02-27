@@ -13,6 +13,8 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,8 @@ import eu.odalic.extrarelatable.algorithms.graph.PropertyTreesBuilder;
 import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;
 import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
-import eu.odalic.extrarelatable.model.annotation.Annotation;
+import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableWriter;
+import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 import eu.odalic.extrarelatable.model.bag.Type;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
@@ -35,10 +38,13 @@ import eu.odalic.extrarelatable.services.csvengine.csvclean.CsvCleanService;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfile;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfilerService;
 import eu.odalic.extrarelatable.util.Lists;
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 @Service
 public class DefaultGraphService implements GraphService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGraphService.class);
+	
 	private final PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 	private final FileCachingService fileCachingService;
 	private final CsvProfilerService csvProfilerService;
@@ -48,6 +54,7 @@ public class DefaultGraphService implements GraphService {
 	private final PropertyTreesBuilder propertyTreesBuilder;
 	private final TableSlicer tableSlicer;
 	private final Annotator annotator;
+	private final CsvTableWriter csvTableWriter;
 	
 	private final Map<String, BackgroundKnowledgeGraph> graphs;
 	
@@ -55,7 +62,7 @@ public class DefaultGraphService implements GraphService {
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator,
-			Map<String, BackgroundKnowledgeGraph> graphs) {
+			CsvTableWriter csvTableWriter, Map<String, BackgroundKnowledgeGraph> graphs) {
 		checkNotNull(propertyTreesMergingStrategy);
 		checkNotNull(fileCachingService);
 		checkNotNull(csvProfilerService);
@@ -65,7 +72,9 @@ public class DefaultGraphService implements GraphService {
 		checkNotNull(propertyTreesBuilder);
 		checkNotNull(tableSlicer);
 		checkNotNull(annotator);
+		checkNotNull(csvTableWriter);
 		checkNotNull(graphs);
+		
 		
 		graphs.entrySet().stream().forEach(
 			e -> {
@@ -83,6 +92,7 @@ public class DefaultGraphService implements GraphService {
 		this.propertyTreesBuilder = propertyTreesBuilder;
 		this.tableSlicer = tableSlicer;
 		this.annotator = annotator;
+		this.csvTableWriter = csvTableWriter;
 		this.graphs = graphs;
 	}
 	
@@ -90,8 +100,8 @@ public class DefaultGraphService implements GraphService {
 	public DefaultGraphService(@Qualifier("labelText") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
-			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator) {
-		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, new HashMap<>());
+			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter) {
+		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, new HashMap<>());
 	}
 
 	@Override
@@ -112,19 +122,31 @@ public class DefaultGraphService implements GraphService {
 		
 		final Path cachedInput = this.fileCachingService.cache(input);
 		
-		final CsvProfile csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		CsvProfile csvProfile;
+		try {
+			csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		} catch (final IllegalStateException e) {
+			LOGGER.warn("Profiling has failed!", e);
+			
+			csvProfile = null;
+		}
 
-		final Format usedFormat = format == null ? getFormat(csvProfile) : format;
+		final Format usedFormat = getFormat(csvProfile, format);
 		
-		final ParsedTable table;
+		ParsedTable table;
 		try (final InputStream cleanedInput = this.csvCleanerService.clean(cachedInput.toFile())) { 
-				table = this.csvTableParser.parse(cleanedInput, usedFormat, metadata);
+			table = this.csvTableParser.parse(cleanedInput, usedFormat, metadata);
+		} catch (final IllegalStateException e) {
+			LOGGER.warn("Cleaning has failed! Using the raw input...", e);
+			
+			table = this.csvTableParser.parse(input, usedFormat, metadata);
 		}
 		checkArgument(table.getHeight() >= 2, "Too few rows in " + input + ".");
+		checkArgument(csvProfile == null || csvProfile.getColumns() == table.getWidth(), "The number of profiled columns does not match!");
 		
-		final Map<Integer, Type> typeHints = Lists.toMap(csvProfile.getTypes());
+		final Map<Integer, Type> typeHints = tryGetHints(csvProfile);
 		
-		final Locale locale = getLocale(metadata);
+		final Locale locale = tryGetLocale(metadata);
 		
 		final TypedTable typedTable = this.tableAnalyzer.infer(table, locale, typeHints);
 		checkArgument(typedTable.getHeight() >= 2, "Too few typed rows in " + input + ".");
@@ -136,22 +158,58 @@ public class DefaultGraphService implements GraphService {
 		graph.addPropertyTrees(trees);
 	}
 	
-	private static Format getFormat(final CsvProfile csvProfile) {
-		final Format format;
-		if (csvProfile == null) {
-			format = null;
-		} else {
-			format = new Format(Charset.forName(csvProfile.getEncoding()), csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true, csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
+	@Override
+	public void learn(String graphName, final ParsedTable table) throws IOException {
+		checkNotNull(graphName);
+		checkNotNull(table);
+		
+		checkArgument(table.getHeight() >= 2, "Too few rows in the table.");
+		
+		final BackgroundKnowledgeGraph graph = this.graphs.get(graphName);
+		checkArgument(graph != null, "Unknown graph!");
+		
+		final Path cachedInput = this.fileCachingService.provideTemporaryFile();
+		
+		this.csvTableWriter.write(cachedInput.toFile(), table);
+		
+		CsvProfile csvProfile;
+		try {
+			csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		} catch (final IllegalStateException e) {
+			LOGGER.warn("Profiling has failed!", e);
+			
+			csvProfile = null;
 		}
-		return format;
-	}
+		checkArgument(csvProfile == null || csvProfile.getColumns() == table.getWidth(), "The number of profiled columns does not match!");
+		
+		final Map<Integer, Type> typeHints = tryGetHints(csvProfile);
+		
+		final Locale locale = tryGetLocale(table.getMetadata());
+		
+		final TypedTable typedTable = this.tableAnalyzer.infer(table, locale, typeHints);
+		checkArgument(typedTable.getHeight() >= 2, "Too few typed rows in the table.");
 
-	private static Locale getLocale(Metadata metadata) {
-		return metadata.getLanguageTag() == null ? Locale.getDefault() : Locale.forLanguageTag(metadata.getLanguageTag());
+		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
+
+		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable);
+		
+		graph.addPropertyTrees(trees);
 	}
 	
+	private static Format getFormat(final CsvProfile csvProfile, final Format forcedFormat) {
+		if (forcedFormat != null) {
+			return forcedFormat;
+		}
+		
+		if (csvProfile == null) {
+			return null;
+		} else {
+			return new Format(Charset.forName(csvProfile.getEncoding()), csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true, csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
+		}
+	}
+
 	@Override
-	public Map<Integer, Annotation> annotate(String graphName, InputStream input, Format format, Metadata metadata) throws IOException {
+	public AnnotationResult annotate(String graphName, InputStream input, Format format, Metadata metadata) throws IOException {
 		checkNotNull(graphName);
 		checkNotNull(input);
 		checkNotNull(metadata);
@@ -161,25 +219,99 @@ public class DefaultGraphService implements GraphService {
 		
 		final Path cachedInput = this.fileCachingService.cache(input);
 		
-		final CsvProfile csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		CsvProfile csvProfile;
+		try {
+			csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		} catch (final Exception e) {
+			LOGGER.warn("Profiling has failed!", e);
+			
+			csvProfile = null;
+		}
 
-		final Format usedFormat = format == null ? getFormat(csvProfile) : format;
+		final Format usedFormat = getFormat(csvProfile, format);
 		
-		final ParsedTable table;
+		ParsedTable table;
 		try (final InputStream cleanedInput = this.csvCleanerService.clean(cachedInput.toFile())) { 
-				table = this.csvTableParser.parse(cleanedInput, usedFormat, metadata);
+			table = this.csvTableParser.parse(cleanedInput, usedFormat, metadata);
+		} catch (final IllegalStateException e) {
+			LOGGER.warn("Cleaning has failed! Using the raw input...", e);
+			
+			table = this.csvTableParser.parse(input, usedFormat, metadata);
 		}
 		checkArgument(table.getHeight() >= 2, "Too few rows in " + input + ".");
+		checkArgument(csvProfile == null || csvProfile.getColumns() == table.getWidth(), "The number of profiled columns does not match!");
 		
-		final Map<Integer, Type> typeHints = Lists.toMap(csvProfile.getTypes());
+		final Map<Integer, Type> typeHints = tryGetHints(csvProfile);
 		
-		final Locale locale = getLocale(metadata);
+		final Locale locale = tryGetLocale(metadata);
 		
 		final TypedTable typedTable = this.tableAnalyzer.infer(table, locale, typeHints);
 		checkArgument(typedTable.getHeight() >= 2, "Too few typed rows in " + input + ".");
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 		
-		return this.annotator.annotate(graph, slicedTable);
+		return new AnnotationResult(table, this.annotator.annotate(graph, slicedTable));
+	}
+	
+	@Override
+	public AnnotationResult annotate(final String graphName, final ParsedTable table) throws IOException {
+		checkNotNull(graphName);
+		checkNotNull(table);
+		
+		checkArgument(table.getHeight() >= 2, "Too few rows in the table.");
+		
+		final BackgroundKnowledgeGraph graph = this.graphs.get(graphName);
+		checkArgument(graph != null, "Unknown graph!");
+		
+		final Path cachedInput = this.fileCachingService.provideTemporaryFile();
+		this.csvTableWriter.write(cachedInput.toFile(), table);
+		
+		CsvProfile csvProfile;
+		try {
+			csvProfile = this.csvProfilerService.profile(cachedInput.toFile());
+		} catch (final Exception e) {
+			LOGGER.warn("Profiling has failed!", e);
+			
+			csvProfile = null;
+		}
+		checkArgument(csvProfile == null || csvProfile.getColumns() == table.getWidth(), "The number of profiled columns does not match!");
+		
+		final Map<Integer, Type> typeHints = tryGetHints(csvProfile);
+		
+		final Locale locale = tryGetLocale(table.getMetadata());
+		
+		final TypedTable typedTable = this.tableAnalyzer.infer(table, locale, typeHints);
+		checkArgument(typedTable.getHeight() >= 2, "Too few typed rows in the table.");
+
+		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
+		
+		return new AnnotationResult(table, this.annotator.annotate(graph, slicedTable));
+	}
+	
+	private static Map<Integer, Type> tryGetHints(@Nullable final CsvProfile csvProfile) {
+		if (csvProfile == null) {
+			return ImmutableMap.of();
+		}
+		
+		return getHints(csvProfile);
+	}
+	
+	private static Map<Integer, Type> getHints(final CsvProfile csvProfile) {
+		return Lists.toMap(csvProfile.getTypes());
+	}
+	
+	private static Locale tryGetLocale(Metadata metadata) {
+		return metadata.getLanguageTag() == null ? Locale.US : getLocale(metadata);
+	}
+	
+	private static Locale getLocale(Metadata metadata) {
+		return Locale.forLanguageTag(metadata.getLanguageTag());
+	}
+
+	@Override
+	public void delete(final String name) {
+		final BackgroundKnowledgeGraph removed = this.graphs.remove(name);
+		
+		checkArgument(removed != null, "No such graph present!");
 	}
 }

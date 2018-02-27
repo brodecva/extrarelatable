@@ -8,4 +8,6 @@ public interface FileCachingService {
 
 	Path cache(InputStream input) throws IOException;
 
+	Path provideTemporaryFile() throws IOException;
+
 }

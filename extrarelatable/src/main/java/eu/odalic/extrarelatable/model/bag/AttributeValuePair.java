@@ -5,8 +5,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.UUID;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import eu.odalic.extrarelatable.api.rest.adapters.AttributeValuePairAdapter;
 
 @Immutable
+@XmlJavaTypeAdapter(AttributeValuePairAdapter.class)
 public final class AttributeValuePair implements Comparable<AttributeValuePair> {
 	
 	private final UUID uuid = UUID.randomUUID();

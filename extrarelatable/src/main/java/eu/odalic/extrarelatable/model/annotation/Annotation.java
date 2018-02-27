@@ -7,16 +7,19 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import eu.odalic.extrarelatable.api.rest.adapters.AnnotationAdapter;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.graph.Property;
 
 @Immutable
+@XmlJavaTypeAdapter(AnnotationAdapter.class)
 public final class Annotation {
 	private final List<Property> properties;
 	private final List<Label> labels;

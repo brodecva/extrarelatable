@@ -18,7 +18,16 @@ public class DefaultFileCachingService implements FileCachingService {
 		
 		Files.copy(input, temporaryFilePath);
 		
+		temporaryFilePath.toFile().deleteOnExit();
+		
 		return temporaryFilePath;
 	}
-
+	
+	@Override
+	public Path provideTemporaryFile() throws IOException {
+		final Path temporaryFilePath = Files.createTempFile(PREFIX, null);
+		temporaryFilePath.toFile().deleteOnExit();
+				
+		return temporaryFilePath;
+	}
 }
