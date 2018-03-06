@@ -110,6 +110,13 @@ public class DefaultGraphService implements GraphService {
 		
 		this.graphs.put(name, new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy));
 	}
+	
+	@Override
+	public boolean exists(final String name) {
+		checkNotNull(name);
+		
+		return this.graphs.containsKey(name);
+	}
 
 	@Override
 	public void learn(String graphName, final InputStream input, @Nullable Format format, Metadata metadata) throws IOException {

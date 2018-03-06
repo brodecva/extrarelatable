@@ -14,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -150,6 +151,10 @@ public final class GraphResource {
 			throw new BadRequestException("Missing metadata!");
 		}
 
+		if (!this.graphService.exists(name)) {
+			this.graphService.create(name);
+		}
+		
 		try {
 			this.graphService.learn(name, input, format, metadata);
 		} catch (final IllegalArgumentException e) {
@@ -174,6 +179,10 @@ public final class GraphResource {
 			throw new BadRequestException("Missing metadata!");
 		}
 
+		if (!this.graphService.exists(name)) {
+			this.graphService.create(name);
+		}
+		
 		try {
 			this.graphService.learn(name, parsedTable);
 		} catch (final IllegalArgumentException e) {
@@ -190,7 +199,8 @@ public final class GraphResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response annotate(final @PathParam("name") String name,
 			final @FormDataParam("input") InputStream input,
-			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata)
+			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
+			final @QueryParam("learn") Boolean learn)
 			throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
@@ -213,6 +223,38 @@ public final class GraphResource {
 			result = this.graphService.annotate(name, input, format, metadata);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
+		}
+		
+		if (learn != null && learn) {
+			learn(name, input, formatValue, metadata);
+		}
+		
+		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
+	}
+	
+	@POST
+	@Path("{name}/annotated")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response annotate(final @PathParam("name") String name, final ParsedTable parsedTable,
+			final @QueryParam("learn") Boolean learn) throws IOException {
+		if (parsedTable == null) {
+			throw new BadRequestException("No table provided!");
+		}
+		
+		if (parsedTable.getMetadata() == null) {
+			throw new BadRequestException("Missing metadata!");
+		}
+
+		final AnnotationResult result;
+		try {
+			result = this.graphService.annotate(name, parsedTable);
+		} catch (final IllegalArgumentException e) {
+			throw new BadRequestException(e.getMessage(), e);
+		}
+		
+		if (learn != null && learn) {
+			learn(name, parsedTable);
 		}
 		
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();

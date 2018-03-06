@@ -13,11 +13,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 
-import eu.odalic.extrarelatable.api.rest.conversions.StatusTypeJsonDeserializer;
 import eu.odalic.extrarelatable.api.rest.conversions.StatusTypeJsonSerializer;
 import eu.odalic.extrarelatable.util.URL;
 
@@ -117,7 +115,6 @@ public final class Reply {
    */
   @XmlElement
   @JsonSerialize(using = StatusTypeJsonSerializer.class)
-  @JsonDeserialize(using = StatusTypeJsonDeserializer.class)
   public StatusType getStatus() {
     return this.status;
   }

@@ -2,21 +2,15 @@ package eu.odalic.extrarelatable.api.rest.values;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import eu.odalic.extrarelatable.api.rest.conversions.AttributeValuePairSetKeyJsonSerializer;
-import eu.odalic.extrarelatable.api.rest.conversions.LabelKeyJsonSerializer;
-import eu.odalic.extrarelatable.api.rest.conversions.PropertyKeyJsonSerializer;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.Statistics;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
@@ -33,27 +27,27 @@ public final class AnnotationValue implements Serializable {
 	private List<Label> labels;
 	private List<Set<AttributeValuePair>> attributeValuePairs;
 
-	private Map<Property, Statistics> propertiesStatistics;
-	private Map<Label, Statistics> labelsStatistics;
-	private Map<Set<AttributeValuePair>, Statistics> pairsStatistics;
+	private List<Statistics> propertiesStatistics;
+	private List<Statistics> labelsStatistics;
+	private List<Statistics> pairsStatistics;
 
 	public AnnotationValue() {
 		this.properties = ImmutableList.of();
 		this.labels = ImmutableList.of();
 		this.attributeValuePairs = ImmutableList.of();
 		
-		this.propertiesStatistics = ImmutableMap.of();
-		this.labelsStatistics = ImmutableMap.of();
-		this.pairsStatistics = ImmutableMap.of();
+		this.propertiesStatistics = ImmutableList.of();
+		this.labelsStatistics = ImmutableList.of();
+		this.pairsStatistics = ImmutableList.of();
 	}
 	
 	public AnnotationValue(final Annotation annotation) {
 		this.properties = annotation.getProperties();
 		this.labels = annotation.getLabels();
 		this.attributeValuePairs = annotation.getAttributeValuePairs();
-		this.propertiesStatistics = annotation.getPropertiesStatistics();
-		this.labelsStatistics = annotation.getLabelsStatistics();
-		this.pairsStatistics = annotation.getPairsStatistics();
+		this.propertiesStatistics = this.properties.stream().map(property -> annotation.getPropertiesStatistics().get(property)).collect(ImmutableList.toImmutableList());
+		this.labelsStatistics = this.labels.stream().map(label -> annotation.getLabelsStatistics().get(label)).collect(ImmutableList.toImmutableList());
+		this.pairsStatistics = this.attributeValuePairs.stream().map(pair -> annotation.getPairsStatistics().get(pair)).collect(ImmutableList.toImmutableList());
 	}
 
 	@XmlElement
@@ -84,33 +78,30 @@ public final class AnnotationValue implements Serializable {
 	}
 
 	@XmlElement
-	@JsonSerialize(keyUsing = PropertyKeyJsonSerializer.class)
-	public Map<Property, Statistics> getPropertiesStatistics() {
+	public List<Statistics> getPropertiesStatistics() {
 		return propertiesStatistics;
 	}
 
-	public void setPropertiesStatistics(Map<? extends Property, ? extends Statistics> propertiesStatistics) {
-		this.propertiesStatistics = ImmutableMap.copyOf(propertiesStatistics);
+	public void setPropertiesStatistics(List<? extends Statistics> propertiesStatistics) {
+		this.propertiesStatistics = ImmutableList.copyOf(propertiesStatistics);
 	}
 
 	@XmlElement
-	@JsonSerialize(keyUsing = LabelKeyJsonSerializer.class)
-	public Map<Label, Statistics> getLabelsStatistics() {
+	public List<Statistics> getLabelsStatistics() {
 		return labelsStatistics;
 	}
 
-	public void setLabelsStatistics(Map<? extends Label, ? extends Statistics> labelsStatistics) {
-		this.labelsStatistics = ImmutableMap.copyOf(labelsStatistics);
+	public void setLabelsStatistics(List<? extends Statistics> labelsStatistics) {
+		this.labelsStatistics = ImmutableList.copyOf(labelsStatistics);
 	}
 
 	@XmlElement
-	@JsonSerialize(keyUsing = AttributeValuePairSetKeyJsonSerializer.class)
-	public Map<Set<AttributeValuePair>, Statistics> getPairsStatistics() {
+	public List<Statistics> getPairsStatistics() {
 		return pairsStatistics;
 	}
 
-	public void setPairsStatistics(Map<? extends Set<? extends AttributeValuePair>, ? extends Statistics> pairsStatistics) {
-		this.pairsStatistics = pairsStatistics.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> ImmutableSet.copyOf(e.getKey()), e -> e.getValue()));
+	public void setPairsStatistics(List<? extends Statistics> pairsStatistics) {
+		this.pairsStatistics = ImmutableList.copyOf(pairsStatistics);
 	}
 
 	@Override

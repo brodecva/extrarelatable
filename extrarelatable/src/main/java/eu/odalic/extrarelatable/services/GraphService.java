@@ -8,7 +8,8 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
 
 public interface GraphService {
-	void create(final String name);
+	void create(String name);
+	boolean exists(String name);
 	void delete(String name);
 	
 	void learn(String graphName, ParsedTable table) throws IOException;
