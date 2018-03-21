@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.graph;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
@@ -19,8 +20,10 @@ import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
 
-public final class PropertyTree implements Iterable<PropertyTree.Node> {
+public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializable {
 	
+	private static final long serialVersionUID = 6392176530261226410L;
+
 	public static abstract class Node {
 		private final Multiset<NumericValue> values;
 		
@@ -101,7 +104,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node> {
 		}
 	}
 	
-	public static final class RootNode extends Node {
+	public static final class RootNode extends Node implements Serializable {
+		
+		private static final long serialVersionUID = -4354850307464730896L;
+
 		private final Label label;
 		
 		private PropertyTree propertyTree;
@@ -154,7 +160,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node> {
 		}
 	}
 	
-	public static final class SharedPairNode extends CommonNode {
+	public static final class SharedPairNode extends CommonNode implements Serializable {
+		
+		private static final long serialVersionUID = 3169369860503260161L;
+		
 		private final AttributeValuePair pair;
 		
 		public SharedPairNode(final AttributeValuePair pair, final Multiset<? extends NumericValue> values) {

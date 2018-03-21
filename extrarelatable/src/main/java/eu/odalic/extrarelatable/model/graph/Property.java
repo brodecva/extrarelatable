@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.graph;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,8 +15,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 
 @XmlJavaTypeAdapter(PropertyAdapter.class)
-public final class Property implements Iterable<PropertyTree>, Comparable<Property> {
+public final class Property implements Iterable<PropertyTree>, Comparable<Property>, Serializable {
 	
+	private static final long serialVersionUID = 8960069289015738836L;
+
 	private final UUID uuid = UUID.randomUUID();
 	
 	private URI uri;

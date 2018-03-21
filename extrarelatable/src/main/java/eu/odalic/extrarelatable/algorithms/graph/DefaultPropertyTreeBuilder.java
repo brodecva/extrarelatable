@@ -3,7 +3,9 @@ package eu.odalic.extrarelatable.algorithms.graph;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -60,33 +62,7 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 
 	@Override
 	public PropertyTree build(final SlicedTable slicedTable, final int columnIndex) {
-		checkNotNull(slicedTable);
-		checkArgument(columnIndex >= 0);
-		checkArgument(columnIndex < slicedTable.getWidth());
-		
-		final List<eu.odalic.extrarelatable.model.bag.Value> numericColumn = slicedTable.getDataColumns().get(columnIndex);
-		
-		final Partition partition = new Partition(numericColumn.stream().filter(e -> e.isNumeric())
-				.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
-		if (partition.size() < MINIMUM_PARTITION_SIZE) {
-			return null;
-		}
-
-		final Label label = slicedTable.getHeaders().get(columnIndex);
-		
-		final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
-		
-		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
-		final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
-		rootNode.addChildren(children);
-
-		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-				slicedTable.getMetadata().getTitle(), null, ImmutableMap.of(), columnIndex, availableContextColumnIndices);
-
-		final PropertyTree tree = new PropertyTree(rootNode, context);
-		rootNode.setPropertyTree(tree);
-		
-		return tree;
+		return build(slicedTable, columnIndex, ImmutableMap.of(), false);
 	}
 	
 	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table) {
@@ -134,5 +110,37 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		}
 
 		return children.build();
+	}
+
+	@Override
+	public PropertyTree build(SlicedTable slicedTable, int columnIndex,
+			Map<? extends Integer, ? extends URI> declaredPropertyUris, boolean onlyWithProperties) {
+		checkNotNull(slicedTable);
+		checkArgument(columnIndex >= 0);
+		checkArgument(columnIndex < slicedTable.getWidth());
+		
+		final List<eu.odalic.extrarelatable.model.bag.Value> numericColumn = slicedTable.getDataColumns().get(columnIndex);
+		
+		final Partition partition = new Partition(numericColumn.stream().filter(e -> e.isNumeric())
+				.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+		if (partition.size() < MINIMUM_PARTITION_SIZE) {
+			return null;
+		}
+
+		final Label label = slicedTable.getHeaders().get(columnIndex);
+		
+		final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
+		
+		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
+		final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
+		rootNode.addChildren(children);
+
+		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
+				slicedTable.getMetadata().getTitle(), null, ImmutableMap.of(), columnIndex, availableContextColumnIndices);
+
+		final PropertyTree tree = new PropertyTree(rootNode, context);
+		rootNode.setPropertyTree(tree);
+		
+		return tree;
 	}
 }

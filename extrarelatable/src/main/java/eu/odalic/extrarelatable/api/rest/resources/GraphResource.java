@@ -22,8 +22,8 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +50,7 @@ public final class GraphResource {
 
 	public static final String TEXT_CSV_MEDIA_TYPE = "text/csv";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphResource.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(GraphResource.class);
 
 	private final GraphService graphService;
 
