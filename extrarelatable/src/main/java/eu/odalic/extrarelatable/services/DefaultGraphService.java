@@ -150,11 +150,11 @@ public class DefaultGraphService implements GraphService {
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,
-			DwtcToCsvService dwtcToCsvService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") Path graphsPath, final @Nullable @Value("${eu.odalic.extrarelatable.onlyWithProperties}") Boolean onlyWithProperties) {
+			DwtcToCsvService dwtcToCsvService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Nullable @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") Boolean onlyWithProperties) {
 		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, new HashMap<>());
 		
 		if (graphsPath != null) {
-			this.graphs.putAll(loadGraphs(graphsPath, onlyWithProperties == null ? false : onlyWithProperties).stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
+			this.graphs.putAll(loadGraphs(Paths.get(graphsPath), onlyWithProperties == null ? false : onlyWithProperties).stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
 		}
 	}
 	
