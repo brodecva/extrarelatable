@@ -34,6 +34,6 @@ public class DefaultPropertyTreesBuilder implements PropertyTreesBuilder {
 			final boolean onlyWithProperties) {
 		return slicedTable.getDataColumns().keySet().stream().map(columnIndex -> 
 			this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredPropertyUris, onlyWithProperties)
-		).collect(ImmutableSet.toImmutableSet());
+		).filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
 	}
 }

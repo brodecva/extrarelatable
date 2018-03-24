@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.poi.hdgf.streams.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,7 +77,7 @@ public class DefaultGraphService implements GraphService {
 	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
 	private static final String SANITIZE_WITH = "_";
 	
-	private static final Pattern LOCALE_LANGUAGE_TAG_IN_GRAPH_NAME_PATTERN = Pattern.compile("_([^_]+)$");
+	private static final Pattern LOCALE_LANGUAGE_TAG_IN_GRAPH_NAME_PATTERN = Pattern.compile("^.*__([^_]+)$");
 	private static final Locale DEFAULT_LOCALE = Locale.getDefault();
 	
 	private static final Path TABLES_SUBPATH = Paths.get("tables");
@@ -150,16 +150,16 @@ public class DefaultGraphService implements GraphService {
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,
-			DwtcToCsvService dwtcToCsvService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Nullable @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") Boolean onlyWithProperties) {
+			DwtcToCsvService dwtcToCsvService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") boolean onlyWithProperties) throws IOException {
 		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, new HashMap<>());
 		
 		if (graphsPath != null) {
-			this.graphs.putAll(loadGraphs(Paths.get(graphsPath), onlyWithProperties == null ? false : onlyWithProperties).stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
+			this.graphs.putAll(loadGraphs(Paths.get(graphsPath), onlyWithProperties).stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
 		}
 	}
 	
-	private Set<BackgroundKnowledgeGraph> loadGraphs(final Path graphsPath, boolean onlyWithProperties) {
-		return Streams.stream(graphsPath.iterator()).filter(path -> {
+	private Set<BackgroundKnowledgeGraph> loadGraphs(final Path graphsPath, boolean onlyWithProperties) throws IOException {
+		return Streams.stream(Files.newDirectoryStream(graphsPath)).sorted().filter(path -> {
 			if (!path.toFile().isDirectory()) {
 				LOGGER.warn(path + " is not a directory.");
 				
@@ -168,11 +168,17 @@ public class DefaultGraphService implements GraphService {
 				return true;
 			}
 		})
-		.map(path -> loadGraph(path, onlyWithProperties))
+		.map(path -> {
+			try {
+				return loadGraph(path, onlyWithProperties);
+			} catch (final IOException e) {
+				throw new RuntimeException(e);
+			}
+		})
 		.collect(ImmutableSet.toImmutableSet());
 	}
 	
-	private BackgroundKnowledgeGraph loadGraph(final Path graphPath, boolean onlyWithProperties) {
+	private BackgroundKnowledgeGraph loadGraph(final Path graphPath, boolean onlyWithProperties) throws IOException {
 		checkArgument(graphPath.toFile().exists(), "The " + graphPath + " does not exist!");
 		checkArgument(graphPath.toFile().isDirectory(), "The " + graphPath + " is not a directory!");
 		
@@ -199,19 +205,19 @@ public class DefaultGraphService implements GraphService {
 		return locale;		
 	}
 
-	private BackgroundKnowledgeGraph loadBagOfTablesGraph(final String graphName, final Path graphPath, final Path profilesPath, final Path cleanedCsvsPath, Locale locale) {
+	private BackgroundKnowledgeGraph loadBagOfTablesGraph(final String graphName, final Path graphPath, final Path profilesPath, final Path cleanedCsvsPath, Locale locale) throws IOException {
 		checkArgument(graphPath.toFile().exists() && graphPath.toFile().isDirectory(), "The directory for " + graphName + " is missing!");
 		checkArgument(profilesPath.toFile().exists() && profilesPath.toFile().isDirectory(), "The profiles directory for " + graphName + " is missing!");
 		checkArgument(cleanedCsvsPath.toFile().exists() && cleanedCsvsPath.toFile().isDirectory(), "The cleaned directory for " + graphName + " is missing!");
 		
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
 		
-		graphPath.forEach(tablePath -> graph.addPropertyTrees(learnTable(tablePath, cleanedCsvsPath, profilesPath, locale)));
+		Streams.stream(Files.newDirectoryStream(graphPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnTable(tablePath, cleanedCsvsPath, profilesPath, locale)));
 		
 		return graph;
 	}
 	
-	private BackgroundKnowledgeGraph loadDwtcGraph(final String graphName, final Path tablesPath, final Path profilesPath, final Path csvsPath, final Path declaredPropertiesPath, boolean onlyWithProperties, Locale locale) {
+	private BackgroundKnowledgeGraph loadDwtcGraph(final String graphName, final Path tablesPath, final Path profilesPath, final Path csvsPath, final Path declaredPropertiesPath, boolean onlyWithProperties, Locale locale) throws IOException {
 		checkArgument(tablesPath.toFile().exists() && tablesPath.toFile().isDirectory(), "The directory for " + graphName + " is missing!");
 		checkArgument(profilesPath.toFile().exists() && profilesPath.toFile().isDirectory(), "The profiles directory for " + graphName + " is missing!");
 		checkArgument(csvsPath.toFile().exists() && csvsPath.toFile().isDirectory(), "The csvs directory for " + graphName + " is missing!");
@@ -219,7 +225,7 @@ public class DefaultGraphService implements GraphService {
 		
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
 		
-		tablesPath.forEach(tablePath -> graph.addPropertyTrees(learnDwtcTable(tablePath, csvsPath, profilesPath, declaredPropertiesPath, onlyWithProperties, locale)));
+		Streams.stream(Files.newDirectoryStream(tablesPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnDwtcTable(tablePath, csvsPath, profilesPath, declaredPropertiesPath, onlyWithProperties, locale)));
 		
 		return graph;
 	}
@@ -252,12 +258,13 @@ public class DefaultGraphService implements GraphService {
 	
 	private Locale getLocaleFromGraphName(final String graphName) {
 		final Matcher matcher = LOCALE_LANGUAGE_TAG_IN_GRAPH_NAME_PATTERN.matcher(graphName);
-		
 		if (!matcher.find()) {
 			return null;
 		}
 		
-		return Locale.forLanguageTag(matcher.group(0));
+		final String languageTag = matcher.group(1);
+		
+		return Locale.forLanguageTag(languageTag);
 	}
 
 	private Path getCleanedInput(final Path input, final Path cleanedInputFilesDirectory) {
