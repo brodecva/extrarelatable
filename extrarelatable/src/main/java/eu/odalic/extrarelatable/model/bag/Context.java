@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 @Immutable
-public final class Context {
+public final class Context implements Serializable {
+	
+	private static final long serialVersionUID = 3692200553185310125L;
+	
 	private final List<Label> columnHeaders;
 	private final String tableAauthor;
 	private final String tableTitle;

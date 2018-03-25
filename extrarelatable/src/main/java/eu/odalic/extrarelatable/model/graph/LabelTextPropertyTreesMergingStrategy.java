@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.graph;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -9,7 +10,9 @@ import java.util.function.Predicate;
 import org.springframework.stereotype.Component;
 
 @Component("labelText")
-public final class LabelTextPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy {
+public final class LabelTextPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy, Serializable {
+
+	private static final long serialVersionUID = -7006330829978202126L;
 
 	@Override
 	public Property find(final PropertyTree propertyTree, final Set<? extends Property> properties) {

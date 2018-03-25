@@ -63,6 +63,7 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	public void persist(String name, BackgroundKnowledgeGraph graph) {
 		this.persistedGraphs.put(name, new BackgroundKnowledgeGraph(graph));
 		this.db.commit();
+		this.db.getStore().compact();
 	}
 
 	@Override
@@ -70,6 +71,7 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 		this.persistedGraphs.clear();
 		this.persistedGraphs.putAll(graphs.entrySet().stream().collect(ImmutableMap.toImmutableMap(entry -> entry.getKey(), entry -> new BackgroundKnowledgeGraph(entry.getValue()))));
 		this.db.commit();
+		this.db.getStore().compact();
 	}
 
 	@Override
@@ -81,5 +83,6 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	public void delete(String name) {
 		this.persistedGraphs.remove(name);
 		this.db.commit();
+		this.db.getStore().compact();
 	}
 }

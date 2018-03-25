@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.annotation.concurrent.Immutable;
@@ -11,8 +12,13 @@ import eu.odalic.extrarelatable.api.rest.adapters.AttributeValuePairAdapter;
 
 @Immutable
 @XmlJavaTypeAdapter(AttributeValuePairAdapter.class)
-public final class AttributeValuePair implements Comparable<AttributeValuePair> {
+public final class AttributeValuePair implements Comparable<AttributeValuePair>, Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1003177810058153064L;
+
 	private final UUID uuid = UUID.randomUUID();
 	
 	private final Attribute attribute;

@@ -1,5 +1,6 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,8 +13,10 @@ import eu.odalic.extrarelatable.api.rest.adapters.LabelAdapter;
 
 @Immutable
 @XmlJavaTypeAdapter(LabelAdapter.class)
-public final class Label implements Comparable<Label> {
+public final class Label implements Comparable<Label>, Serializable {
 	
+	private static final long serialVersionUID = -4083750297108671549L;
+
 	private final UUID uuid = UUID.randomUUID();
 	
 	private final String text;

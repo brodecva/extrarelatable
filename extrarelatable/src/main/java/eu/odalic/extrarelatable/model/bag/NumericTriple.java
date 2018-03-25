@@ -2,13 +2,19 @@ package eu.odalic.extrarelatable.model.bag;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Multiset;
 
 @Immutable
-public final class NumericTriple {
+public final class NumericTriple implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3685988013935181859L;
 	private final Label label;
 	private final Multiset<NumericValue> values;
 	private final Context context;

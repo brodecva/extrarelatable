@@ -1,9 +1,15 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class IdValue extends AbstractValue {
+public final class IdValue extends AbstractValue implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2331954295033377038L;
 	private final String id;
 
 	public static IdValue of(final String id) {

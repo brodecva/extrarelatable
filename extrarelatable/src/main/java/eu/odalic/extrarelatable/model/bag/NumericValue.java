@@ -1,9 +1,14 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import java.io.Serializable;
+
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class NumericValue extends AbstractValue {
+public final class NumericValue extends AbstractValue implements Serializable {
+	
+	private static final long serialVersionUID = -25440715468458309L;
+	
 	private final double figure;
 
 	public static final NumericValue of(double figure) {

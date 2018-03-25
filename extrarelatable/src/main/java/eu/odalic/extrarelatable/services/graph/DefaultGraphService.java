@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -153,7 +154,7 @@ public class DefaultGraphService implements GraphService {
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,
 			DwtcToCsvService dwtcToCsvService, final GraphsPersitingService graphsPersitingService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") boolean onlyWithProperties) throws IOException {
-		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, graphsPersitingService, graphsPersitingService.load());
+		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, graphsPersitingService, new HashMap<>(graphsPersitingService.load()));
 		
 		final Set<BackgroundKnowledgeGraph> loadedGraphs = loadGraphs(Paths.get(graphsPath), onlyWithProperties);
 		
@@ -220,7 +221,7 @@ public class DefaultGraphService implements GraphService {
 		checkArgument(profilesPath.toFile().exists() && profilesPath.toFile().isDirectory(), "The profiles directory for " + graphName + " is missing!");
 		checkArgument(cleanedCsvsPath.toFile().exists() && cleanedCsvsPath.toFile().isDirectory(), "The cleaned directory for " + graphName + " is missing!");
 		
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(graphName, this.propertyTreesMergingStrategy);
 		
 		Streams.stream(Files.newDirectoryStream(graphPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnTable(tablePath, cleanedCsvsPath, profilesPath, locale)));
 		
@@ -233,7 +234,7 @@ public class DefaultGraphService implements GraphService {
 		checkArgument(csvsPath.toFile().exists() && csvsPath.toFile().isDirectory(), "The csvs directory for " + graphName + " is missing!");
 		checkArgument(declaredPropertiesPath.toFile().exists() && declaredPropertiesPath.toFile().isDirectory(), "The property directory for " + graphName + " is missing!");
 		
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(graphName, this.propertyTreesMergingStrategy);
 		
 		Streams.stream(Files.newDirectoryStream(tablesPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnDwtcTable(tablePath, csvsPath, profilesPath, declaredPropertiesPath, onlyWithProperties, locale)));
 		
@@ -507,7 +508,7 @@ public class DefaultGraphService implements GraphService {
 	public void create(final String name) {
 		checkNotNull(name);
 		
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(name, this.propertyTreesMergingStrategy);
 		
 		this.graphs.put(name, graph);
 		this.graphsPersistingService.persist(name, graph);

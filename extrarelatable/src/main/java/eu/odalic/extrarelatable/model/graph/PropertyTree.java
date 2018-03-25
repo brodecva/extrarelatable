@@ -24,7 +24,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 	
 	private static final long serialVersionUID = 6392176530261226410L;
 
-	public static abstract class Node {
+	public static abstract class Node implements Serializable {
+		
+		private static final long serialVersionUID = -4572082835480257596L;
+
 		private final Multiset<NumericValue> values;
 		
 		private final Set<CommonNode> children;
@@ -72,7 +75,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		public abstract Property getProperty();
 	}
 	
-	public static abstract class CommonNode extends Node {
+	public static abstract class CommonNode extends Node implements Serializable {
+		
+		private static final long serialVersionUID = -1380171855192858385L;
+		
 		private Node parent;
 		
 		public CommonNode(final Multiset<? extends NumericValue> values) {

@@ -1,11 +1,16 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class InstantValue extends AbstractValue {
+public final class InstantValue extends AbstractValue implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8198368132975821586L;
 	private final Instant instant;
 
 	public static final InstantValue of(Instant instant) {
