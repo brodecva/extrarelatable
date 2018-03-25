@@ -37,7 +37,7 @@ import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
-import eu.odalic.extrarelatable.services.GraphService;
+import eu.odalic.extrarelatable.services.graph.GraphService;
 
 /**
  * File resource definition.

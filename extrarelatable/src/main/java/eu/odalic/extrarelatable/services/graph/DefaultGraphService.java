@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.services;
+package eu.odalic.extrarelatable.services.graph;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,7 +23,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import org.apache.poi.hdgf.streams.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,6 +62,8 @@ import eu.odalic.extrarelatable.services.csvengine.csvclean.CsvCleanService;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfile;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfilerService;
 import eu.odalic.extrarelatable.services.dwtc.DwtcToCsvService;
+import eu.odalic.extrarelatable.services.persistence.FileCachingService;
+import eu.odalic.extrarelatable.services.persistence.GraphsPersitingService;
 import eu.odalic.extrarelatable.util.Lists;
 import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
@@ -100,15 +100,15 @@ public class DefaultGraphService implements GraphService {
 	private final Annotator annotator;
 	private final CsvTableWriter csvTableWriter;
 	private final DwtcToCsvService dwtcToCsvService;
+	private final GraphsPersitingService graphsPersistingService;
 	
 	private final Map<String, BackgroundKnowledgeGraph> graphs;
-
 	
 	DefaultGraphService(PropertyTreesMergingStrategy propertyTreesMergingStrategy,
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator,
-			CsvTableWriter csvTableWriter, DwtcToCsvService dwtcToCsvService,
+			CsvTableWriter csvTableWriter, DwtcToCsvService dwtcToCsvService, GraphsPersitingService graphsPersistingService,
 			Map<String, BackgroundKnowledgeGraph> graphs) {
 		checkNotNull(propertyTreesMergingStrategy);
 		checkNotNull(fileCachingService);
@@ -122,6 +122,7 @@ public class DefaultGraphService implements GraphService {
 		checkNotNull(csvTableWriter);
 		checkNotNull(dwtcToCsvService);
 		checkNotNull(graphs);
+		checkNotNull(graphsPersistingService);
 		
 		
 		graphs.entrySet().stream().forEach(
@@ -143,6 +144,7 @@ public class DefaultGraphService implements GraphService {
 		this.csvTableWriter = csvTableWriter;
 		this.dwtcToCsvService = dwtcToCsvService;
 		this.graphs = graphs;
+		this.graphsPersistingService = graphsPersistingService;
 	}
 	
 	@Inject
@@ -150,11 +152,15 @@ public class DefaultGraphService implements GraphService {
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,
-			DwtcToCsvService dwtcToCsvService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") boolean onlyWithProperties) throws IOException {
-		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, new HashMap<>());
+			DwtcToCsvService dwtcToCsvService, final GraphsPersitingService graphsPersitingService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") boolean onlyWithProperties) throws IOException {
+		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, graphsPersitingService, graphsPersitingService.load());
+		
+		final Set<BackgroundKnowledgeGraph> loadedGraphs = loadGraphs(Paths.get(graphsPath), onlyWithProperties);
+		
+		loadedGraphs.forEach(graph -> this.graphsPersistingService.persist(graph.getName(), graph));
 		
 		if (graphsPath != null) {
-			this.graphs.putAll(loadGraphs(Paths.get(graphsPath), onlyWithProperties).stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
+			this.graphs.putAll(loadedGraphs.stream().collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
 		}
 	}
 	
@@ -175,6 +181,7 @@ public class DefaultGraphService implements GraphService {
 				throw new RuntimeException(e);
 			}
 		})
+		.filter(graph -> graph != null)
 		.collect(ImmutableSet.toImmutableSet());
 	}
 	
@@ -183,6 +190,10 @@ public class DefaultGraphService implements GraphService {
 		checkArgument(graphPath.toFile().isDirectory(), "The " + graphPath + " is not a directory!");
 		
 		final String graphName = graphPath.getFileName().toString();
+		if (this.graphs.containsKey(graphName)) {
+			LOGGER.warn("Graph " + graphName + " already loaded. Skipping...");
+			return null;
+		}
 		
 		final Locale locale = tryGetLocaleFromGraphName(graphName);
 				
@@ -193,7 +204,6 @@ public class DefaultGraphService implements GraphService {
 		} else {
 			return loadBagOfTablesGraph(graphName, graphPath, graphPath.resolve(PROFILES_SUBPATH), graphPath.resolve(CLEANED_CSVS_SUBPATH), locale);
 		}
-		
 	}
 	
 	private Locale tryGetLocaleFromGraphName(String graphName) {
@@ -497,7 +507,10 @@ public class DefaultGraphService implements GraphService {
 	public void create(final String name) {
 		checkNotNull(name);
 		
-		this.graphs.put(name, new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy));
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.propertyTreesMergingStrategy);
+		
+		this.graphs.put(name, graph);
+		this.graphsPersistingService.persist(name, graph);
 	}
 	
 	@Override
@@ -519,6 +532,7 @@ public class DefaultGraphService implements GraphService {
 		final Path cachedInput = this.fileCachingService.cache(input);
 		
 		learn(graph, cachedInput, format, metadata);
+		this.graphsPersistingService.persist(graph.getName(), graph);
 	}
 	
 	private void learn(final BackgroundKnowledgeGraph graph, final Path input, @Nullable Format format, Metadata metadata) throws IOException {
@@ -596,6 +610,8 @@ public class DefaultGraphService implements GraphService {
 		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable);
 		
 		graph.addPropertyTrees(trees);
+		
+		this.graphsPersistingService.persist(graph.getName(), graph);
 	}
 	
 	private static Format getFormat(final CsvProfile csvProfile, final Format forcedFormat) {
@@ -713,7 +729,8 @@ public class DefaultGraphService implements GraphService {
 	@Override
 	public void delete(final String name) {
 		final BackgroundKnowledgeGraph removed = this.graphs.remove(name);
-		
 		checkArgument(removed != null, "No such graph present!");
+		
+		this.graphsPersistingService.delete(removed.getName());
 	}
 }

@@ -19,15 +19,22 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	
 	private static final long serialVersionUID = 8960069289015738836L;
 
-	private final UUID uuid = UUID.randomUUID();
+	private final UUID uuid;
 	
 	private URI uri;
 	
 	private final Set<PropertyTree> instances;
 	
 	public Property() {
-		this.setUri(null);
+		this.uuid = UUID.randomUUID();
+		this.uri = null;
 		this.instances = new HashSet<>();
+	}
+	
+	public Property(final Property original) {
+		this.uuid = original.uuid;
+		this.uri = original.uri;
+		this.instances = new HashSet<>(original.instances);
 	}
 
 	public URI getUri() {

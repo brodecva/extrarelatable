@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.services;
+package eu.odalic.extrarelatable.services.graph;
 
 import java.io.IOException;
 import java.io.InputStream;

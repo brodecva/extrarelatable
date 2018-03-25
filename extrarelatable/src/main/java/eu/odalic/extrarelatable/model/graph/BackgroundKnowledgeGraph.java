@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -35,6 +36,12 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	
 	public BackgroundKnowledgeGraph(final PropertyTreesMergingStrategy propertyTreesMergingStrategy) {
 		this(UUID.randomUUID().toString(), propertyTreesMergingStrategy);
+	}
+	
+	public BackgroundKnowledgeGraph(final BackgroundKnowledgeGraph original) {
+		this.name = original.name;
+		this.propertyTreesMergingStrategy = original.propertyTreesMergingStrategy;
+		this.properties = original.properties.stream().map(property -> new Property(property)).collect(Collectors.toCollection(HashSet::new));
 	}
 
 	public String getName() {
