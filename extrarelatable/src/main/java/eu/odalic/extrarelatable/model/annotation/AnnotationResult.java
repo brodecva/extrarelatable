@@ -2,21 +2,33 @@ package eu.odalic.extrarelatable.model.annotation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.api.rest.adapters.AnnotationResultAdapter;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 @XmlJavaTypeAdapter(AnnotationResultAdapter.class)
-public class AnnotationResult {
+public final class AnnotationResult implements Serializable {
+	
+	private static final long serialVersionUID = 8678871094793797335L;
+
 	private final ParsedTable parsedTable;
 	
 	private final Map<Integer, Annotation> annotations;
 
+	@SuppressWarnings("unused")
+	private AnnotationResult() {
+		parsedTable = null;
+		annotations = ImmutableMap.of();
+	}
+	
 	public AnnotationResult(final ParsedTable parsedTable, final Map<? extends Integer, ? extends Annotation> annotations) {
 		checkNotNull(parsedTable);
 		checkNotNull(annotations);
@@ -25,6 +37,8 @@ public class AnnotationResult {
 		this.annotations = ImmutableMap.copyOf(annotations);
 	}
 	
+	@XmlTransient
+	@JsonIgnore
 	public ParsedTable getParsedTable() {
 		return parsedTable;
 	}

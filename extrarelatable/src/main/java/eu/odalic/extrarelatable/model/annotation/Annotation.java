@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.google.common.collect.ImmutableList;
@@ -29,6 +30,7 @@ public final class Annotation {
 	private final Map<Label, Statistics> labelsStatistics;
 	private final Map<Set<AttributeValuePair>, Statistics> pairsStatistics;
 
+	@XmlTransient
 	public static Annotation of(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs,
 			final Map<? extends Property, ? extends Statistics> propertiesStatistics,
@@ -37,9 +39,19 @@ public final class Annotation {
 		return new Annotation(properties, labels, attributeValuePairs, propertiesStatistics, labelsStatistics, pairsStatistics);
 	}
 	
+	@XmlTransient
 	public static Annotation of(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs) {
 		return new Annotation(properties, labels, attributeValuePairs, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of());
+	}
+	
+	private Annotation() {
+		this.properties = ImmutableList.of();
+		this.labels = ImmutableList.of();
+		this.attributeValuePairs = ImmutableList.of();
+		this.propertiesStatistics = ImmutableMap.of();
+		this.labelsStatistics = ImmutableMap.of();
+		this.pairsStatistics = ImmutableMap.of();
 	}
 	
 	private Annotation(final List<? extends Property> properties, final List<? extends Label> labels,

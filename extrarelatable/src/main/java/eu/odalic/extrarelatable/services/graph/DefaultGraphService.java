@@ -704,7 +704,9 @@ public class DefaultGraphService implements GraphService {
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 		
-		return new AnnotationResult(table, this.annotator.annotate(graph, slicedTable));
+		final AnnotationResult result = new AnnotationResult(table, this.annotator.annotate(graph, slicedTable));
+		
+		return result;
 	}
 	
 	private static Map<Integer, Type> tryGetHints(@Nullable final CsvProfile csvProfile) {

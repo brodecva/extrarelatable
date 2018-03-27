@@ -15,10 +15,13 @@ import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
+import eu.odalic.extrarelatable.api.rest.filters.AuthenticationFilter;
+import eu.odalic.extrarelatable.api.rest.filters.AuthorizationFilter;
 import eu.odalic.extrarelatable.api.rest.filters.CorsResponseFilter;
 import eu.odalic.extrarelatable.api.rest.filters.LoggingResponseFilter;
 import eu.odalic.extrarelatable.api.rest.resources.GraphResource;
 import eu.odalic.extrarelatable.api.rest.resources.WelcomeResource;
+import eu.odalic.extrarelatable.api.rest.responses.ThrowableMapper;
 
 /**
  * Configures the provided resources, filters and features.
@@ -46,10 +49,15 @@ public final class Configuration extends ResourceConfig {
     register(RequestContextFilter.class);
     register(LoggingResponseFilter.class);
     register(CorsResponseFilter.class);
+    register(AuthenticationFilter.class);
+    register(AuthorizationFilter.class);
 
     // Features registration
     register(JacksonFeature.class);
     register(MultiPartFeature.class);
+
+    // Exception mappers registration
+    register(ThrowableMapper.class);
 
     // Prevent the container to interfere with the error entities.
     property(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, "true");

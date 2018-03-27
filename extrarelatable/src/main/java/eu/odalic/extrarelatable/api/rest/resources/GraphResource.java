@@ -1,5 +1,7 @@
 package eu.odalic.extrarelatable.api.rest.resources;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -18,23 +20,22 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+//import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-
 import org.glassfish.jersey.media.multipart.FormDataParam;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Preconditions;
-
 import eu.odalic.extrarelatable.api.rest.responses.Message;
 import eu.odalic.extrarelatable.api.rest.responses.Reply;
 import eu.odalic.extrarelatable.api.rest.values.FormatValue;
 import eu.odalic.extrarelatable.api.rest.values.GraphValue;
+import eu.odalic.extrarelatable.api.rest.values.ParsedTableValue;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 import eu.odalic.extrarelatable.model.table.Metadata;
+import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
 import eu.odalic.extrarelatable.services.graph.GraphService;
@@ -50,19 +51,20 @@ public final class GraphResource {
 
 	public static final String TEXT_CSV_MEDIA_TYPE = "text/csv";
 
-	//private static final Logger LOGGER = LoggerFactory.getLogger(GraphResource.class);
+	// private static final Logger LOGGER =
+	// LoggerFactory.getLogger(GraphResource.class);
 
 	private final GraphService graphService;
 
-	@Context
-	private SecurityContext securityContext;
+	/*@Context
+	private SecurityContext securityContext;*/
 
 	@Context
 	private UriInfo uriInfo;
 
 	@Autowired
 	public GraphResource(final GraphService graphService) {
-		Preconditions.checkNotNull(graphService, "The graphService cannot be null!");
+		checkNotNull(graphService, "The graphService cannot be null!");
 
 		this.graphService = graphService;
 	}
@@ -131,8 +133,7 @@ public final class GraphResource {
 	@Path("{name}/learnt")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response learn(final @PathParam("name") String name,
-			final @FormDataParam("input") InputStream input,
+	public Response learn(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata)
 			throws IOException {
 		if (input == null) {
@@ -143,10 +144,11 @@ public final class GraphResource {
 		if (formatValue == null) {
 			format = null;
 		} else {
-			format = new Format(Charset.forName(formatValue.getCharset()), formatValue.getDelimiter(), formatValue.isEmptyLinesIgnored(),
-					formatValue.getQuoteCharacter(), formatValue.getEscapeCharacter(), formatValue.getCommentMarker());
+			format = new Format(Charset.forName(formatValue.getCharset()), formatValue.getDelimiter(),
+					formatValue.isEmptyLinesIgnored(), formatValue.getQuoteCharacter(),
+					formatValue.getEscapeCharacter(), formatValue.getCommentMarker());
 		}
-		
+
 		if (metadata == null) {
 			throw new BadRequestException("Missing metadata!");
 		}
@@ -154,54 +156,55 @@ public final class GraphResource {
 		if (!this.graphService.exists(name)) {
 			this.graphService.create(name);
 		}
-		
+
 		try {
 			this.graphService.learn(name, input, format, metadata);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
-		
-		return Message.of("An input has been learnt for graph " + name + ".")
-				.toResponse(Response.Status.OK, this.uriInfo);
+
+		return Message.of("An input has been learnt for graph " + name + ".").toResponse(Response.Status.OK,
+				this.uriInfo);
 	}
-	
+
 	@POST
 	@Path("{name}/learnt")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response learn(final @PathParam("name") String name, final ParsedTable parsedTable)
+	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue)
 			throws IOException {
-		if (parsedTable == null) {
+		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
 		}
-		
-		if (parsedTable.getMetadata() == null) {
+
+		if (parsedTableValue.getMetadata() == null) {
 			throw new BadRequestException("Missing metadata!");
 		}
+
+		final ParsedTable parsedTable = NestedListsParsedTable.fromRows(parsedTableValue.getHeaders(),
+				parsedTableValue.getRows(), parsedTableValue.getMetadata());
 
 		if (!this.graphService.exists(name)) {
 			this.graphService.create(name);
 		}
-		
+
 		try {
 			this.graphService.learn(name, parsedTable);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
-		
-		return Message.of("A table has been learnt for graph " + name + ".")
-				.toResponse(Response.Status.OK, this.uriInfo);
+
+		return Message.of("A table has been learnt for graph " + name + ".").toResponse(Response.Status.OK,
+				this.uriInfo);
 	}
-	
+
 	@POST
 	@Path("{name}/annotated")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response annotate(final @PathParam("name") String name,
-			final @FormDataParam("input") InputStream input,
+	public Response annotate(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
-			final @QueryParam("learn") Boolean learn)
-			throws IOException {
+			final @QueryParam("learn") Boolean learn) throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
 		}
@@ -210,10 +213,11 @@ public final class GraphResource {
 		if (formatValue == null) {
 			format = null;
 		} else {
-			format = new Format(Charset.forName(formatValue.getCharset()), formatValue.getDelimiter(), formatValue.isEmptyLinesIgnored(),
-					formatValue.getQuoteCharacter(), formatValue.getEscapeCharacter(), formatValue.getCommentMarker());
+			format = new Format(Charset.forName(formatValue.getCharset()), formatValue.getDelimiter(),
+					formatValue.isEmptyLinesIgnored(), formatValue.getQuoteCharacter(),
+					formatValue.getEscapeCharacter(), formatValue.getCommentMarker());
 		}
-		
+
 		if (metadata == null) {
 			throw new BadRequestException("Missing metadata!");
 		}
@@ -224,27 +228,30 @@ public final class GraphResource {
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
-		
+
 		if (learn != null && learn) {
 			learn(name, input, formatValue, metadata);
 		}
-		
+
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
 	}
-	
+
 	@POST
 	@Path("{name}/annotated")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response annotate(final @PathParam("name") String name, final ParsedTable parsedTable,
+	public Response annotate(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
 			final @QueryParam("learn") Boolean learn) throws IOException {
-		if (parsedTable == null) {
+		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
 		}
-		
-		if (parsedTable.getMetadata() == null) {
+
+		if (parsedTableValue.getMetadata() == null) {
 			throw new BadRequestException("Missing metadata!");
 		}
+
+		final ParsedTable parsedTable = NestedListsParsedTable.fromRows(parsedTableValue.getHeaders(),
+				parsedTableValue.getRows(), parsedTableValue.getMetadata());
 
 		final AnnotationResult result;
 		try {
@@ -252,11 +259,11 @@ public final class GraphResource {
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
-		
+
 		if (learn != null && learn) {
-			learn(name, parsedTable);
+			learn(name, parsedTableValue);
 		}
-		
+
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
 	}
 }

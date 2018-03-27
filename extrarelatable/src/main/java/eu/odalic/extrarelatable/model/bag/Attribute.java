@@ -8,12 +8,15 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public final class Attribute implements Serializable {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = -6922739591510264619L;
 	private final String name;
 
+	@SuppressWarnings("unused")
+	private Attribute() {
+		this.name = null;
+	}
+	
 	public Attribute(String name) {
 		checkNotNull(name);
 		

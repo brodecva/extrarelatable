@@ -12,6 +12,7 @@
 		<java.version>1.8</java.version>
 		<jcloverslf4j.version>1.7.21</jcloverslf4j.version>
 		<jersey.version>2.23.1</jersey.version>
+<!-- 		<jackson.version>2.5.4</jackson.version> -->
 		<logback.version>1.1.7</logback.version>
 		<spring.version>4.3.0.RELEASE</spring.version>
 		<guava.version>21.0</guava.version>
@@ -209,7 +210,43 @@
 			<artifactId>jackson-annotations</artifactId>
 			<version>2.8.6</version>
 		</dependency>
+
+		<!-- Jackson -->
+		<!-- <dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
 		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-jaxrs-base</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.module</groupId>
+		    <artifactId>jackson-module-jaxb-annotations</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+		 -->
 		<!-- JUnit -->
 		<dependency>
 			<groupId>junit</groupId>

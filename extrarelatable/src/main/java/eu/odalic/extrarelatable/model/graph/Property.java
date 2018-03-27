@@ -10,7 +10,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 
@@ -45,10 +48,14 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 		this.uri = uri;
 	}
 
+	@XmlTransient
+	@JsonIgnore
 	public Set<PropertyTree> getInstances() {
 		return Collections.unmodifiableSet(instances);
 	}
 
+	@XmlTransient
+	@JsonIgnore
 	public void add(final PropertyTree instance) {
 		checkNotNull(instance);
 		
@@ -56,6 +63,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 		this.instances.add(instance);
 	}
 	
+	@XmlTransient
+	@JsonIgnore
 	public void addAll(final Set<? extends PropertyTree> instances) {
 		checkNotNull(instances);
 		instances.forEach(instance -> checkNotNull(instance));
@@ -65,6 +74,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	}
 
 	@Override
+	@XmlTransient
+	@JsonIgnore
 	public Iterator<PropertyTree> iterator() {
 		return instances.iterator();
 	}
@@ -99,6 +110,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 		return true;
 	}
 
+	@XmlTransient
+	@JsonIgnore
 	public int compareTo(final Property other) {
 		return uuid.compareTo(other.uuid);
 	}

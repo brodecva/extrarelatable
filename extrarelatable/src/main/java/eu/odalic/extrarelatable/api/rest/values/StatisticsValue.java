@@ -1,5 +1,7 @@
 package eu.odalic.extrarelatable.api.rest.values;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -7,7 +9,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import eu.odalic.extrarelatable.model.annotation.Statistics;
 
 @XmlRootElement(name = "statistics")
-public final class StatisticsValue {
+public final class StatisticsValue implements Serializable {
+	
+	private static final long serialVersionUID = -3767853193633012050L;
+	
 	private Double average;
 	private Double median;
 	private Integer occurence;

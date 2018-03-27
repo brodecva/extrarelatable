@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.api.rest.values;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -12,7 +13,9 @@ import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 
 @XmlRootElement(name = "annotationResult")
-public class AnnotationResultValue {
+public class AnnotationResultValue implements Serializable {
+	
+	private static final long serialVersionUID = 447474098862783908L;
 	
 	private Map<Integer, Annotation> annotations;
 

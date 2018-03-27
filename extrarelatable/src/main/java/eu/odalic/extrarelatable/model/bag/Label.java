@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.google.common.collect.ImmutableList;
@@ -29,16 +30,30 @@ public final class Label implements Comparable<Label>, Serializable {
 	private final List<String> headers;
 	private final List<List<String>> firstRows; 
 		
+	@XmlTransient
 	public static Label synthetic(final String description, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
 		return new Label(UUID.randomUUID().toString(), description, true, index, file, firstValues, headers, firstRows);
 	}
 	
+	@XmlTransient
 	public static Label synthetic(final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
 		return synthetic(null, index, file, firstValues, headers, firstRows);
 	}
 	
+	@XmlTransient
 	public static Label of(final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
 		return new Label(text, description, false, index, file, firstValues, headers, firstRows);
+	}
+	
+	private Label() {
+		this.text = null;
+		this.description = null;
+		this.synthetic = true;
+		this.index = -1;
+		this.file = null;
+		this.firstValues = ImmutableList.of();
+		this.headers = ImmutableList.of();
+		this.firstRows = ImmutableList.of();
 	}
 	
 	private Label(final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {

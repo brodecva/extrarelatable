@@ -1,11 +1,18 @@
 package eu.odalic.extrarelatable.model.annotation;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import eu.odalic.extrarelatable.api.rest.adapters.StatisticsAdapter;
 
 @XmlJavaTypeAdapter(StatisticsAdapter.class)
-public final class Statistics {
+public final class Statistics implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3810017751616551396L;
+	
 	private final Double average;
 	private final Double median;
 	private final Integer occurence;
@@ -13,6 +20,13 @@ public final class Statistics {
 	
 	public static Statistics of(final Double average, final Double median, final Integer occurence, final Double relativeOccurence) {
 		return new Statistics(average, median, occurence, relativeOccurence);
+	}
+	
+	private Statistics() {
+		this.average = null;
+		this.median = null;
+		this.occurence = null;
+		this.relativeOccurence = null;
 	}
 	
 	private Statistics(final Double average, final Double median, final Integer occurence, final Double relativeOccurence) {

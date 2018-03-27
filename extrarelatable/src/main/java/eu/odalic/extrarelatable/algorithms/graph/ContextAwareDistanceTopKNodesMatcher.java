@@ -33,7 +33,7 @@ import jersey.repackaged.com.google.common.collect.ImmutableList;
 @Component
 public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatcher {
 	
-	public static final int INITIAL_DEFAULT_K = Integer.MAX_VALUE;
+	public static final int INITIAL_DEFAULT_K = 50;
 	public static final double INITIAL_DEFAULT_VALUES_WEIGHT = 0.5d;
 	
 	private final Distance distance;
@@ -41,7 +41,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	private final int defaultK;
 	
 	@Inject
-	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight?:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.valuesWeight?:2147483647}") final int defaultK) {
+	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight?:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.topKNeighbours?:50}") final int defaultK) {
 		checkNotNull(distance);
 		checkArgument(defaultValuesWeight >= 0, "The default values weight must be at least zero!");
 		checkArgument(defaultValuesWeight <= 1, "The default values weight can be at most one!");
@@ -91,13 +91,15 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 					final int contextPropertiesIntersectionSize = contextPropertiesIntersection.size();
 					
 					final double jaccardSimilarity = ((double) contextPropertiesIntersectionSize) / (uniqueMatchedContextPropertiesSize + candidateContextUniquePropertiesSize - contextPropertiesIntersectionSize);
-					final double jaccardDissimilarity = 1 - jaccardSimilarity; 
+					final double jaccardDissimilarity = 1 - jaccardSimilarity;
+					
+					final double normalizedjaccardDissimilarity = Double.isNaN(jaccardDissimilarity) ? 1 : jaccardDissimilarity;
 					
 					final double[] candidateValues = node.getValues().stream().mapToDouble(e -> e.getFigure()).toArray();
 					
 					final double computedDistance = distance.compute(inputValues, candidateValues);
 					
-					final double measuredDistance = valuesWeight * computedDistance + (1 - valuesWeight) * jaccardDissimilarity; 
+					final double measuredDistance = valuesWeight * computedDistance + (1 - valuesWeight) * normalizedjaccardDissimilarity; 
 					
 					final MeasuredNode candidateNode = new MeasuredNode(node, measuredDistance);
 					

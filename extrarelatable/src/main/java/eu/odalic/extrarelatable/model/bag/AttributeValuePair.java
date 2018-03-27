@@ -6,7 +6,10 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import javax.annotation.concurrent.Immutable;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import eu.odalic.extrarelatable.api.rest.adapters.AttributeValuePairAdapter;
 
@@ -24,6 +27,12 @@ public final class AttributeValuePair implements Comparable<AttributeValuePair>,
 	private final Attribute attribute;
 	private final Value value;
 	
+	@SuppressWarnings("unused")
+	private AttributeValuePair() {
+		this.attribute = null;
+		this.value = null;
+	}
+	
 	public AttributeValuePair(Attribute attribute, Value value) {
 		checkNotNull(attribute);
 		checkNotNull(value);
@@ -32,10 +41,14 @@ public final class AttributeValuePair implements Comparable<AttributeValuePair>,
 		this.value = value;
 	}
 
+	@XmlTransient
+	@JsonIgnore
 	public Attribute getAttribute() {
 		return attribute;
 	}
 
+	@XmlTransient
+	@JsonIgnore
 	public Value getValue() {
 		return value;
 	}	
@@ -66,6 +79,7 @@ public final class AttributeValuePair implements Comparable<AttributeValuePair>,
 		return true;
 	}
 	
+	@XmlTransient
 	@Override
 	public int compareTo(AttributeValuePair other) {
 		return uuid.compareTo(other.uuid);
