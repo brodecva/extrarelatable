@@ -55,15 +55,9 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	public synchronized void addPropertyTree(final PropertyTree propertyTree) {
 		checkNotNull(propertyTree);
 		
-		final Property property = propertyTreesMergingStrategy.find(propertyTree, properties);
-		if (property == null) {
-			final Property newProperty = new Property();
-			newProperty.add(propertyTree);
-			newProperty.setUri(propertyTree.getContext().getDeclaredPropertyUri());
-			
-			properties.add(newProperty);
-		} else {
-			property.add(propertyTree);
+		final Property property = propertyTreesMergingStrategy.merge(propertyTree, properties);
+		if (property != null) {
+			properties.add(property);
 		}
 	}
 	

@@ -38,6 +38,8 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 @Component
 public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 
+	private static final Set<URI> STOP_PROPERTIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
+
 	public final int MINIMUM_PARTITION_SIZE = 2;
 	
 	private final SubcontextCompiler subcontextCompiler;
@@ -135,12 +137,26 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
 		rootNode.addChildren(children);
 
+		final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+		if (declaredPropertyUri == null) {
+			if (onlyWithProperties) {
+				return null;
+			}
+		}
+		
 		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-				slicedTable.getMetadata().getTitle(), null, ImmutableMap.of(), columnIndex, availableContextColumnIndices);
+				slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), columnIndex, availableContextColumnIndices);
 
 		final PropertyTree tree = new PropertyTree(rootNode, context);
 		rootNode.setPropertyTree(tree);
 		
 		return tree;
+	}
+	
+	private static Map<Integer, URI> getMeaningfulContextProperties(
+			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
+		return declaredPropertyUris.entrySet().stream().filter(
+				e -> !STOP_PROPERTIES.contains(e.getValue())
+			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 }
