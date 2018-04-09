@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 //import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
+
 import org.glassfish.jersey.media.multipart.FormDataParam;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -34,6 +37,7 @@ import eu.odalic.extrarelatable.api.rest.values.FormatValue;
 import eu.odalic.extrarelatable.api.rest.values.GraphValue;
 import eu.odalic.extrarelatable.api.rest.values.ParsedTableValue;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
+import eu.odalic.extrarelatable.model.graph.SearchResult;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -265,5 +269,26 @@ public final class GraphResource {
 		}
 
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
+	}
+	
+	@GET
+	@Path("{name}/search")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response search(final @PathParam("name") String name, final @QueryParam("pattern") String pattern,
+			final @QueryParam("flags") Integer flags,
+			final @QueryParam("limit") Integer limit)
+			throws IOException {
+		if (pattern == null) {
+			throw new BadRequestException("No pattern provided!");
+		}
+		
+		final SearchResult result;
+		try {
+			result = this.graphService.search(name, pattern, flags, limit == null ? Integer.MAX_VALUE : limit);
+		} catch (final IllegalArgumentException e) {
+			throw new BadRequestException(e.getMessage(), e);
+		}
+
+		return Reply.data(Status.OK, result, this.uriInfo).toResponse();
 	}
 }

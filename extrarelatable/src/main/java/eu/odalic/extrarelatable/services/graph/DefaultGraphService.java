@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
@@ -49,10 +52,12 @@ import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableWriter;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
+import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Type;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTreesMergingStrategy;
+import eu.odalic.extrarelatable.model.graph.SearchResult;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -735,5 +740,47 @@ public class DefaultGraphService implements GraphService {
 		checkArgument(removed != null, "No such graph present!");
 		
 		this.graphsPersistingService.delete(removed.getName());
+	}
+	
+	@Override
+	public SearchResult search(final String graphName, final String pattern, final Integer flags, final int limit) {
+		checkNotNull(graphName);
+		checkNotNull(pattern);
+		checkArgument(limit >= 1, "The limit on the number of searched items must be at least one!");
+		
+		final Pattern compiledPattern;
+		try {
+			if (flags == null) {
+				compiledPattern = Pattern.compile(pattern);
+			} else {
+				compiledPattern = Pattern.compile(pattern, flags);
+			}
+		} catch (final PatternSyntaxException e) {
+			throw new IllegalArgumentException("Invalid search pattern!", e);
+		}
+		
+		final BackgroundKnowledgeGraph graph = this.graphs.get(graphName);
+		checkArgument(graph != null, "Unknown graph!");
+		
+		return new SearchResult(graph.getProperties().stream().filter(property -> {
+			final URI uri = property.getUri();
+			
+			if (uri != null) {
+				if (compiledPattern.matcher(uri.toString()).find()) {
+					return true;
+				}
+			}
+			
+			return property.getInstances().stream().filter(tree -> {
+				final Label label = tree.getRoot().getLabel();
+				if (label == null) {
+					return false;
+				}
+				
+				return compiledPattern.matcher(label.getText()).find();
+			}).findAny().isPresent();
+		})
+		.limit(limit)
+		.collect(ImmutableList.toImmutableList()));
 	}
 }
