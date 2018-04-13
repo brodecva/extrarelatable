@@ -13,8 +13,8 @@ public interface GraphService {
 	boolean exists(String name);
 	void delete(String name);
 	
-	void learn(String graphName, ParsedTable table) throws IOException;
-	void learn(String graphName, InputStream input, Format format, Metadata metadata) throws IOException;
+	void learn(String graphName, ParsedTable table, boolean onlyWithProperties) throws IOException;
+	void learn(String graphName, InputStream input, Format format, Metadata metadata, boolean onlyWithProperties) throws IOException;
 
 	AnnotationResult annotate(String graphName, ParsedTable table) throws IOException;
 	AnnotationResult annotate(String graphName, InputStream input, Format format, Metadata metadata) throws IOException;

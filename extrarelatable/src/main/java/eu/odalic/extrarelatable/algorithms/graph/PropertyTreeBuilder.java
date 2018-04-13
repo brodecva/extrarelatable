@@ -10,6 +10,8 @@ public interface PropertyTreeBuilder {
 
 	PropertyTree build(SlicedTable slicedTable, int columnIndex);
 	
-	PropertyTree build(SlicedTable slicedTable, int columnIndex, Map<? extends Integer, ? extends URI> declaredPropertyUris, boolean onlyWithProperties);
+	PropertyTree build(SlicedTable slicedTable, int columnIndex,
+			Map<? extends Integer, ? extends URI> declaredPropertyUris,
+			Map<? extends Integer, ? extends URI> declaredClassUris, boolean onlyWithProperties);
 
 }

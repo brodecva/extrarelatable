@@ -10,5 +10,6 @@ import eu.odalic.extrarelatable.model.table.SlicedTable;
 public interface PropertyTreesBuilder {
 	Set<PropertyTree> build(SlicedTable slicedTable);
 
-	Set<PropertyTree> build(SlicedTable slicedTable, Map<? extends Integer, ? extends URI> declaredPropertyUris, boolean onlyWithProperties);
+	Set<PropertyTree> build(SlicedTable slicedTable, Map<? extends Integer, ? extends URI> declaredPropertyUris,
+			Map<? extends Integer, ? extends URI> declaredClassUris, boolean onlyWithProperties);
 }

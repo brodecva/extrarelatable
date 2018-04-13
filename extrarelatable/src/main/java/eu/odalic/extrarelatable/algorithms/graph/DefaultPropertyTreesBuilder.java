@@ -26,14 +26,15 @@ public class DefaultPropertyTreesBuilder implements PropertyTreesBuilder {
 
 	@Override
 	public Set<PropertyTree> build(final SlicedTable slicedTable) {
-		return build(slicedTable, ImmutableMap.of(), false);
+		return build(slicedTable, ImmutableMap.of(), ImmutableMap.of(), false);
 	}
 
 	@Override
 	public Set<PropertyTree> build(final SlicedTable slicedTable, final Map<? extends Integer, ? extends URI> declaredPropertyUris,
+			final Map<? extends Integer, ? extends URI> declaredClassUris,
 			final boolean onlyWithProperties) {
 		return slicedTable.getDataColumns().keySet().stream().map(columnIndex -> 
-			this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredPropertyUris, onlyWithProperties)
+			this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredPropertyUris, declaredClassUris, onlyWithProperties)
 		).filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
 	}
 }

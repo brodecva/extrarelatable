@@ -138,7 +138,8 @@ public final class GraphResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response learn(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
-			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata)
+			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
+			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties)
 			throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
@@ -162,7 +163,7 @@ public final class GraphResource {
 		}
 
 		try {
-			this.graphService.learn(name, input, format, metadata);
+			this.graphService.learn(name, input, format, metadata, onlyWithProperties == null ? false : onlyWithProperties);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -175,7 +176,7 @@ public final class GraphResource {
 	@Path("{name}/learnt")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue)
+	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties)
 			throws IOException {
 		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
@@ -193,7 +194,7 @@ public final class GraphResource {
 		}
 
 		try {
-			this.graphService.learn(name, parsedTable);
+			this.graphService.learn(name, parsedTable, onlyWithProperties == null ? false : onlyWithProperties);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -208,7 +209,7 @@ public final class GraphResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response annotate(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
-			final @QueryParam("learn") Boolean learn) throws IOException {
+			final @QueryParam("learn") Boolean learn, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties) throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
 		}
@@ -234,7 +235,7 @@ public final class GraphResource {
 		}
 
 		if (learn != null && learn) {
-			learn(name, input, formatValue, metadata);
+			learn(name, input, formatValue, metadata, onlyWithProperties == null ? false : onlyWithProperties);
 		}
 
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
@@ -245,7 +246,7 @@ public final class GraphResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response annotate(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
-			final @QueryParam("learn") Boolean learn) throws IOException {
+			final @QueryParam("learn") Boolean learn, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties) throws IOException {
 		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
 		}
@@ -265,7 +266,7 @@ public final class GraphResource {
 		}
 
 		if (learn != null && learn) {
-			learn(name, parsedTableValue);
+			learn(name, parsedTableValue, onlyWithProperties);
 		}
 
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();

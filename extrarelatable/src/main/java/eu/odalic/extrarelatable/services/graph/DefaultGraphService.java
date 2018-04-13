@@ -253,7 +253,7 @@ public class DefaultGraphService implements GraphService {
 		
 		final Format format = getFormat(csvProfile);
 		
-		final ParsedTable table = parse(tablePath, cleanedInput, format);
+		final ParsedTable table = parse(tablePath, cleanedInput, format, locale);
 		if (table.getHeight() < 2) {
 			LOGGER.warn("Too few rows in " + tablePath + ". Skipping.");
 			return ImmutableSet.of();
@@ -315,10 +315,10 @@ public class DefaultGraphService implements GraphService {
 		Files.createFile(cleanedInputFilesDirectory.resolve(input.getFileName() + DOT_LEADING_FAILED_RESULT_FILE_SUFFIX));
 	}
 	
-	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format) {
+	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format, final Locale locale) {
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
-			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, null));
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, locale.toLanguageTag()));
 		} catch (final IOException e) {
 			throw new RuntimeException("Failed to parse " + input + "!", e);
 		}
@@ -348,7 +348,10 @@ public class DefaultGraphService implements GraphService {
 			return ImmutableSet.of();
 		}
 
-		final ParsedTable table = toParsedTable(dataset, tablePath.getFileName().toString());
+		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
+				tablePath.getFileName().toString());
+		
+		final ParsedTable table = toParsedTable(dataset, tablePath.getFileName().toString(), declaredPropertyUris, locale);
 		if (table.getHeight() < 2) {
 			LOGGER.warn("Too few rows in " + tablePath + ". Skipping.");
 			return ImmutableSet.of();
@@ -364,10 +367,9 @@ public class DefaultGraphService implements GraphService {
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 
-		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
-				tablePath.getFileName().toString());
+		
 
-		return this.propertyTreesBuilder.build(slicedTable, declaredPropertyUris, onlyWithProperties);
+		return this.propertyTreesBuilder.build(slicedTable, declaredPropertyUris, ImmutableMap.of(), onlyWithProperties);
 	}
 	
 	private static Map<Integer, URI> getDeclaredPropertyUris(final Path declaredPropertiesPath,
@@ -418,9 +420,9 @@ public class DefaultGraphService implements GraphService {
 		return propertiesPath;
 	}
 	
-	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName) {
+	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName, Map<Integer, URI> declaredPropertyUris, final Locale locale) {
 		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
-				new Metadata(fileName, dataset.getUrl(), null));
+				new Metadata(fileName, dataset.getUrl(), locale.toLanguageTag(), declaredPropertyUris, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()));
 
 		return table;
 	}
@@ -527,7 +529,7 @@ public class DefaultGraphService implements GraphService {
 	}
 
 	@Override
-	public void learn(String graphName, final InputStream input, @Nullable Format format, Metadata metadata) throws IOException {
+	public void learn(final String graphName, final InputStream input, final @Nullable Format format, final Metadata metadata, final boolean onlyWithProperties) throws IOException {
 		checkNotNull(graphName);
 		checkNotNull(input);
 		checkNotNull(metadata);
@@ -537,11 +539,11 @@ public class DefaultGraphService implements GraphService {
 		
 		final Path cachedInput = this.fileCachingService.cache(input);
 		
-		learn(graph, cachedInput, format, metadata);
+		learn(graph, cachedInput, format, metadata, onlyWithProperties);
 		this.graphsPersistingService.persist(graph.getName(), graph);
 	}
 	
-	private void learn(final BackgroundKnowledgeGraph graph, final Path input, @Nullable Format format, Metadata metadata) throws IOException {
+	private void learn(final BackgroundKnowledgeGraph graph, final Path input, @Nullable Format format, Metadata metadata, final boolean onlyWithProperties) throws IOException {
 		CsvProfile csvProfile;
 		try {
 			csvProfile = this.csvProfilerService.profile(input.toFile());
@@ -575,13 +577,13 @@ public class DefaultGraphService implements GraphService {
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 
-		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable);
+		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredPropertyUris(), metadata.getDeclaredClassUris(), onlyWithProperties);
 		
 		graph.addPropertyTrees(trees);
 	}
 	
 	@Override
-	public void learn(String graphName, final ParsedTable table) throws IOException {
+	public void learn(String graphName, final ParsedTable table, final boolean onlyWithProperties) throws IOException {
 		checkNotNull(graphName);
 		checkNotNull(table);
 		
@@ -613,7 +615,9 @@ public class DefaultGraphService implements GraphService {
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 
-		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable);
+		final Metadata metadata = slicedTable.getMetadata();
+		
+		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredPropertyUris(), metadata.getDeclaredClassUris(), onlyWithProperties);
 		
 		graph.addPropertyTrees(trees);
 		

@@ -628,7 +628,7 @@ public class T2Dv2GoldStandard {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -868,7 +868,7 @@ public class T2Dv2GoldStandard {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);

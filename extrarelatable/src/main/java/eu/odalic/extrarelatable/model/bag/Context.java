@@ -16,29 +16,38 @@ import com.google.common.collect.ImmutableSet;
 
 @Immutable
 public final class Context implements Serializable {
-	
+
 	private static final long serialVersionUID = 3692200553185310125L;
-	
+
 	private final List<Label> columnHeaders;
 	private final String tableAauthor;
 	private final String tableTitle;
 	private final URI declaredPropertyUri;
 	private final Map<Integer, URI> declaredColumnProperties;
+	private final Map<Integer, URI> declaredColumnClasses;
 	private final Integer columnIndex;
 	private final Set<Integer> contextColumnIndices;
-	
+
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle) {
-		this(columnHeaders, tableAuthor, tableTitle, null, ImmutableMap.of(), null, ImmutableSet.of());
+		this(columnHeaders, tableAuthor, tableTitle, null, ImmutableMap.of(), ImmutableMap.of(), null,
+				ImmutableSet.of());
 	}
-	
-	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle, final URI declaredPropertyUri, final Map<? extends Integer, ? extends URI> declaredColumnProperties, final Integer columnIndex, final Set<? extends Integer> contextColumnIndices) {
+
+	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle,
+			final URI declaredPropertyUri, final Map<? extends Integer, ? extends URI> declaredColumnProperties,
+			final Map<? extends Integer, ? extends URI> declaredColumnClasses, final Integer columnIndex,
+			final Set<? extends Integer> contextColumnIndices) {
 		checkNotNull(columnHeaders);
-		
+		checkNotNull(declaredColumnProperties);
+		checkNotNull(declaredColumnClasses);
+		checkNotNull(contextColumnIndices);
+
 		this.columnHeaders = ImmutableList.copyOf(columnHeaders);
 		this.tableAauthor = tableAuthor;
 		this.tableTitle = tableTitle;
 		this.declaredPropertyUri = declaredPropertyUri;
 		this.declaredColumnProperties = ImmutableMap.copyOf(declaredColumnProperties);
+		this.declaredColumnClasses = ImmutableMap.copyOf(declaredColumnClasses);
 		this.columnIndex = columnIndex;
 		this.contextColumnIndices = ImmutableSet.copyOf(contextColumnIndices);
 	}
@@ -54,13 +63,17 @@ public final class Context implements Serializable {
 	public String getTableTitle() {
 		return tableTitle;
 	}
-	
+
 	public URI getDeclaredPropertyUri() {
 		return declaredPropertyUri;
 	}
 
 	public Map<Integer, URI> getDeclaredColumnProperties() {
 		return declaredColumnProperties;
+	}
+
+	public Map<Integer, URI> getDeclaredColumnClasses() {
+		return declaredColumnClasses;
 	}
 
 	public Integer getColumnIndex() {
@@ -70,11 +83,17 @@ public final class Context implements Serializable {
 	public Set<Integer> getContextColumnIndices() {
 		return contextColumnIndices;
 	}
-	
+
 	public Map<Integer, URI> getDeclaredContextColumnProperties() {
-		return declaredColumnProperties.entrySet().stream().filter(e -> contextColumnIndices.contains(e.getKey())).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
+		return declaredColumnProperties.entrySet().stream().filter(e -> contextColumnIndices.contains(e.getKey()))
+				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
-	
+
+	public Map<Integer, URI> getDeclaredContextColumnClasses() {
+		return declaredColumnClasses.entrySet().stream().filter(e -> contextColumnIndices.contains(e.getKey()))
+				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -83,6 +102,7 @@ public final class Context implements Serializable {
 		result = prime * result + ((columnIndex == null) ? 0 : columnIndex.hashCode());
 		result = prime * result + ((contextColumnIndices == null) ? 0 : contextColumnIndices.hashCode());
 		result = prime * result + ((declaredColumnProperties == null) ? 0 : declaredColumnProperties.hashCode());
+		result = prime * result + ((declaredColumnClasses == null) ? 0 : declaredColumnClasses.hashCode());
 		result = prime * result + ((declaredPropertyUri == null) ? 0 : declaredPropertyUri.hashCode());
 		result = prime * result + ((tableAauthor == null) ? 0 : tableAauthor.hashCode());
 		result = prime * result + ((tableTitle == null) ? 0 : tableTitle.hashCode());
@@ -129,6 +149,13 @@ public final class Context implements Serializable {
 		} else if (!declaredColumnProperties.equals(other.declaredColumnProperties)) {
 			return false;
 		}
+		if (declaredColumnClasses == null) {
+			if (other.declaredColumnClasses != null) {
+				return false;
+			}
+		} else if (!declaredColumnClasses.equals(other.declaredColumnClasses)) {
+			return false;
+		}
 		if (declaredPropertyUri == null) {
 			if (other.declaredPropertyUri != null) {
 				return false;
@@ -157,7 +184,7 @@ public final class Context implements Serializable {
 	public String toString() {
 		return "Context [columnHeaders=" + columnHeaders + ", tableAauthor=" + tableAauthor + ", tableTitle="
 				+ tableTitle + ", declaredPropertyUri=" + declaredPropertyUri + ", declaredColumnProperties="
-				+ declaredColumnProperties + ", columnIndex=" + columnIndex + ", contextColumnIndices="
-				+ contextColumnIndices + "]";
+				+ declaredColumnProperties + ", declaredColumnClasses=" + declaredColumnClasses + ", columnIndex="
+				+ columnIndex + ", contextColumnIndices=" + contextColumnIndices + "]";
 	}
 }

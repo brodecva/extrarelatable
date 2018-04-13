@@ -72,7 +72,7 @@ public final class DefaultAnnotator implements Annotator {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		slicedTable.getDataColumns().keySet().forEach(columnIndex -> {
-			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex);
+			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex, slicedTable.getMetadata().getCollectedPropertyUris(), slicedTable.getMetadata().getCollectedClassUris(), false);
 
 			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder();
 
