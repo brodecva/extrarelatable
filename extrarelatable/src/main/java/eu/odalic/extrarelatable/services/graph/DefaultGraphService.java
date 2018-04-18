@@ -154,7 +154,7 @@ public class DefaultGraphService implements GraphService {
 	}
 	
 	@Inject
-	public DefaultGraphService(@Qualifier("labelText") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
+	public DefaultGraphService(@Qualifier("propertyUriLabelTextFallback") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,

@@ -26,6 +26,7 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
