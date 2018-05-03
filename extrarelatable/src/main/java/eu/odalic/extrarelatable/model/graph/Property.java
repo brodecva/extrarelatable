@@ -20,7 +20,7 @@ import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 @XmlJavaTypeAdapter(PropertyAdapter.class)
 public final class Property implements Iterable<PropertyTree>, Comparable<Property>, Serializable {
 	
-	private static final long serialVersionUID = 8960069289015738836L;
+	private static final long serialVersionUID = 3889990772214135061L;
 
 	private final UUID uuid;
 	
@@ -40,6 +40,10 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 		this.instances = new HashSet<>(original.instances);
 	}
 
+	public UUID getUuid() {
+		return uuid;
+	}
+	
 	public URI getUri() {
 		return uri;
 	}
