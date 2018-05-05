@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Sets;
@@ -27,7 +28,7 @@ import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 @Immutable
 @Component
@@ -67,13 +68,13 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 		return match(graph, values, ImmutableList.of(), 1, k);
 	}
 	
-	private SortedSet<MeasuredNode> match(final BackgroundKnowledgeGraph graph, final Collection<? extends NumericValue> matchedValues, final Collection<? extends URI> matchedContextProperties, final double valuesWeight, final int k) {
+	private SortedSet<MeasuredNode> match(final BackgroundKnowledgeGraph graph, final Collection<? extends NumericValue> matchedValues, final Collection<? extends DeclaredEntity> matchedContextProperties, final double valuesWeight, final int k) {
 		checkNotNull(graph);
 		checkNotNull(matchedValues);
 		checkNotNull(matchedContextProperties);
 		checkArgument(k >= 1);
 
-		final Set<URI> matchedUniqueContextProperties = ImmutableSet.copyOf(matchedContextProperties);
+		final Set<URI> matchedUniqueContextProperties = ImmutableSet.copyOf(matchedContextProperties.stream().map(p -> p.getUri()).collect(ImmutableList.toImmutableList()));
 		final int uniqueMatchedContextPropertiesSize = matchedUniqueContextProperties.size();
 		
 		final double[] inputValues = matchedValues.stream().mapToDouble(e -> e.getFigure()).toArray();
@@ -83,7 +84,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 		for (final Property property : graph) {
 			for (final PropertyTree instance : property) {
 				for (final Node node : instance) {
-					final Collection<URI> candidateContextProperties = node.getPropertyTree().getContext().getDeclaredContextColumnProperties().values();
+					final Collection<URI> candidateContextProperties = node.getPropertyTree().getContext().getDeclaredContextColumnProperties().values().stream().map(p -> p.getUri()).collect(ImmutableList.toImmutableList());
 					final Set<URI> candidateContextUniqueProperties = ImmutableSet.copyOf(candidateContextProperties);
 					final int candidateContextUniquePropertiesSize = candidateContextUniqueProperties.size();
 					

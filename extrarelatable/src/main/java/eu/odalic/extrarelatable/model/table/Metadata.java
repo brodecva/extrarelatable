@@ -3,14 +3,14 @@ package eu.odalic.extrarelatable.model.table;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Map;
 
 import javax.annotation.concurrent.Immutable;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.google.common.collect.ImmutableMap;
+
 import eu.odalic.extrarelatable.api.rest.adapters.MetadataAdapter;
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 @Immutable
 @XmlJavaTypeAdapter(MetadataAdapter.class)
@@ -21,30 +21,28 @@ public final class Metadata implements Serializable {
 	private final String title;
 	private final String author;
 	private final String languageTag;
-	private final Map<Integer, URI> declaredPropertyUris;
-	private final Map<Integer, URI> declaredClassUris;
-
-	private Map<Integer, URI> collectedPropertyUris;
-
-	private Map<Integer, URI> collectedClassUris;
+	private final Map<Integer, DeclaredEntity> declaredProperties;
+	private final Map<Integer, DeclaredEntity> declaredClasses;
+	private final Map<Integer, DeclaredEntity> collectedProperties;
+	private final Map<Integer, DeclaredEntity> collectedClasses;
 	
 	public Metadata(final String title, final String author, final String languageTag,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris,
-			final Map<? extends Integer, ? extends URI> declaredClassUris,
-			final Map<? extends Integer, ? extends URI> collectedPropertyUris,
-			final Map<? extends Integer, ? extends URI> collectedClassUris) {
-		checkNotNull(declaredPropertyUris);
-		checkNotNull(declaredClassUris);
-		checkNotNull(collectedClassUris);
-		checkNotNull(collectedPropertyUris);
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
+			final Map<? extends Integer, ? extends DeclaredEntity> collectedProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> collectedClasses) {
+		checkNotNull(declaredProperties);
+		checkNotNull(declaredClasses);
+		checkNotNull(collectedClasses);
+		checkNotNull(collectedProperties);
 		
 		this.title = title;
 		this.author = author;
 		this.languageTag = languageTag;
-		this.declaredPropertyUris = ImmutableMap.copyOf(declaredPropertyUris);
-		this.declaredClassUris = ImmutableMap.copyOf(declaredClassUris);
-		this.collectedClassUris = ImmutableMap.copyOf(collectedClassUris);
-		this.collectedPropertyUris = ImmutableMap.copyOf(collectedPropertyUris);
+		this.declaredProperties = ImmutableMap.copyOf(declaredProperties);
+		this.declaredClasses = ImmutableMap.copyOf(declaredClasses);
+		this.collectedClasses = ImmutableMap.copyOf(collectedClasses);
+		this.collectedProperties = ImmutableMap.copyOf(collectedProperties);
 	}
 	
 	public Metadata(final String title, final String author, final String languageTag) {
@@ -67,20 +65,20 @@ public final class Metadata implements Serializable {
 		return languageTag;
 	}
 
-	public Map<Integer, URI> getDeclaredPropertyUris() {
-		return declaredPropertyUris;
+	public Map<Integer, DeclaredEntity> getDeclaredProperties() {
+		return declaredProperties;
 	}
 
-	public Map<Integer, URI> getDeclaredClassUris() {
-		return declaredClassUris;
+	public Map<Integer, DeclaredEntity> getDeclaredClasses() {
+		return declaredClasses;
 	}
 	
-	public Map<Integer, URI> getCollectedPropertyUris() {
-		return collectedPropertyUris;
+	public Map<Integer, DeclaredEntity> getCollectedProperties() {
+		return collectedProperties;
 	}
 
-	public Map<Integer, URI> getCollectedClassUris() {
-		return collectedClassUris;
+	public Map<Integer, DeclaredEntity> getCollectedClasses() {
+		return collectedClasses;
 	}
 
 	@Override
@@ -88,10 +86,10 @@ public final class Metadata implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
-		result = prime * result + ((collectedClassUris == null) ? 0 : collectedClassUris.hashCode());
-		result = prime * result + ((collectedPropertyUris == null) ? 0 : collectedPropertyUris.hashCode());
-		result = prime * result + ((declaredClassUris == null) ? 0 : declaredClassUris.hashCode());
-		result = prime * result + ((declaredPropertyUris == null) ? 0 : declaredPropertyUris.hashCode());
+		result = prime * result + ((collectedClasses == null) ? 0 : collectedClasses.hashCode());
+		result = prime * result + ((collectedProperties == null) ? 0 : collectedProperties.hashCode());
+		result = prime * result + ((declaredClasses == null) ? 0 : declaredClasses.hashCode());
+		result = prime * result + ((declaredProperties == null) ? 0 : declaredProperties.hashCode());
 		result = prime * result + ((languageTag == null) ? 0 : languageTag.hashCode());
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
@@ -116,32 +114,32 @@ public final class Metadata implements Serializable {
 		} else if (!author.equals(other.author)) {
 			return false;
 		}
-		if (collectedClassUris == null) {
-			if (other.collectedClassUris != null) {
+		if (collectedClasses == null) {
+			if (other.collectedClasses != null) {
 				return false;
 			}
-		} else if (!collectedClassUris.equals(other.collectedClassUris)) {
+		} else if (!collectedClasses.equals(other.collectedClasses)) {
 			return false;
 		}
-		if (collectedPropertyUris == null) {
-			if (other.collectedPropertyUris != null) {
+		if (collectedProperties == null) {
+			if (other.collectedProperties != null) {
 				return false;
 			}
-		} else if (!collectedPropertyUris.equals(other.collectedPropertyUris)) {
+		} else if (!collectedProperties.equals(other.collectedProperties)) {
 			return false;
 		}
-		if (declaredClassUris == null) {
-			if (other.declaredClassUris != null) {
+		if (declaredClasses == null) {
+			if (other.declaredClasses != null) {
 				return false;
 			}
-		} else if (!declaredClassUris.equals(other.declaredClassUris)) {
+		} else if (!declaredClasses.equals(other.declaredClasses)) {
 			return false;
 		}
-		if (declaredPropertyUris == null) {
-			if (other.declaredPropertyUris != null) {
+		if (declaredProperties == null) {
+			if (other.declaredProperties != null) {
 				return false;
 			}
-		} else if (!declaredPropertyUris.equals(other.declaredPropertyUris)) {
+		} else if (!declaredProperties.equals(other.declaredProperties)) {
 			return false;
 		}
 		if (languageTag == null) {
@@ -164,8 +162,8 @@ public final class Metadata implements Serializable {
 	@Override
 	public String toString() {
 		return "Metadata [title=" + title + ", author=" + author + ", languageTag=" + languageTag
-				+ ", declaredPropertyUris=" + declaredPropertyUris + ", declaredClassUris=" + declaredClassUris
-				+ ", collectedPropertyUris=" + collectedPropertyUris + ", collectedClassUris=" + collectedClassUris
+				+ ", declaredProperties=" + declaredProperties + ", declaredClasses=" + declaredClasses
+				+ ", collectedProperties=" + collectedProperties + ", collectedClasses=" + collectedClasses
 				+ "]";
 	}
 }

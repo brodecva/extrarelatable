@@ -10,6 +10,11 @@ import java.util.function.Predicate;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
+
 @Component("propertyUriLabelTextFallback")
 public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy, Serializable {
 
@@ -20,13 +25,15 @@ public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy impl
 		checkNotNull(propertyTree);
 		checkNotNull(properties);
 		
-		final URI treeDeclaredPropertyUri = propertyTree.getContext().getDeclaredPropertyUri();
+		final DeclaredEntity declaredProperty = propertyTree.getContext().getDeclaredProperty();
+		final URI declaredPropertyUri = declaredProperty == null ? null : declaredProperty.getUri();
+		final Set<String> declaredPropertyLabels = declaredProperty == null ? ImmutableSet.of() : declaredProperty.getLabels();
 		
 		final Property mergedByUri = properties.stream().filter(
 			property -> {
 				final URI propertyUri = property.getUri();
 				
-				return propertyUri != null && propertyUri.equals(treeDeclaredPropertyUri);
+				return propertyUri != null && propertyUri.equals(declaredPropertyUri);
 			}
 		).findFirst().orElse(null);
 		
@@ -40,21 +47,24 @@ public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy impl
 			if (mergedByText == null) {
 				final Property newProperty = new Property();
 				newProperty.add(propertyTree);
-				newProperty.setUri(treeDeclaredPropertyUri);
+				newProperty.setUri(declaredPropertyUri);
+				newProperty.setDeclaredLabels(declaredPropertyLabels);
 				
 				return newProperty;
 			} else {
 				mergedByText.add(propertyTree);
 				if (mergedByText.getUri() == null) {
-					if (treeDeclaredPropertyUri != null) {
-						mergedByText.setUri(treeDeclaredPropertyUri);
+					if (declaredPropertyUri != null) {
+						mergedByText.setUri(declaredPropertyUri);
 					}
 				}
+				mergedByText.setDeclaredLabels(Sets.union(mergedByText.getDeclaredLabels(), declaredPropertyLabels).immutableCopy());
 				
 				return null;
 			}
 		} else {
 			mergedByUri.add(propertyTree);
+			mergedByUri.setDeclaredLabels(Sets.union(mergedByUri.getDeclaredLabels(), declaredPropertyLabels).immutableCopy());
 			
 			return null;
 		}

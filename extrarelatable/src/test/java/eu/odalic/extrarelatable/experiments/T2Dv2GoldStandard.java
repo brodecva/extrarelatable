@@ -96,6 +96,7 @@ import eu.odalic.extrarelatable.services.dwtc.DwtcToCsvService;
 import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
 import webreduce.data.HeaderPosition;
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -378,7 +379,7 @@ public class T2Dv2GoldStandard {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
 
-			final Map<Integer, URI> solution = getSolution(file, declaredPropertiesPath);
+			final Map<Integer, DeclaredEntity> solution = getSolution(file, declaredPropertiesPath);
 			
 			final AnnotationResult result;
 			try {
@@ -433,16 +434,16 @@ public class T2Dv2GoldStandard {
 							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property)};
 				}).collect(ImmutableList.toImmutableList()));
 				
-				final URI columnSolution = solution.get(index);
-				csvWriter.writeRow("Solution:", columnSolution);
+				final DeclaredEntity columnSolution = solution.get(index);
+				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
 				
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();
 				} else {
-					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> isAcceptableFor(uri, columnSolution))) {
+					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri()))) {
 						testStatisticsBuilder.addMatchingSolution();
 					} else {
-						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution);
+						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution.getUri());
 					}
 				}
 				
@@ -459,7 +460,7 @@ public class T2Dv2GoldStandard {
 		});
 	}
 
-	private static Set<URI> getContextProperties(final Property property) {
+	private static Set<DeclaredEntity> getContextProperties(final Property property) {
 		return property.getInstances().stream().map(
 				i -> i.getContext().getDeclaredContextColumnProperties().values()).flatMap(e -> e.stream()).collect(ImmutableSet.toImmutableSet());
 	}
@@ -471,7 +472,7 @@ public class T2Dv2GoldStandard {
 		);
 	}
 
-	private static Map<Integer, URI> getSolution(final Path input, final Path declaredPropertiesPath) {
+	private static Map<Integer, DeclaredEntity> getSolution(final Path input, final Path declaredPropertiesPath) {
 		return getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 	}
 
@@ -520,17 +521,17 @@ public class T2Dv2GoldStandard {
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable,
 				hints);
 
-		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
+		final Map<Integer, DeclaredEntity> declaredProperties = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
-		Set<PropertyTree> trees = buildTrees(slicedTable, declaredPropertyUris, onlyWithProperties, repetition);
+		Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, onlyWithProperties, repetition);
 		
 		testStatisticsBuilder.addLearntFile();
 		
 		return trees;
 	}
 
-	private static Map<Integer, URI> getDeclaredPropertyUris(final Path declaredPropertiesPath,
+	private static Map<Integer, DeclaredEntity> getDeclaredPropertyUris(final Path declaredPropertiesPath,
 			final String tableFileName) {
 		final Path propertiesPath = getPropertiesPath(declaredPropertiesPath, tableFileName);
 		if (propertiesPath == null) {
@@ -557,7 +558,7 @@ public class T2Dv2GoldStandard {
 		
 		try {
 		return rows.stream().collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields[fields.length - 1]),
-						fields -> URI.create(fields[0])));
+						fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableList.of(fields[1]))));
 		} catch (final ArrayIndexOutOfBoundsException e) {
 			return ImmutableMap.of();
 		}
@@ -579,7 +580,7 @@ public class T2Dv2GoldStandard {
 	}
 
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties, final int repetition) {
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, final boolean onlyWithProperties, final int repetition) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -615,20 +616,20 @@ public class T2Dv2GoldStandard {
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
 			rootNode.addChildren(children);
 
-			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
-			if (declaredPropertyUri == null) {
+			final DeclaredEntity declaredProperty = declaredProperties.get(columnIndex);
+			if (declaredProperty == null) {
 				testStatisticsBuilder.addNoPropertyLearningNumericColumn();
 				
 				if (onlyWithProperties) {
 					continue;
 				}
 			} else {
-				testStatisticsBuilder.addUniqueProperty(repetition, declaredPropertyUri);
-				testStatisticsBuilder.addUniquePropertyLearnt(repetition, declaredPropertyUri);
+				testStatisticsBuilder.addUniqueProperty(repetition, declaredProperty.getUri());
+				testStatisticsBuilder.addUniquePropertyLearnt(repetition, declaredProperty.getUri());
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredProperty, getMeaningfulContextProperties(declaredProperties), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -826,14 +827,14 @@ public class T2Dv2GoldStandard {
 		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable,
 				hints);
 
-		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
+		final Map<Integer, DeclaredEntity> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
 
 		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, onlyWithProperties, repetition));
 	}
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris, final boolean onlyWithProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, final boolean onlyWithProperties,
 			final int repetition) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
@@ -855,20 +856,20 @@ public class T2Dv2GoldStandard {
 			final RootNode rootNode = new RootNode(label, ImmutableMultiset.copyOf(partition.getValues()));
 			rootNode.addChildren(children);
 
-			final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
-			if (declaredPropertyUri == null) {
+			final DeclaredEntity declaredProperty = declaredProperties.get(columnIndex);
+			if (declaredProperty == null) {
 				testStatisticsBuilder.addNoPropertyTestingNumericColumn();
 				
 				if (onlyWithProperties) {
 					continue;
 				}
 			} else {
-				testStatisticsBuilder.addUniqueProperty(repetition, declaredPropertyUri);
-				testStatisticsBuilder.addUniquePropertyTested(repetition, declaredPropertyUri);
+				testStatisticsBuilder.addUniqueProperty(repetition, declaredProperty.getUri());
+				testStatisticsBuilder.addUniquePropertyTested(repetition, declaredProperty.getUri());
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredProperty, getMeaningfulContextProperties(declaredProperties), ImmutableMap.of(), columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -897,10 +898,10 @@ public class T2Dv2GoldStandard {
 		return builder.build();
 	}
 
-	private Map<Integer, URI> getMeaningfulContextProperties(
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
-		return declaredPropertyUris.entrySet().stream().filter(
-				e -> !STOP_PROPERTIES.contains(e.getValue())
+	private Map<Integer, DeclaredEntity> getMeaningfulContextProperties(
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties) {
+		return declaredProperties.entrySet().stream().filter(
+				e -> !STOP_PROPERTIES.contains(e.getValue().getUri())
 			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 

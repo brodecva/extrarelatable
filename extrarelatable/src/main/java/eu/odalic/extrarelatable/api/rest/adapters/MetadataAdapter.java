@@ -15,6 +15,6 @@ public final class MetadataAdapter extends XmlAdapter<MetadataValue, Metadata> {
 
   @Override
   public Metadata unmarshal(final MetadataValue value) throws Exception {
-    return new Metadata(value.getTitle(), value.getAuthor(), value.getLanguageTag(), value.getDeclaredPropertyUris(), value.getDeclaredClassUris(), value.getCollectedPropertyUris(), value.getCollectedClassUris());
+    return new Metadata(value.getTitle(), value.getAuthor(), value.getLanguageTag(), value.getDeclaredProperties(), value.getDeclaredClasses(), value.getCollectedProperties(), value.getCollectedClasses());
   }
 }

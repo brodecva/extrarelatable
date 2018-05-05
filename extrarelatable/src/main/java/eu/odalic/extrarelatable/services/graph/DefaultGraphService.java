@@ -58,6 +58,7 @@ import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTreesMergingStrategy;
 import eu.odalic.extrarelatable.model.graph.SearchResult;
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -348,10 +349,10 @@ public class DefaultGraphService implements GraphService {
 			return ImmutableSet.of();
 		}
 
-		final Map<Integer, URI> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
+		final Map<Integer, DeclaredEntity> declaredProperties = getDeclaredProperties(declaredPropertiesPath,
 				tablePath.getFileName().toString());
 		
-		final ParsedTable table = toParsedTable(dataset, tablePath.getFileName().toString(), declaredPropertyUris, locale);
+		final ParsedTable table = toParsedTable(dataset, tablePath.getFileName().toString(), declaredProperties, locale);
 		if (table.getHeight() < 2) {
 			LOGGER.warn("Too few rows in " + tablePath + ". Skipping.");
 			return ImmutableSet.of();
@@ -369,10 +370,10 @@ public class DefaultGraphService implements GraphService {
 
 		
 
-		return this.propertyTreesBuilder.build(slicedTable, declaredPropertyUris, ImmutableMap.of(), onlyWithProperties);
+		return this.propertyTreesBuilder.build(slicedTable, declaredProperties, ImmutableMap.of(), onlyWithProperties);
 	}
 	
-	private static Map<Integer, URI> getDeclaredPropertyUris(final Path declaredPropertiesPath,
+	private static Map<Integer, DeclaredEntity> getDeclaredProperties(final Path declaredPropertiesPath,
 			final String tableFileName) {
 		final Path propertiesPath = getPropertiesPath(declaredPropertiesPath, tableFileName);
 		if (propertiesPath == null) {
@@ -399,7 +400,7 @@ public class DefaultGraphService implements GraphService {
 		
 		try {
 		return rows.stream().collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields[fields.length - 1]),
-						fields -> URI.create(fields[0])));
+						fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableList.of(fields[1]))));
 		} catch (final ArrayIndexOutOfBoundsException e) {
 			return ImmutableMap.of();
 		}
@@ -420,7 +421,7 @@ public class DefaultGraphService implements GraphService {
 		return propertiesPath;
 	}
 	
-	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName, Map<Integer, URI> declaredPropertyUris, final Locale locale) {
+	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName, Map<Integer, DeclaredEntity> declaredPropertyUris, final Locale locale) {
 		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
 				new Metadata(fileName, dataset.getUrl(), locale.toLanguageTag(), declaredPropertyUris, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()));
 
@@ -577,7 +578,7 @@ public class DefaultGraphService implements GraphService {
 
 		final SlicedTable slicedTable = this.tableSlicer.slice(typedTable, typeHints);
 
-		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredPropertyUris(), metadata.getDeclaredClassUris(), onlyWithProperties);
+		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredProperties(), metadata.getDeclaredClasses(), onlyWithProperties);
 		
 		graph.addPropertyTrees(trees);
 	}
@@ -617,7 +618,7 @@ public class DefaultGraphService implements GraphService {
 
 		final Metadata metadata = slicedTable.getMetadata();
 		
-		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredPropertyUris(), metadata.getDeclaredClassUris(), onlyWithProperties);
+		final Set<PropertyTree> trees = this.propertyTreesBuilder.build(slicedTable, metadata.getDeclaredProperties(), metadata.getDeclaredClasses(), onlyWithProperties);
 		
 		graph.addPropertyTrees(trees);
 		

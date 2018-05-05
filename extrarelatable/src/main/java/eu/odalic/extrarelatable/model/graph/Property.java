@@ -8,12 +8,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 
@@ -26,17 +28,21 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	
 	private URI uri;
 	
+	private SortedSet<String> declaredLabels;
+	
 	private final Set<PropertyTree> instances;
 	
 	public Property() {
 		this.uuid = UUID.randomUUID();
 		this.uri = null;
+		this.declaredLabels = ImmutableSortedSet.of();
 		this.instances = new HashSet<>();
 	}
 	
 	public Property(final Property original) {
 		this.uuid = original.uuid;
 		this.uri = original.uri;
+		this.declaredLabels = original.declaredLabels;
 		this.instances = new HashSet<>(original.instances);
 	}
 
@@ -50,6 +56,14 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 
 	public void setUri(URI uri) {
 		this.uri = uri;
+	}
+
+	public SortedSet<String> getDeclaredLabels() {
+		return declaredLabels;
+	}
+
+	public void setDeclaredLabels(final Set<? extends String> declaredLabels) {
+		this.declaredLabels = ImmutableSortedSet.copyOf(declaredLabels);
 	}
 
 	@XmlTransient
@@ -119,9 +133,10 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	public int compareTo(final Property other) {
 		return uuid.compareTo(other.uuid);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Property [uuid=" + uuid + ", uri=" + uri + ", instances=" + instances + "]";
+		return "Property [uuid=" + uuid + ", uri=" + uri + ", declaredLabels=" + declaredLabels + ", instances="
+				+ instances + "]";
 	}
 }

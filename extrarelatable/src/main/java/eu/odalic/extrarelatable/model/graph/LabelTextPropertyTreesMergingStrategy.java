@@ -10,6 +10,11 @@ import java.util.function.Predicate;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
+
 @Component("labelText")
 public final class LabelTextPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy, Serializable {
 
@@ -26,21 +31,25 @@ public final class LabelTextPropertyTreesMergingStrategy implements PropertyTree
 			property -> property.getInstances().stream().map(toLabelText()).anyMatch(equal(propertyTreeLabelText))
 		).findFirst().orElse(null);
 		
-		final URI treeDeclaredPropertyUri = propertyTree.getContext().getDeclaredPropertyUri();
+		final DeclaredEntity declaredProperty = propertyTree.getContext().getDeclaredProperty();
+		final URI declaredPropertyUri = declaredProperty == null ? null : declaredProperty.getUri();
+		final Set<String> declaredPropertyLabels = declaredProperty == null ? ImmutableSet.of() : declaredProperty.getLabels();
 		
 		if (merged == null) {
 			final Property newProperty = new Property();
 			newProperty.add(propertyTree);
-			newProperty.setUri(treeDeclaredPropertyUri);
+			newProperty.setUri(declaredPropertyUri);
+			newProperty.setDeclaredLabels(declaredPropertyLabels);
 			
 			return newProperty;
 		} else {
 			merged.add(propertyTree);
 			if (merged.getUri() == null) {
-				if (treeDeclaredPropertyUri != null) {
-					merged.setUri(treeDeclaredPropertyUri);
+				if (declaredPropertyUri != null) {
+					merged.setUri(declaredPropertyUri);
 				}
 			}
+			merged.setDeclaredLabels(Sets.union(merged.getDeclaredLabels(), declaredPropertyLabels).immutableCopy());
 			
 			return null;
 		}

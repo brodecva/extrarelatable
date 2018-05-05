@@ -32,6 +32,7 @@ import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.SharedPairNode;
 import eu.odalic.extrarelatable.model.subcontext.Partition;
 import eu.odalic.extrarelatable.model.subcontext.Subcontext;
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
@@ -117,8 +118,8 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 
 	@Override
 	public PropertyTree build(SlicedTable slicedTable, int columnIndex,
-			Map<? extends Integer, ? extends URI> declaredPropertyUris,
-			Map<? extends Integer, ? extends URI> declaredClassUris,
+			Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
 			boolean onlyWithProperties) {
 		checkNotNull(slicedTable);
 		checkArgument(columnIndex >= 0);
@@ -140,7 +141,7 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
 		rootNode.addChildren(children);
 
-		final URI declaredPropertyUri = declaredPropertyUris.get(columnIndex);
+		final DeclaredEntity declaredPropertyUri = declaredProperties.get(columnIndex);
 		if (declaredPropertyUri == null) {
 			if (onlyWithProperties) {
 				return null;
@@ -148,7 +149,7 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		}
 		
 		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-				slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredPropertyUris), getMeaningfulContextClasses(declaredClassUris), columnIndex, availableContextColumnIndices);
+				slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredProperties), getMeaningfulContextClasses(declaredClasses), columnIndex, availableContextColumnIndices);
 
 		final PropertyTree tree = new PropertyTree(rootNode, context);
 		rootNode.setPropertyTree(tree);
@@ -156,17 +157,17 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		return tree;
 	}
 	
-	private static Map<Integer, URI> getMeaningfulContextProperties(
-			final Map<? extends Integer, ? extends URI> declaredPropertyUris) {
-		return declaredPropertyUris.entrySet().stream().filter(
-				e -> !STOP_PROPERTIES.contains(e.getValue())
+	private static Map<Integer, DeclaredEntity> getMeaningfulContextProperties(
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties) {
+		return declaredProperties.entrySet().stream().filter(
+				e -> !STOP_PROPERTIES.contains(e.getValue().getUri())
 			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 	
-	private static Map<Integer, URI> getMeaningfulContextClasses(
-			final Map<? extends Integer, ? extends URI> declaredClassUris) {
-		return declaredClassUris.entrySet().stream().filter(
-				e -> !STOP_CLASSES.contains(e.getValue())
+	private static Map<Integer, DeclaredEntity> getMeaningfulContextClasses(
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses) {
+		return declaredClasses.entrySet().stream().filter(
+				e -> !STOP_CLASSES.contains(e.getValue().getUri())
 			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 }

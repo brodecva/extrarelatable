@@ -4,13 +4,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.google.common.collect.ImmutableList;
+import org.eclipse.collections.impl.block.factory.Comparators;
+
+import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.model.graph.Property;
 
@@ -23,18 +26,23 @@ public final class PropertyValue implements Serializable {
 	
 	private URI uri;
 	
-	private List<String> labels;
+	private SortedSet<String> labels;
 	
 	public PropertyValue() {
 		this.uuid = null;
 		this.uri = null;
-		this.labels = ImmutableList.of();
+		this.labels = ImmutableSortedSet.of();
 	}
 	
 	public PropertyValue(final Property adaptee) {
 		this.uuid = adaptee.getUuid();
 		this.uri = adaptee.getUri();
-		this.labels = adaptee.getInstances().stream().map(instance -> instance.getRoot().getLabel().getText()).distinct().sorted().collect(ImmutableList.toImmutableList());
+		
+		if (adaptee.getDeclaredLabels().isEmpty()) {
+			this.labels = adaptee.getInstances().stream().map(instance -> instance.getRoot().getLabel().getText()).distinct().collect(ImmutableSortedSet.toImmutableSortedSet(Comparators.naturalOrder()));
+		} else {
+			this.labels = adaptee.getDeclaredLabels();
+		}
 	}
 
 	@XmlElement
@@ -57,14 +65,14 @@ public final class PropertyValue implements Serializable {
 		this.uri = uri;
 	}
 	
-	public List<String> getLabels() {
+	public Set<String> getLabels() {
 		return labels;
 	}
 
-	public void setLabels(final List<? extends String> labels) {
+	public void setLabels(final Set<? extends String> labels) {
 		checkNotNull(labels);
 		
-		this.labels = ImmutableList.copyOf(labels);
+		this.labels = ImmutableSortedSet.copyOf(labels);
 	}
 
 	@Override
