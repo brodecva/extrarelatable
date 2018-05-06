@@ -38,29 +38,33 @@ public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy impl
 		).findFirst().orElse(null);
 		
 		if (mergedByUri == null) {
-			final String propertyTreeLabelText = getLabelText(propertyTree);
-			
-			final Property mergedByText = properties.stream().filter(
-				property -> property.getInstances().stream().map(toLabelText()).anyMatch(equal(propertyTreeLabelText))
-			).findFirst().orElse(null);
-			
-			if (mergedByText == null) {
+			if (declaredProperty == null) {
+				final String propertyTreeLabelText = getLabelText(propertyTree);
+				
+				final Property mergedByText = properties.stream().filter(
+					property -> property.getInstances().stream().map(toLabelText()).anyMatch(equal(propertyTreeLabelText))
+				).findFirst().orElse(null);
+				
+				if (mergedByText == null) {
+					final Property newProperty = new Property();
+					newProperty.add(propertyTree);
+					newProperty.setUri(declaredPropertyUri);
+					newProperty.setDeclaredLabels(declaredPropertyLabels);
+					
+					return newProperty;
+				} else {
+					mergedByText.add(propertyTree);
+					mergedByText.setDeclaredLabels(Sets.union(mergedByText.getDeclaredLabels(), declaredPropertyLabels).immutableCopy());
+					
+					return null;
+				}
+			} else {
 				final Property newProperty = new Property();
 				newProperty.add(propertyTree);
 				newProperty.setUri(declaredPropertyUri);
 				newProperty.setDeclaredLabels(declaredPropertyLabels);
 				
 				return newProperty;
-			} else {
-				mergedByText.add(propertyTree);
-				if (mergedByText.getUri() == null) {
-					if (declaredPropertyUri != null) {
-						mergedByText.setUri(declaredPropertyUri);
-					}
-				}
-				mergedByText.setDeclaredLabels(Sets.union(mergedByText.getDeclaredLabels(), declaredPropertyLabels).immutableCopy());
-				
-				return null;
 			}
 		} else {
 			mergedByUri.add(propertyTree);

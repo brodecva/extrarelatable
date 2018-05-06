@@ -227,15 +227,15 @@ public final class GraphResource {
 			throw new BadRequestException("Missing metadata!");
 		}
 
+		if (learn != null && learn) {
+			learn(name, input, formatValue, metadata, onlyWithProperties == null ? false : onlyWithProperties);
+		}
+		
 		final AnnotationResult result;
 		try {
 			result = this.graphService.annotate(name, input, format, metadata);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
-		}
-
-		if (learn != null && learn) {
-			learn(name, input, formatValue, metadata, onlyWithProperties == null ? false : onlyWithProperties);
 		}
 
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
@@ -258,6 +258,10 @@ public final class GraphResource {
 		final ParsedTable parsedTable = NestedListsParsedTable.fromRows(parsedTableValue.getHeaders(),
 				parsedTableValue.getRows(), parsedTableValue.getMetadata());
 
+		if (learn != null && learn) {
+			learn(name, parsedTableValue, onlyWithProperties);
+		}
+		
 		final AnnotationResult result;
 		try {
 			result = this.graphService.annotate(name, parsedTable);
@@ -265,9 +269,6 @@ public final class GraphResource {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 
-		if (learn != null && learn) {
-			learn(name, parsedTableValue, onlyWithProperties);
-		}
 
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
 	}
