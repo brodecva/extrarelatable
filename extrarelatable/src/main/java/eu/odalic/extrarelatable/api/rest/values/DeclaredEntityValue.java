@@ -3,55 +3,60 @@ package eu.odalic.extrarelatable.api.rest.values;
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.List;
+import java.util.NavigableSet;
+import java.util.Set;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 @XmlRootElement(name = "declaredEntity")
 public final class DeclaredEntityValue implements Serializable {
 
-  private static final long serialVersionUID = -9009289293200568981L;
+	private static final long serialVersionUID = -9009289293200568981L;
 
-  private URI uri;
-  
-  private List<String> labels;
+	private URI uri;
 
-  public DeclaredEntityValue() {
-    this.uri = null;
-    this.labels = ImmutableList.of();
-  }
+	private NavigableSet<String> labels;
 
-  public DeclaredEntityValue(DeclaredEntity bound) {
-	this.uri = bound.getUri();
-	this.labels = ImmutableList.copyOf(bound.getLabels());
-  }
+	@SuppressWarnings("unused")
+	private DeclaredEntityValue() {
+		this.uri = null;
+		this.labels = ImmutableSortedSet.of();
+	}
 
-@XmlElement
-  public URI getUri() {
-    return uri;
-  }
+	public DeclaredEntityValue(DeclaredEntity bound) {
+		this.uri = bound.getUri();
+		this.labels = ImmutableSortedSet.copyOf(bound.getLabels());
+	}
 
-  public void setUri(final URI uri) {
-    this.uri = uri;
-  }
-  
-  @XmlElement
-  public List<String> getLabels() {
-    return labels;
-  }
+	@XmlElement
+	public URI getUri() {
+		return uri;
+	}
 
-  public void setLabels(final List<? extends String> labels) {
-    checkNotNull(labels);
-    
-    this.labels = ImmutableList.copyOf(labels);
-  }
+	public void setUri(final URI uri) {
+		checkNotNull(uri);
 
-  @Override
-  public String toString() {
-    return "DeclaredEntityValue [uri=" + uri + ", labels=" + labels + "]";
-  }
+		this.uri = uri;
+	}
+
+	@XmlElement
+	public NavigableSet<String> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(final Set<? extends String> labels) {
+		checkNotNull(labels);
+
+		this.labels = ImmutableSortedSet.copyOf(labels);
+	}
+
+	@Override
+	public String toString() {
+		return "DeclaredEntityValue [uri=" + uri + ", labels=" + labels + "]";
+	}
 }

@@ -4,10 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -26,9 +27,10 @@ public final class PropertyValue implements Serializable {
 	
 	private URI uri;
 	
-	private SortedSet<String> labels;
+	private NavigableSet<String> labels;
 	
-	public PropertyValue() {
+	@SuppressWarnings("unused")
+	private PropertyValue() {
 		this.uuid = null;
 		this.uri = null;
 		this.labels = ImmutableSortedSet.of();
@@ -51,6 +53,7 @@ public final class PropertyValue implements Serializable {
 	}
 	
 	@XmlElement
+	@Nullable
 	public URI getUri() {
 		return uri;
 	}
@@ -61,11 +64,12 @@ public final class PropertyValue implements Serializable {
 		this.uuid = uuid;
 	}
 	
-	public void setUri(URI uri) {
+	public void setUri(@Nullable URI uri) {
 		this.uri = uri;
 	}
 	
-	public Set<String> getLabels() {
+	@XmlElement
+	public NavigableSet<String> getLabels() {
 		return labels;
 	}
 
@@ -77,6 +81,6 @@ public final class PropertyValue implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PropertyValue [uri=" + uri + ", labels=" + labels + "]";
+		return "PropertyValue [uuid=" + uuid + ", uri=" + uri + ", labels=" + labels + "]";
 	}
 }

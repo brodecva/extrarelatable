@@ -7,10 +7,11 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NavigableSet;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -28,7 +29,7 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	
 	private URI uri;
 	
-	private SortedSet<String> declaredLabels;
+	private NavigableSet<String> declaredLabels;
 	
 	private final Set<PropertyTree> instances;
 	
@@ -49,20 +50,23 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	public UUID getUuid() {
 		return uuid;
 	}
-	
+
+	@Nullable
 	public URI getUri() {
 		return uri;
 	}
 
-	public void setUri(URI uri) {
+	public void setUri(@Nullable URI uri) {
 		this.uri = uri;
 	}
 
-	public SortedSet<String> getDeclaredLabels() {
+	public NavigableSet<String> getDeclaredLabels() {
 		return declaredLabels;
 	}
 
 	public void setDeclaredLabels(final Set<? extends String> declaredLabels) {
+		checkNotNull(declaredLabels);
+		
 		this.declaredLabels = ImmutableSortedSet.copyOf(declaredLabels);
 	}
 

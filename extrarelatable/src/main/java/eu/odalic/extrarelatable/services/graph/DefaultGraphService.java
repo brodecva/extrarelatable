@@ -400,7 +400,7 @@ public class DefaultGraphService implements GraphService {
 		
 		try {
 		return rows.stream().collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields[fields.length - 1]),
-						fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableList.of(fields[1]))));
+						fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableSet.of(fields[1]))));
 		} catch (final ArrayIndexOutOfBoundsException e) {
 			return ImmutableMap.of();
 		}
