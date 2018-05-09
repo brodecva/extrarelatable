@@ -209,7 +209,7 @@ public class DefaultGraphService implements GraphService {
 		if (tablesPath.toFile().exists() && tablesPath.toFile().isDirectory()) {
 			return loadDwtcGraph(graphName, tablesPath, tablesPath.resolve(PROFILES_SUBPATH), tablesPath.resolve(PARSED_TABLES_CSVS_SUBPATH), graphPath.resolve(DECLARED_PROPERTIES_SUBPATH), onlyWithProperties, locale);
 		} else {
-			return loadBagOfTablesGraph(graphName, graphPath, graphPath.resolve(PROFILES_SUBPATH), graphPath.resolve(CLEANED_CSVS_SUBPATH), locale);
+			return loadBagOfTablesGraph(graphName, graphPath, graphPath.resolve(PROFILES_SUBPATH), graphPath.resolve(CLEANED_CSVS_SUBPATH), graphPath.resolve(DECLARED_PROPERTIES_SUBPATH), onlyWithProperties,  locale);
 		}
 	}
 	
@@ -222,14 +222,14 @@ public class DefaultGraphService implements GraphService {
 		return locale;		
 	}
 
-	private BackgroundKnowledgeGraph loadBagOfTablesGraph(final String graphName, final Path graphPath, final Path profilesPath, final Path cleanedCsvsPath, Locale locale) throws IOException {
+	private BackgroundKnowledgeGraph loadBagOfTablesGraph(final String graphName, final Path graphPath, final Path profilesPath, final Path cleanedCsvsPath, Path declaredPropertiesPath, boolean onlyWithProperties, Locale locale) throws IOException {
 		checkArgument(graphPath.toFile().exists() && graphPath.toFile().isDirectory(), "The directory for " + graphName + " is missing!");
 		checkArgument(profilesPath.toFile().exists() && profilesPath.toFile().isDirectory(), "The profiles directory for " + graphName + " is missing!");
 		checkArgument(cleanedCsvsPath.toFile().exists() && cleanedCsvsPath.toFile().isDirectory(), "The cleaned directory for " + graphName + " is missing!");
 		
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(graphName, this.propertyTreesMergingStrategy);
 		
-		Streams.stream(Files.newDirectoryStream(graphPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnTable(tablePath, cleanedCsvsPath, profilesPath, locale)));
+		Streams.stream(Files.newDirectoryStream(graphPath)).filter(tablePath -> tablePath.toFile().isFile()).sorted().forEach(tablePath -> graph.addPropertyTrees(learnTable(tablePath, cleanedCsvsPath, profilesPath, declaredPropertiesPath, onlyWithProperties, locale)));
 		
 		return graph;
 	}
@@ -247,14 +247,17 @@ public class DefaultGraphService implements GraphService {
 		return graph;
 	}
 	
-	private Set<PropertyTree> learnTable(Path tablePath, Path cleanedCsvsPath, Path profilesPath, final Locale locale) {
+	private Set<PropertyTree> learnTable(Path tablePath, Path cleanedCsvsPath, Path profilesPath, Path declaredPropertiesPath, boolean onlyWithProperties, final Locale locale) {
 		final Path cleanedInput = getCleanedInput(tablePath, cleanedCsvsPath);
 		
 		final CsvProfile csvProfile = getProfile(cleanedInput, profilesPath);
 		
 		final Format format = getFormat(csvProfile);
 		
-		final ParsedTable table = parse(tablePath, cleanedInput, format, locale);
+		final Map<Integer, DeclaredEntity> declaredProperties = getDeclaredTableProperties(declaredPropertiesPath,
+				tablePath.getFileName().toString());
+		
+		final ParsedTable table = parse(tablePath, cleanedInput, format, declaredProperties, locale);
 		if (table.getHeight() < 2) {
 			LOGGER.warn("Too few rows in " + tablePath + ". Skipping.");
 			return ImmutableSet.of();
@@ -316,10 +319,10 @@ public class DefaultGraphService implements GraphService {
 		Files.createFile(cleanedInputFilesDirectory.resolve(input.getFileName() + DOT_LEADING_FAILED_RESULT_FILE_SUFFIX));
 	}
 	
-	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format, final Locale locale) {
+	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format, final Map<Integer, DeclaredEntity> declaredProperties, final Locale locale) {
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
-			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, locale.toLanguageTag()));
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, locale.toLanguageTag(), declaredProperties, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()));
 		} catch (final IOException e) {
 			throw new RuntimeException("Failed to parse " + input + "!", e);
 		}
@@ -349,7 +352,7 @@ public class DefaultGraphService implements GraphService {
 			return ImmutableSet.of();
 		}
 
-		final Map<Integer, DeclaredEntity> declaredProperties = getDeclaredProperties(declaredPropertiesPath,
+		final Map<Integer, DeclaredEntity> declaredProperties = getDeclaredDwtcTableProperties(declaredPropertiesPath,
 				tablePath.getFileName().toString());
 		
 		final ParsedTable table = toParsedTable(dataset, tablePath.getFileName().toString(), declaredProperties, locale);
@@ -373,9 +376,21 @@ public class DefaultGraphService implements GraphService {
 		return this.propertyTreesBuilder.build(slicedTable, declaredProperties, ImmutableMap.of(), onlyWithProperties);
 	}
 	
-	private static Map<Integer, DeclaredEntity> getDeclaredProperties(final Path declaredPropertiesPath,
+	private static Map<Integer, DeclaredEntity> getDeclaredDwtcTableProperties(final Path declaredPropertiesPath,
 			final String tableFileName) {
-		final Path propertiesPath = getPropertiesPath(declaredPropertiesPath, tableFileName);
+		final Path propertiesPath = getDwtcTablePropertiesPath(declaredPropertiesPath, tableFileName);
+		
+		return getDeclaredProperties(propertiesPath);
+	}
+	
+	private static Map<Integer, DeclaredEntity> getDeclaredTableProperties(final Path declaredPropertiesPath,
+			final String tableFileName) {
+		final Path propertiesPath = getTablePropertiesPath(declaredPropertiesPath, tableFileName);
+		
+		return getDeclaredProperties(propertiesPath);
+	}
+	
+	private static Map<Integer, DeclaredEntity> getDeclaredProperties(final Path propertiesPath) {
 		if (propertiesPath == null) {
 			return ImmutableMap.of();
 		}
@@ -406,7 +421,7 @@ public class DefaultGraphService implements GraphService {
 		}
 	}
 	
-	private static Path getPropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
+	private static Path getDwtcTablePropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
 		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
 
 		final String sanitizedFileName = fileName.replaceAll(CHARACTERS_TO_SANITIZE_REGEX, SANITIZE_WITH);
@@ -421,9 +436,20 @@ public class DefaultGraphService implements GraphService {
 		return propertiesPath;
 	}
 	
-	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName, Map<Integer, DeclaredEntity> declaredPropertyUris, final Locale locale) {
+	private static Path getTablePropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
+		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
+
+		final Path propertiesPath = declaredPropertiesPath.resolve(fileName);
+		if (!propertiesPath.toFile().exists()) {
+			return null;
+		}
+		
+		return propertiesPath;
+	}
+	
+	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName, Map<Integer, DeclaredEntity> declaredProperties, final Locale locale) {
 		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
-				new Metadata(fileName, dataset.getUrl(), locale.toLanguageTag(), declaredPropertyUris, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()));
+				new Metadata(fileName, dataset.getUrl(), locale.toLanguageTag(), declaredProperties, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of()));
 
 		return table;
 	}
