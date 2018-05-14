@@ -5,10 +5,8 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
-
 /**
- * Domain class {@link BackgroundKnowledgeGraph} adapted for REST API.
+ * Domain class adapted for REST API.
  *
  * @author Václav Brodec
  *

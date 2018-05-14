@@ -75,7 +75,7 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
+@ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class BaselineDataOpenDataPortalAt {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = 0.6;

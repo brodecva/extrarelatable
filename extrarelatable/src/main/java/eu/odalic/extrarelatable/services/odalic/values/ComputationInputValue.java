@@ -1,33 +1,24 @@
-package eu.odalic.extrarelatable.api.rest.values;
+package eu.odalic.extrarelatable.services.odalic.values;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.Serializable;
 import java.util.List;
-
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-import eu.odalic.extrarelatable.api.rest.adapters.MetadataAdapter;
-import eu.odalic.extrarelatable.model.table.Metadata;
-import eu.odalic.extrarelatable.model.table.ParsedTable;
-
 /**
- * An adapted for REST API.
- *
  * @author Václav Brodec
  */
-@XmlRootElement(name = "parsedTable")
+@XmlRootElement(name = "computationInput")
 @XmlAccessorType(XmlAccessType.NONE)
 @Immutable
-public final class ParsedTableValue implements Serializable {
+public final class ComputationInputValue implements Serializable {
 
 	private static final long serialVersionUID = 4101912998363935336L;
 
@@ -35,64 +26,62 @@ public final class ParsedTableValue implements Serializable {
 
 	private List<String> headers;
 
-	private Metadata metadata;
-	
-	public ParsedTableValue() {
+	private String identifier;
+
+	@SuppressWarnings("unused")
+	private ComputationInputValue() {
 		this.rows = ImmutableList.of();
 		this.headers = ImmutableList.of();
-		this.metadata = null;
+		this.identifier = null;
 	}
 
-	public ParsedTableValue(final ParsedTable adaptee) {
-		this.rows = adaptee.getRows();
-		this.headers = adaptee.getHeaders();
-		this.metadata = adaptee.getMetadata();
+	public ComputationInputValue(final List<? extends List<? extends String>> rows,
+			final List<? extends String> headers, final String identifier) {
+		checkNotNull(rows);
+		checkNotNull(headers);
+		checkNotNull(identifier);
+
+		this.rows = rows.stream().map(e -> ImmutableList.copyOf(e)).collect(ImmutableList.toImmutableList());
+		this.headers = ImmutableList.copyOf(headers);
+		this.identifier = identifier;
 	}
 
-	
 	@XmlElement
 	public List<List<String>> getRows() {
 		return rows;
 	}
 
-
-
 	public void setRows(List<List<String>> rows) {
 		checkNotNull(rows);
-		
+
 		this.rows = rows.stream().map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
 	}
-
 
 	@XmlElement
 	public List<String> getHeaders() {
 		return headers;
 	}
 
-
-
 	public void setHeaders(List<String> headers) {
 		checkNotNull(headers);
-		
+
 		this.headers = ImmutableList.copyOf(headers);
 	}
 
-
 	@XmlElement
 	@Nullable
-	@XmlJavaTypeAdapter(MetadataAdapter.class)
-	public Metadata getMetadata() {
-		return metadata;
+	public String getIdentifier() {
+		return identifier;
 	}
 
-	public void setMetadata(Metadata metadata) {
-		this.metadata = metadata;
+	public void setIdentifier(String identifier) {
+		Preconditions.checkNotNull(identifier);
+
+		this.identifier = identifier;
 	}
-
-
 
 	@Override
 	public String toString() {
-		return "ParsedTableValue [rows=" + rows + ", headers=" + headers + ", metadata=" + metadata + "]";
+		return "ComputationInputValue [rows=" + rows + ", headers=" + headers + ", identifier=" + identifier + "]";
 	}
 }

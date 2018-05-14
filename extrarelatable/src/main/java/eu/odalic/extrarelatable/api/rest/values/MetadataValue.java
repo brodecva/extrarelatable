@@ -15,7 +15,7 @@ import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 
 /**
- * Domain class {@link Metadata} adapted for REST API.
+ * Domain class adapted for REST API.
  *
  * @author Václav Brodec
  */

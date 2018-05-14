@@ -8,7 +8,12 @@
 	<!-- Properties -->
 	<context:property-placeholder location="file:${eu.odalic.extrarelatable.configuration}" ignore-unresolvable="true" ignore-resource-not-found="true" />
 
-	<context:component-scan base-package="eu.odalic.extrarelatable.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable.algorithms.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable.model.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable.services.csvengine.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable.services.dwtc.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable.services.odalic.*" />
+	<context:component-scan base-package="eu.odalic.extrarelatable..util.*" />
 
 	<!-- Helpers -->
 	

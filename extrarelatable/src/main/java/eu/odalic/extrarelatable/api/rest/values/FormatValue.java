@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
- * Domain class {@link Format} adapted for REST API.
+ * Domain class adapted for REST API.
  *
  * @author Václav Brodec
  */

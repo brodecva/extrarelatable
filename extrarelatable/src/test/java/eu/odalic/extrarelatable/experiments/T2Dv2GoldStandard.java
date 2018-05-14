@@ -106,7 +106,7 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:spring/applicationContext.xml" })
+@ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class T2Dv2GoldStandard {
 
 	private static final String FILES_WITHOUT_PROPERTY_PREFIX = "CC-MAIN";
