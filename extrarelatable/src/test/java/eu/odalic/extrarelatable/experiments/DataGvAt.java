@@ -5,14 +5,15 @@ package eu.odalic.extrarelatable.experiments;
 
 import static java.util.function.Function.identity;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,6 +68,7 @@ import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextCompiler;
 import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextMatcher;
 import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;
 import eu.odalic.extrarelatable.algorithms.table.TableSlicer;
+import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
@@ -90,15 +92,12 @@ import eu.odalic.extrarelatable.model.subcontext.Partition;
 import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
+import eu.odalic.extrarelatable.model.table.csv.Format;
+import eu.odalic.extrarelatable.services.csvengine.csvclean.CsvCleanService;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfile;
 import eu.odalic.extrarelatable.services.csvengine.csvprofiler.CsvProfilerService;
-import eu.odalic.extrarelatable.services.dwtc.DwtcToCsvService;
-import eu.odalic.extrarelatable.util.Matrix;
-import webreduce.data.Dataset;
-import webreduce.data.HeaderPosition;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
-import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
@@ -107,13 +106,11 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
-public class T2Dv2GoldStandard {
+public class DataGvAt {
 
-	private static final String FILES_WITHOUT_PROPERTY_PREFIX = "CC-MAIN";
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
 	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
-	private static final String INSTANCE_SUBPATH = "extended_instance_goldstandard";
-	private static final String SET_SUBPATH = "tables";
+	private static final String INSTANCE_SUBPATH = "data.gv.at.1_annotated";
 	private static final String DECLARED_PROPERTIES_SUBPATH = "property";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.minimumPartitionRelativeSize", "0.01"));
 	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.maximumPartitionRelativeSize", "0.99"));
@@ -123,9 +120,7 @@ public class T2Dv2GoldStandard {
 	private static final double SAMPLE_SIZE_STEP_RATIO = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.sampleSizeStepRatio", "0.1"));
 	private static final long SEED = Long.parseLong(System.getProperty("eu.odalic.extrarelatable.seed", String.valueOf(System.currentTimeMillis())));
 	private static final String PROFILES_DIRECTORY = "profiles";
-	private static final String CONVERTED_INPUT_FILES_DIRECTORY = "csvs";
-	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
-	private static final String SANITIZE_WITH = "_";
+	private static final String CLEANED_INPUT_FILES_DIRECTORY = "cleaned";
 	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
 	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
 	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices") == null ? null : Splitter.on(",").splitToList(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices")).stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
@@ -137,6 +132,11 @@ public class T2Dv2GoldStandard {
 	private static final double VALUES_WEIGHT = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
 	private static final Set<URI> STOP_PROPERTIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
 
+	@Autowired
+	@Lazy
+	@Qualifier("automatic")
+	private CsvTableParser csvTableParser;
+	
 	@Autowired
 	@Lazy
 	private TableAnalyzer tableAnalyzer;
@@ -169,11 +169,11 @@ public class T2Dv2GoldStandard {
 
 	@Autowired
 	@Lazy
-	private CsvProfilerService csvProfilerService;
-
+	private CsvCleanService csvCleanService;
+	
 	@Autowired
 	@Lazy
-	private DwtcToCsvService dwtcToCsvService;
+	private CsvProfilerService csvProfilerService;
 
 	private TestStatistics.Builder testStatisticsBuilder;
 	
@@ -284,7 +284,7 @@ public class T2Dv2GoldStandard {
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
 
-		final Path setPath = instancePath.resolve(SET_SUBPATH);
+		final Path setPath = instancePath;
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
 		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
@@ -300,10 +300,10 @@ public class T2Dv2GoldStandard {
 		final List<Path> learningPaths = getLearningFiles(files, testPaths);
 		testStatisticsBuilder.addLearningFilesCount(learningPaths.size());
 
-		final Path inputFilesPath = setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY);
+		final Path cleanedInputFilesPath = setPath.resolve(CLEANED_INPUT_FILES_DIRECTORY);
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
 		
-		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
+		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition);
 
 		csvWriter.writeEmptyRow();
@@ -311,7 +311,7 @@ public class T2Dv2GoldStandard {
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		
-		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition);
+		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition);
 		
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
@@ -347,7 +347,6 @@ public class T2Dv2GoldStandard {
 	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath, final boolean onlyWithProperties) throws IOException {
 		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath))
 				.filter(path -> path.toFile().isFile()
-						&& !path.getFileName().toString().startsWith(FILES_WITHOUT_PROPERTY_PREFIX)
 						&& ((!onlyWithProperties) || getPropertiesPath(declaredPropertiesPath, path.getFileName().toString()) != null)
 				)
 				.collect(Collectors.toCollection(ArrayList::new));
@@ -373,7 +372,7 @@ public class T2Dv2GoldStandard {
 	}
 
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties,
 			final int repetition)
 			throws IOException {
 		paths.forEach(file -> {
@@ -383,7 +382,7 @@ public class T2Dv2GoldStandard {
 			
 			final AnnotationResult result;
 			try {
-				result = annotateTable(csvWriter, file, graph, convertedInputFilesDirectory, profilesDirectory,
+				result = annotateTable(csvWriter, file, graph, cleanedInputFilesDirectory, profilesDirectory,
 						declaredPropertiesPath, onlyWithProperties, repetition);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
@@ -480,28 +479,21 @@ public class T2Dv2GoldStandard {
 		return getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 	}
 
-	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory,
+	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path cleanedInputFilesDirectory,
 			final Path profilesDirectory, final Path declaredPropertiesPath, final boolean onlyWithProperties,
 			final int repetition) {
 		csvWriter.writeRow("Processing file:", input);
 
-		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
+		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+		
+		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
-		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
+		final Format format = getFormat(csvProfile);
 
 		/* Parse the input file to table. */
-		final Dataset dataset = parse(input);
-		final HeaderPosition headerPosition = dataset.getHeaderPosition();
-		if (headerPosition != HeaderPosition.FIRST_ROW) {
-			csvWriter.writeRow("File " + input + " has no regular header!");
-			
-			testStatisticsBuilder.addIrregularHeaderFile();
-			
-			return ImmutableSet.of();
-		}
-
-		final ParsedTable table = toParsedTable(dataset, input.getFileName().toString());
-		if (table.getHeight() < 2) {
+		
+		final ParsedTable parsedTable = parse(input, cleanedInput, format);
+		if (parsedTable.getHeight() < 2) {
 			csvWriter.writeRow("Too few rows in " + input + ". Skipping.");
 			
 			testStatisticsBuilder.addFewRowsFile();
@@ -512,7 +504,7 @@ public class T2Dv2GoldStandard {
 		/* Assign data types to each table cell. */
 		final Map<Integer, Type> hints = getHints(csvProfile);
 
-		final TypedTable typedTable = tableAnalyzer.infer(table, Locale.forLanguageTag("en-us"), hints);
+		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.forLanguageTag("de-at"), hints);
 		if (typedTable.getHeight() < 2) {
 			csvWriter.writeRow("Too few typed rows in " + input + ". Skipping.");
 			
@@ -571,9 +563,7 @@ public class T2Dv2GoldStandard {
 	private static Path getPropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
 		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
 
-		final String sanitizedFileName = fileName.replaceAll(CHARACTERS_TO_SANITIZE_REGEX, SANITIZE_WITH);
-
-		final String propertiesFileName = sanitizedFileName + ".csv";
+		final String propertiesFileName = fileName + ".csv";
 
 		final Path propertiesPath = declaredPropertiesPath.resolve(propertiesFileName);
 		if (!propertiesPath.toFile().exists()) {
@@ -645,6 +635,26 @@ public class T2Dv2GoldStandard {
 		return propertyTreesBuilder.build();
 	}
 
+	private Format getFormat(final CsvProfile csvProfile) {
+		final Format format;
+		if (csvProfile == null) {
+			format = null;
+		} else {
+			format = new Format(Charset.forName(csvProfile.getEncoding()), csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true, csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
+		}
+		return format;
+	}
+	
+	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format) {
+		final ParsedTable table;
+		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
+			table = csvTableParser.parse(inputStream, format, new Metadata(input.getFileName().toString(), null, null));
+		} catch (final IOException e) {
+			throw new RuntimeException("Failed to parse " + input + "!", e);
+		}
+		return table;
+	}
+	
 	private Map<Integer, Type> getHints(final CsvProfile csvProfile) {
 		final Map<Integer, Type> hints;
 		if (csvProfile == null) {
@@ -656,24 +666,7 @@ public class T2Dv2GoldStandard {
 		return hints;
 	}
 
-	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName) {
-		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
-				new Metadata(fileName, dataset.getUrl(), null));
-
-		return table;
-	}
-
-	private Dataset parse(final Path input) {
-		final Dataset dataset;
-		try (final InputStream datasetInputStream = Files.newInputStream(input, StandardOpenOption.READ)) {
-			dataset = webreduce.data.Dataset.fromJson(datasetInputStream);
-		} catch (final IOException e) {
-			throw new RuntimeException("Failed to read " + input + "!", e);
-		}
-		return dataset;
-	}
-
-	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory, final Path convertedInput) {
+	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory, final Path cleanedInput) {
 		CsvProfile csvProfile = null;
 		final Path profileInput = profilesDirectory.resolve(input.getFileName());
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
@@ -689,7 +682,7 @@ public class T2Dv2GoldStandard {
 			csvProfile = null;
 		} else {
 			try {
-				csvProfile = csvProfilerService.profile(convertedInput.toFile());
+				csvProfile = csvProfilerService.profile(cleanedInput.toFile());
 
 				try {
 					saveProfile(csvProfile, profileInput);
@@ -711,19 +704,37 @@ public class T2Dv2GoldStandard {
 		}
 		return csvProfile;
 	}
-
-	private Path convert(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory) {
-		Path convertedInput = convertedInputFilesDirectory.resolve(input.getFileName() + ".csv");
-		if (convertedInput.toFile().exists()) {
-			csvWriter.writeRow("File " + input + " already converted.");
+	
+	private Path clean(final Path input, final Path cleanedInputFilesDirectory) {
+		Path cleanedInput = cleanedInputFilesDirectory.resolve(input.getFileName());
+		final Path failedCleanNotice = cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail");
+		if (cleanedInput.toFile().exists()) {
+			System.out.println("File " + input + " already cleaned.");
+		} else if (failedCleanNotice.toFile().exists()) {
+			System.out.println("Previously failed cleaning attempt for + " + input + ". Using original instead.");
+			
+			cleanedInput = input;
 		} else {
-			try {
-				dwtcToCsvService.convert(input, convertedInput);
+			try (final InputStream cleanedInputStream = csvCleanService.clean(input.toFile())) {
+				Files.copy(cleanedInputStream, cleanedInput);
+			} catch (final IllegalStateException e) {
+				System.out.println("Failed clean attempt for + " + input + "!");
+				
+				cleanedInput = input;
+				try {
+					cacheFailedCleaning(cleanedInputFilesDirectory, input);
+				} catch (final IOException e1) {
+					throw new RuntimeException("Failed to note failed cleaning for " + input + "!", e);
+				}
 			} catch (final IOException e) {
-				throw new RuntimeException("Failed to convert " + input + "!", e);
+				throw new RuntimeException("Failed to clean " + input + "!", e);
 			}
 		}
-		return convertedInput;
+		return cleanedInput;
+	}
+
+	private void cacheFailedCleaning(Path cleanedInputFilesDirectory, Path input) throws IOException {
+		Files.createFile(cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail"));
 	}
 
 	private void cacheFailedProfiling(Path profilesDirectory, Path input) throws IOException {
@@ -801,20 +812,16 @@ public class T2Dv2GoldStandard {
 	}
 
 	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input, final BackgroundKnowledgeGraph graph,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final boolean onlyWithProperties, final int repetition) {
-		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
+		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+		
+		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
-		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
-
+		final Format format = getFormat(csvProfile);
+		
 		/* Parse the input file to table. */
-		final Dataset dataset = parse(input);
-		final HeaderPosition headerPosition = dataset.getHeaderPosition();
-		if (headerPosition != HeaderPosition.FIRST_ROW) {
-			throw new IllegalArgumentException("File " + input + " has no regular header!");
-		}
-
-		final ParsedTable parsedTable = toParsedTable(dataset, input.getFileName().toString());
+		final ParsedTable parsedTable = parse(input, cleanedInput, format);
 		if (parsedTable.getHeight() < 2) {
 			throw new IllegalArgumentException("Too few rows in " + input + ". Skipping.");
 		}
@@ -822,7 +829,7 @@ public class T2Dv2GoldStandard {
 		/* Assign data types to each table cell. */
 		final Map<Integer, Type> hints = getHints(csvProfile);
 
-		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.forLanguageTag("en-us"), hints);
+		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.forLanguageTag("de-at"), hints);
 		if (typedTable.getHeight() < 2) {
 			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
 		}

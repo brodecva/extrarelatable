@@ -307,7 +307,7 @@ public class Trivial {
 					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table);
 			
 			final Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(partition.getValues()));
+			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue), ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 			
 			children.add(subtree);

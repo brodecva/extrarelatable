@@ -30,7 +30,7 @@ public final class PropertyUriPropertyTreesMergingStrategy implements PropertyTr
 			property -> {
 				final URI propertyUri = property.getUri();
 				
-				return propertyUri != null && propertyUri.equals(declaredProperty.getUri());
+				return propertyUri != null && propertyUri.equals(declaredPropertyUri);
 			}
 		).findFirst().orElse(null);
 		
