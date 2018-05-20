@@ -9,6 +9,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 import java.util.Set;
 
 import javax.ws.rs.client.Client;
@@ -25,12 +26,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import eu.odalic.extrarelatable.model.table.ParsedTable;
+import eu.odalic.extrarelatable.services.odalic.responses.ResultReply;
 import eu.odalic.extrarelatable.services.odalic.values.ComputationInputValue;
 import eu.odalic.extrarelatable.services.odalic.values.ComputationValue;
 import eu.odalic.extrarelatable.services.odalic.values.ResultValue;
 
 @Service
-public final class DefaultOdalicService implements OdalicService {
+public final class OdalicContextCollectionService implements ContextCollectionService {
 
 	private static final String COMPUTATIONS_SUBPATH = "computations";
 
@@ -41,6 +43,7 @@ public final class DefaultOdalicService implements OdalicService {
 	private static final long MINIMUM_QUERY_INTERVAL_MILIS = 2000;
 
 	private final URI targetPath;
+	private final int rowsLimit;
 	private final ComputationInputConverter computationInputConverter;
 	
 	private Client client;
@@ -48,26 +51,29 @@ public final class DefaultOdalicService implements OdalicService {
 
 	
 	@Autowired
-	public DefaultOdalicService(final ComputationInputConverter computationInputConverter, final @Value("${eu.odalic.extrarelatable.odalic.basePath:http://localhost:8080/odalic/}") String basePath, final @Value("${eu.odalic.extrarelatable.odalic.userId:odalic@email.cz}") String userId) {
+	public OdalicContextCollectionService(final ComputationInputConverter computationInputConverter, final @Value("${eu.odalic.extrarelatable.odalic.basePath:http://localhost:8080/odalic/}") String basePath, final @Value("${eu.odalic.extrarelatable.odalic.userId:odalic@email.cz}") String userId,
+			final @Value("${eu.odalic.extrarelatable.odalic.rowsLimit:200}") int rowsLimit) {
 		checkNotNull(computationInputConverter);
 		checkNotNull(basePath);
 		checkNotNull(userId);
+		checkArgument(rowsLimit >= 2, "The limit of input rows has to be at least two!");
 
 		this.computationInputConverter = computationInputConverter;
 		this.targetPath = URI.create(basePath).resolve(USERS_SUBPATH + userId + PATH_SEGMENT_DELIMITER).resolve(COMPUTATIONS_SUBPATH);
+		this.rowsLimit = rowsLimit;
 		this.client = ClientBuilder.newBuilder().register(JacksonFeature.class)
 				.build();
 	}
 
 	@Override
-	public ResultValue process(final ParsedTable table, final Set<? extends String> usedBases, final String primaryBase) {
+	public ResultValue process(final ParsedTable table, final Set<? extends String> usedBases, final String primaryBase, final Random random) {
 		checkNotNull(table);
 		checkNotNull(usedBases);
 		checkNotNull(primaryBase);
 		checkArgument(!usedBases.isEmpty(), "At least one base has to be provided!");
 		checkArgument(usedBases.contains(primaryBase), "The used bases must contain the primary base!");
 		
-		final ComputationInputValue computationInput = this.computationInputConverter.convert(table);
+		final ComputationInputValue computationInput = this.computationInputConverter.convert(table, this.rowsLimit, random);
 		final ComputationValue computation = new ComputationValue(computationInput, usedBases, primaryBase,
 				false);
 
@@ -96,7 +102,7 @@ public final class DefaultOdalicService implements OdalicService {
 					+ response.readEntity(String.class) + "]");
 		}
 
-		return response.readEntity(ResultValue.class);
+		return response.readEntity(ResultReply.class).getPayload();
 	}
 
 	private static boolean isSuccessful(final Response response) {

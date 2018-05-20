@@ -17,11 +17,10 @@ import jersey.repackaged.com.google.common.base.Preconditions;
 public final class ColumnRelationPositionKeyJsonDeserializer extends KeyDeserializer {
 
   private static final int NUMBER_OF_INDICES = 2;
-private static final String DELIMITER = ";";
 
 @Override
   public Object deserializeKey(final String key, final DeserializationContext ctxt) {
-		final List<String> indices = Splitter.on(DELIMITER).splitToList(key);
+		final List<String> indices = Splitter.on(ColumnRelationPositionKeyJsonSerializer.DELIMITER).splitToList(key);
 		Preconditions.checkArgument(indices.size() == NUMBER_OF_INDICES, "Invalid column relation position key format!");
     
     try {

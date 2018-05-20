@@ -326,6 +326,8 @@ public class T2Dv2GoldStandard {
 	}
 
 	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio, final int sampleSizeIndex, final List<Path> files) {
+		final List<Path> filesCopy = new ArrayList<>(files);
+		
 		final int allFilesSize = files.size();
 		final double sampleSize = allFilesSize - sampleSizeIndex * sampleSizeStepRatio * allFilesSize;
 		if (sampleSize < 0) {
@@ -336,9 +338,9 @@ public class T2Dv2GoldStandard {
 		
 		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
 		for (int i = 0; i < wholeSampleSize; i++) {
-			final int removedIndex = random.nextInt(files.size());
+			final int removedIndex = random.nextInt(filesCopy.size());
 
-			testPathsBuilder.add(files.remove(removedIndex));
+			testPathsBuilder.add(filesCopy.remove(removedIndex));
 		}
 		final List<Path> testPaths = testPathsBuilder.build();
 		return testPaths;
@@ -347,13 +349,12 @@ public class T2Dv2GoldStandard {
 	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath, final boolean onlyWithProperties) throws IOException {
 		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath))
 				.filter(path -> path.toFile().isFile()
-						&& !path.getFileName().toString().startsWith(FILES_WITHOUT_PROPERTY_PREFIX)
 						&& ((!onlyWithProperties) || getPropertiesPath(declaredPropertiesPath, path.getFileName().toString()) != null)
 				)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		Collections.sort(paths);
-		return paths;
+		return ImmutableList.copyOf(paths);
 	}
 
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
@@ -460,9 +461,9 @@ public class T2Dv2GoldStandard {
 		});
 	}
 
-	private static Set<DeclaredEntity> getContextProperties(final Property property) {
+	private static Set<URI> getContextProperties(final Property property) {
 		return property.getInstances().stream().map(
-				i -> i.getContext().getDeclaredContextColumnProperties().values()).flatMap(e -> e.stream()).collect(ImmutableSet.toImmutableSet());
+				i -> i.getContext().getDeclaredContextColumnProperties().values()).flatMap(e -> e.stream()).map(e -> e.getUri()).collect(ImmutableSet.toImmutableSet());
 	}
 
 	private boolean isAcceptableFor(final URI first, final URI second) {

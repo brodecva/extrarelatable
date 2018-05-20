@@ -10,12 +10,14 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueNavigableSetDeserializer;
 import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueSetDeserializer;
+import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueSetSerializer;
 
 /**
  * <p>
@@ -42,6 +44,7 @@ public final class CellAnnotationValue {
    */
   @XmlAnyElement
   @JsonDeserialize(contentUsing = EntityCandidateValueNavigableSetDeserializer.class)
+  @JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
   public Map<String, NavigableSet<EntityCandidateValue>> getCandidates() {
     return this.candidates;
   }
@@ -51,6 +54,7 @@ public final class CellAnnotationValue {
    */
   @XmlAnyElement
   @JsonDeserialize(contentUsing = EntityCandidateValueSetDeserializer.class)
+  @JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
   public Map<String, Set<EntityCandidateValue>> getChosen() {
     return this.chosen;
   }

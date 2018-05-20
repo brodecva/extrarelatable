@@ -10,8 +10,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.SortedSet;
 import javax.annotation.concurrent.Immutable;
-import javax.inject.Inject;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	private final double defaultValuesWeight;
 	private final int defaultK;
 	
-	@Inject
+	@Autowired
 	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight?:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.topKNeighbours?:50}") final int defaultK) {
 		checkNotNull(distance);
 		checkArgument(defaultValuesWeight >= 0, "The default values weight must be at least zero!");

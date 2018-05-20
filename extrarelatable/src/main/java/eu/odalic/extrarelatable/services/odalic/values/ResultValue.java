@@ -12,13 +12,17 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.services.odalic.conversions.ColumnPositionValueSetDeserializer;
+import eu.odalic.extrarelatable.services.odalic.conversions.ColumnPositionValueSetSerializer;
 import eu.odalic.extrarelatable.services.odalic.conversions.ColumnRelationPositionKeyJsonDeserializer;
+import eu.odalic.extrarelatable.services.odalic.conversions.ColumnRelationPositionKeyJsonSerializer;
 
 /**
  * Odalic domain class adapted for REST API.
@@ -27,6 +31,7 @@ import eu.odalic.extrarelatable.services.odalic.conversions.ColumnRelationPositi
  *
  */
 @XmlRootElement(name = "result")
+@JsonIgnoreProperties(ignoreUnknown=true)
 public final class ResultValue implements Serializable {
 
   private static final long serialVersionUID = -6359038623760039155L;
@@ -76,6 +81,7 @@ public final class ResultValue implements Serializable {
    */
   @XmlElement
   @JsonDeserialize(keyUsing = ColumnRelationPositionKeyJsonDeserializer.class)
+  @JsonSerialize(keyUsing = ColumnRelationPositionKeyJsonSerializer.class)
   public Map<ColumnRelationPositionValue, ColumnRelationAnnotationValue> getColumnRelationAnnotationsAlternative() {
     return this.columnRelationAnnotationsAlternative;
   }
@@ -101,6 +107,7 @@ public final class ResultValue implements Serializable {
    */
   @XmlAnyElement
   @JsonDeserialize(contentUsing = ColumnPositionValueSetDeserializer.class)
+  @JsonSerialize(contentUsing = ColumnPositionValueSetSerializer.class)
   public Map<String, Set<ColumnPositionValue>> getSubjectColumnsPositions() {
     return this.subjectColumnsPositions;
   }

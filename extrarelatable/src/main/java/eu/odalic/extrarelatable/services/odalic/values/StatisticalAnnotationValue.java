@@ -9,10 +9,12 @@ import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueSetDeserializer;
+import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueSetSerializer;
 
 /**
  * <p>
@@ -47,6 +49,7 @@ public final class StatisticalAnnotationValue {
    */
   @XmlAnyElement
   @JsonDeserialize(contentUsing = EntityCandidateValueSetDeserializer.class)
+  @JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
   public Map<String, Set<EntityCandidateValue>> getPredicate() {
     return this.predicate;
   }

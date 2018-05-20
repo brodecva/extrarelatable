@@ -5,8 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ public class DefaultTableSlicer implements TableSlicer {
 	
 	private final double defaultThreshold;
 	
-	@Inject
+	@Autowired
 	public DefaultTableSlicer(final ColumnTypeAnalyzer columnTypeAnalyzer,
 			@Value("${eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold?:0.6}") final double defaultThreshold) {
 		checkNotNull(columnTypeAnalyzer);
