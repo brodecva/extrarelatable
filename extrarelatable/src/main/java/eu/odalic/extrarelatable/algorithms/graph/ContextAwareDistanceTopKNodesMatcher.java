@@ -41,7 +41,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	private final int defaultK;
 	
 	@Autowired
-	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight?:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.topKNeighbours?:50}") final int defaultK) {
+	ContextAwareDistanceTopKNodesMatcher(final Distance distance, @Value("${eu.odalic.extrarelatable.valuesWeight:0.5}") final double defaultValuesWeight, @Value("${eu.odalic.extrarelatable.topKNeighbours?:50}") final int defaultK) {
 		checkNotNull(distance);
 		checkArgument(defaultValuesWeight >= 0, "The default values weight must be at least zero!");
 		checkArgument(defaultValuesWeight <= 1, "The default values weight can be at most one!");

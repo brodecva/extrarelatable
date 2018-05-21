@@ -595,11 +595,7 @@ public class DataGvAt {
 	}
 
 	private static Path getPropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
-		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
-
-		final String propertiesFileName = fileName + ".csv";
-
-		final Path propertiesPath = declaredPropertiesPath.resolve(propertiesFileName);
+		final Path propertiesPath = declaredPropertiesPath.resolve(tableFileName);
 		if (!propertiesPath.toFile().exists()) {
 			return null;
 		}
@@ -704,6 +700,7 @@ public class DataGvAt {
 		CsvProfile csvProfile = null;
 		final Path profileInput = profilesDirectory.resolve(input.getFileName());
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
+		
 		if (profileInput.toFile().exists()) {
 			try {
 				csvProfile = loadProfile(profileInput);

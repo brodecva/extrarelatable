@@ -109,7 +109,6 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class T2Dv2GoldStandard {
 
-	private static final String FILES_WITHOUT_PROPERTY_PREFIX = "CC-MAIN";
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
 	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
 	private static final String INSTANCE_SUBPATH = "extended_instance_goldstandard";
@@ -676,8 +675,11 @@ public class T2Dv2GoldStandard {
 
 	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory, final Path convertedInput) {
 		CsvProfile csvProfile = null;
-		final Path profileInput = profilesDirectory.resolve(input.getFileName());
-		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
+
+		final String fileName = com.google.common.io.Files.getNameWithoutExtension(input.getFileName().toString());
+		final Path profileInput = profilesDirectory.resolve(fileName + ".json");
+		final Path failedProfileNotice = profilesDirectory.resolve(fileName + ".fail");
+		
 		if (profileInput.toFile().exists()) {
 			try {
 				csvProfile = loadProfile(profileInput);
@@ -714,7 +716,7 @@ public class T2Dv2GoldStandard {
 	}
 
 	private Path convert(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory) {
-		Path convertedInput = convertedInputFilesDirectory.resolve(input.getFileName() + ".csv");
+		final Path convertedInput = convertedInputFilesDirectory.resolve(com.google.common.io.Files.getNameWithoutExtension(input.getFileName().toString()) + ".csv");
 		if (convertedInput.toFile().exists()) {
 			csvWriter.writeRow("File " + input + " already converted.");
 		} else {

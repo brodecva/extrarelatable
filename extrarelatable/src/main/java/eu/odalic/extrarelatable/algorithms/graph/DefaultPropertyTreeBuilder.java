@@ -50,8 +50,8 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 	private final double minimumPartitionRelativeSize;
 	private final double maximumPartitionRelativeSize;
 	
-	public DefaultPropertyTreeBuilder(final SubcontextCompiler subcontextCompiler, final SubcontextMatcher subcontextMatcher, @Value("${eu.odalic.extrarelatable.minimumPartitionRelativeSize?:0.01}") final double minimumPartitionRelativeSize,
-			@Value("${eu.odalic.extrarelatable.maximumPartitionRelativeSize?:0.99}") final double maximumPartitionRelativeSize) {
+	public DefaultPropertyTreeBuilder(final SubcontextCompiler subcontextCompiler, final SubcontextMatcher subcontextMatcher, @Value("${eu.odalic.extrarelatable.minimumPartitionRelativeSize:0.01}") final double minimumPartitionRelativeSize,
+			@Value("${eu.odalic.extrarelatable.maximumPartitionRelativeSize:0.99}") final double maximumPartitionRelativeSize) {
 		checkNotNull(subcontextCompiler);
 		checkNotNull(subcontextMatcher);
 		checkArgument(minimumPartitionRelativeSize > 0);

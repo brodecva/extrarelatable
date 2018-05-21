@@ -79,6 +79,7 @@ import webreduce.data.HeaderPosition;
 public class DefaultGraphService implements GraphService {
 
 	private static final String DOT_LEADING_FAILED_RESULT_FILE_SUFFIX = ".fail";
+	private static final String DOT_LEADING_JSON_SUFFIX = ".json";
 	private static final String DOT_LEADING_CSV_SUFFIX = ".csv";
 	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
 	private static final String SANITIZE_WITH = "_";
@@ -158,7 +159,7 @@ public class DefaultGraphService implements GraphService {
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
 			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser, TableAnalyzer tableAnalyzer,
 			PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer, Annotator annotator, CsvTableWriter csvTableWriter,
-			DwtcToCsvService dwtcToCsvService, final GraphsPersitingService graphsPersitingService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties?:false}") boolean onlyWithProperties) throws IOException {
+			DwtcToCsvService dwtcToCsvService, final GraphsPersitingService graphsPersitingService, final @Nullable @Value("${eu.odalic.extrarelatable.graphsPath}") String graphsPath, final @Value("${eu.odalic.extrarelatable.onlyWithProperties:false}") boolean onlyWithProperties) throws IOException {
 		this(propertyTreesMergingStrategy, fileCachingService, csvProfilerService, csvCleanerService, csvTableParser, tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService, graphsPersitingService, new HashMap<>(graphsPersitingService.load()));
 		
 		final Set<BackgroundKnowledgeGraph> loadedGraphs = loadGraphs(Paths.get(graphsPath), onlyWithProperties);
@@ -249,7 +250,7 @@ public class DefaultGraphService implements GraphService {
 	private Set<PropertyTree> learnTable(Path tablePath, Path cleanedCsvsPath, Path profilesPath, Path declaredPropertiesPath, boolean onlyWithProperties, final Locale locale) {
 		final Path cleanedInput = getCleanedInput(tablePath, cleanedCsvsPath);
 		
-		final CsvProfile csvProfile = getProfile(cleanedInput, profilesPath);
+		final CsvProfile csvProfile = getProfile(cleanedInput, profilesPath, false);
 		
 		final Format format = getFormat(csvProfile);
 		
@@ -342,7 +343,7 @@ public class DefaultGraphService implements GraphService {
 			Path declaredPropertiesPath, boolean onlyWithProperties, Locale locale) {
 		final Path convertedInput = convertDwtcToCsv(tablePath, csvsPath);
 
-		final CsvProfile csvProfile = getProfile(convertedInput, profilesPath);
+		final CsvProfile csvProfile = getProfile(convertedInput, profilesPath, true);
 
 		final Dataset dataset = parseDwtc(tablePath);
 		final HeaderPosition headerPosition = dataset.getHeaderPosition();
@@ -436,9 +437,7 @@ public class DefaultGraphService implements GraphService {
 	}
 	
 	private static Path getTablePropertiesPath(final Path declaredPropertiesPath, final String tableFileName) {
-		final String fileName = com.google.common.io.Files.getNameWithoutExtension(tableFileName);
-
-		final Path propertiesPath = declaredPropertiesPath.resolve(fileName);
+		final Path propertiesPath = declaredPropertiesPath.resolve(tableFileName);
 		if (!propertiesPath.toFile().exists()) {
 			return null;
 		}
@@ -454,7 +453,7 @@ public class DefaultGraphService implements GraphService {
 	}
 	
 	private Path convertDwtcToCsv(final Path dwtcTablePath, final Path csvsPath) {
-		final Path csvTablePath = csvsPath.resolve(dwtcTablePath.getFileName() + DOT_LEADING_CSV_SUFFIX);
+		final Path csvTablePath = csvsPath.resolve(com.google.common.io.Files.getNameWithoutExtension(dwtcTablePath.getFileName().toString()) + DOT_LEADING_CSV_SUFFIX);
 		if (csvTablePath.toFile().exists()) {
 			LOGGER.info("File " + dwtcTablePath + " already converted.");
 			return csvTablePath;
@@ -479,10 +478,21 @@ public class DefaultGraphService implements GraphService {
 		return dataset;
 	}
 	
-	private CsvProfile getProfile(final Path input, final Path profilesDirectory) {
+	private CsvProfile getProfile(final Path input, final Path profilesDirectory, boolean replaceExtension) {
 		CsvProfile csvProfile = null;
-		final Path profileInput = profilesDirectory.resolve(input.getFileName());
-		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + DOT_LEADING_FAILED_RESULT_FILE_SUFFIX);
+		
+		final Path profileInput;
+		final Path failedProfileNotice;
+		if (replaceExtension) {
+			final String fileName = com.google.common.io.Files.getNameWithoutExtension(input.getFileName().toString());
+			
+			profileInput = profilesDirectory.resolve(fileName + DOT_LEADING_JSON_SUFFIX);
+			failedProfileNotice = profilesDirectory.resolve(fileName + DOT_LEADING_FAILED_RESULT_FILE_SUFFIX);
+		} else {
+			profileInput = profilesDirectory.resolve(input.getFileName());
+			failedProfileNotice = profilesDirectory.resolve(input.getFileName() + DOT_LEADING_FAILED_RESULT_FILE_SUFFIX);
+		}
+		
 		if (profileInput.toFile().exists()) {
 			try {
 				csvProfile = loadProfile(profileInput);

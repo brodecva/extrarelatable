@@ -28,7 +28,7 @@ public class DefaultTableSlicer implements TableSlicer {
 	
 	@Autowired
 	public DefaultTableSlicer(final ColumnTypeAnalyzer columnTypeAnalyzer,
-			@Value("${eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold?:0.6}") final double defaultThreshold) {
+			@Value("${eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold:0.6}") final double defaultThreshold) {
 		checkNotNull(columnTypeAnalyzer);
 		checkArgument(defaultThreshold > 0);
 		checkArgument(defaultThreshold <= 1);

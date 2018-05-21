@@ -351,7 +351,7 @@ public class CsvEngineTreeMajorityVoteLabelsOnlyRandomDataGvAt {
 
 	private CsvProfile profile(final Path input, final Path profilesDirectory, final Path cleanedInput) {
 		CsvProfile csvProfile = null;
-		final Path profileInput = profilesDirectory.resolve(input.getFileName());
+		final Path profileInput = profilesDirectory.resolve(input.getFileName() + ".json");
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
 		if (profileInput.toFile().exists()) {
 			try {
