@@ -127,8 +127,8 @@ public class DataGvAt {
 	private static final String PROFILES_DIRECTORY = "profiles";
 	private static final String CLEANED_INPUT_FILES_DIRECTORY = "cleaned";
 	private static final String CONTEXT_COLLECTION_RESULTS_SUBPATH = "context";
-	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "false"));
-	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "false"));
+	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
+	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
 	private static final boolean ONLY_DECLARED_AS_CONTEXT = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.onlyDeclaredAsContext", "false"));
 	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices") == null ? null : Splitter.on(",").splitToList(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices")).stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
 	private static final int TEST_REPETITIONS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
@@ -140,6 +140,7 @@ public class DataGvAt {
 	private static final Set<URI> STOP_ENTITIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
 	private static final Set<String> USED_BASES = System.getProperty("eu.odalic.extrarelatable.odalic.usedBases", "GermanDBpediaLocal") == null ? null : ImmutableSet.copyOf(Splitter.on(",").split(System.getProperty("eu.odalic.extrarelatable.odalic.usedBases", "GermanDBpediaLocal")));
 	private static final String PRIMARY_BASE = System.getProperty("eu.odalic.extrarelatable.odalic.primaryBase", "GermanDBpediaLocal");
+	private static final int MAXIMUM_COLUMN_SAMPLE_SIZE = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.maximumColumnSampleSize", "1000"));
 
 	@Autowired
 	@Lazy
@@ -318,14 +319,14 @@ public class DataGvAt {
 		
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
-				ONLY_DECLARED_AS_CONTEXT, repetition, random);
+				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		
-		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition, random);
+		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 		
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
@@ -374,13 +375,13 @@ public class DataGvAt {
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition,
-			final Random random)
+			final Random random, final int maxColumnSampleSize)
 			throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random);
+					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -391,7 +392,7 @@ public class DataGvAt {
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition, final Random random)
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize)
 			throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
@@ -401,7 +402,7 @@ public class DataGvAt {
 			final AnnotationResult result;
 			try {
 				result = annotateTable(csvWriter, file, graph, cleanedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random);
+						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
@@ -499,7 +500,7 @@ public class DataGvAt {
 
 	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path cleanedInputFilesDirectory,
 			final Path profilesDirectory, final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition, final Random random) {
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
@@ -554,7 +555,7 @@ public class DataGvAt {
 			contextClasses = ImmutableMap.of();
 		}
 		
-		Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition);
+		Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
 		
 		testStatisticsBuilder.addLearntFile();
 		
@@ -604,7 +605,7 @@ public class DataGvAt {
 	}
 
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, Map<? extends Integer, ? extends DeclaredEntity> contextProperties, Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition) {
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, Map<? extends Integer, ? extends DeclaredEntity> contextProperties, Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -626,7 +627,9 @@ public class DataGvAt {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric())
+			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
+			
+			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				testStatisticsBuilder.addTooSmallNumericColumn();
@@ -663,6 +666,19 @@ public class DataGvAt {
 		}
 
 		return propertyTreesBuilder.build();
+	}
+
+	private List<Value> createColumnSample(final Random random, final Entry<Integer, List<Value>> numericColumn,
+			final int maxColumnSampleSize) {
+		final List<Value> values = new ArrayList<>(numericColumn.getValue());
+		final int initialRowsSize = values.size();
+		final int toRemove = Math.max(0, initialRowsSize - maxColumnSampleSize);
+		
+		for (int i = 0; i < toRemove; i++) {
+			final int removedIndex = random.nextInt(values.size());
+			values.remove(removedIndex);
+		}
+		return values;
 	}
 
 	private Format getFormat(final CsvProfile csvProfile) {
@@ -863,7 +879,7 @@ public class DataGvAt {
 
 	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input, final BackgroundKnowledgeGraph graph,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random) {
+			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
 		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
 		
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
@@ -907,7 +923,7 @@ public class DataGvAt {
 			contextClasses = ImmutableMap.of();
 		}
 		
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition));
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
 	}
 
 	private Map<Integer, DeclaredEntity> getContextClasses(final ResultValue collectedContext) {
@@ -1009,7 +1025,7 @@ public class DataGvAt {
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, Map<? extends Integer, ? extends DeclaredEntity> contextProperties, Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition) {
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -1018,7 +1034,9 @@ public class DataGvAt {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric())
+			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
+			
+			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				continue;
