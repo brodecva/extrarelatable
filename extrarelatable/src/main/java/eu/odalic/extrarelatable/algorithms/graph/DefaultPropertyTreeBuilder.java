@@ -39,8 +39,7 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 @Component
 public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 
-	private static final Set<URI> STOP_PROPERTIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
-	private static final Set<URI> STOP_CLASSES = ImmutableSet.of();
+	private static final Set<URI> STOP_ENTITIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
 
 	public final int MINIMUM_PARTITION_SIZE = 2;
 	
@@ -66,7 +65,7 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 
 	@Override
 	public PropertyTree build(final SlicedTable slicedTable, final int columnIndex) {
-		return build(slicedTable, columnIndex, ImmutableMap.of(), ImmutableMap.of(), false);
+		return build(slicedTable, columnIndex, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), false, false);
 	}
 	
 	private Set<CommonNode> buildChildren(final Partition partition, final Set<Integer> availableContextColumnIndices, final TypedTable table) {
@@ -116,11 +115,13 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		return children.build();
 	}
 
+
 	@Override
 	public PropertyTree build(SlicedTable slicedTable, int columnIndex,
 			Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
-			boolean onlyWithProperties) {
+			Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			Map<? extends Integer, ? extends DeclaredEntity> contextClasses, boolean onlyWithProperties, boolean onlyDeclaredAsContext) {
 		checkNotNull(slicedTable);
 		checkArgument(columnIndex >= 0);
 		checkArgument(columnIndex < slicedTable.getWidth());
@@ -141,33 +142,30 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
 		rootNode.addChildren(children);
 
-		final DeclaredEntity declaredPropertyUri = declaredProperties.get(columnIndex);
-		if (declaredPropertyUri == null) {
+		final DeclaredEntity declaredProperty = declaredProperties.get(columnIndex);
+		if (declaredProperty == null) {
 			if (onlyWithProperties) {
 				return null;
 			}
 		}
 		
 		final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-				slicedTable.getMetadata().getTitle(), declaredPropertyUri, getMeaningfulContextProperties(declaredProperties), getMeaningfulContextClasses(declaredClasses), columnIndex, availableContextColumnIndices);
-
+				slicedTable.getMetadata().getTitle(), declaredProperty,
+				onlyDeclaredAsContext ? getMeaningfulEntities(declaredProperties)
+						: getMeaningfulEntities(contextProperties),
+				onlyDeclaredAsContext ? ImmutableMap.of() : contextClasses, columnIndex,
+				availableContextColumnIndices);
+		
 		final PropertyTree tree = new PropertyTree(rootNode, context);
 		rootNode.setPropertyTree(tree);
 		
 		return tree;
 	}
 	
-	private static Map<Integer, DeclaredEntity> getMeaningfulContextProperties(
+	private static Map<Integer, DeclaredEntity> getMeaningfulEntities(
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties) {
 		return declaredProperties.entrySet().stream().filter(
-				e -> !STOP_PROPERTIES.contains(e.getValue().getUri())
-			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
-	}
-	
-	private static Map<Integer, DeclaredEntity> getMeaningfulContextClasses(
-			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses) {
-		return declaredClasses.entrySet().stream().filter(
-				e -> !STOP_CLASSES.contains(e.getValue().getUri())
+				e -> !STOP_ENTITIES.contains(e.getValue().getUri())
 			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 }

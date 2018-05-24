@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Set;
+
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -43,6 +45,7 @@ import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.csv.Format;
 import eu.odalic.extrarelatable.services.graph.GraphService;
+import jersey.repackaged.com.google.common.collect.ImmutableSet;
 
 /**
  * File resource definition.
@@ -60,8 +63,9 @@ public final class GraphResource {
 
 	private final GraphService graphService;
 
-	/*@Context
-	private SecurityContext securityContext;*/
+	/*
+	 * @Context private SecurityContext securityContext;
+	 */
 
 	@Context
 	private UriInfo uriInfo;
@@ -139,8 +143,11 @@ public final class GraphResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response learn(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
-			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties)
-			throws IOException {
+			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
+			final @QueryParam("collectContext") Boolean contextCollected,
+			final @QueryParam("onlyDeclaredAsContext") Boolean onlyDeclaredAsContext,
+			final @QueryParam("usedContextBases") Set<String> usedBases,
+			final @QueryParam("primaryContextBase") String primaryBase) throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
 		}
@@ -163,7 +170,8 @@ public final class GraphResource {
 		}
 
 		try {
-			this.graphService.learn(name, input, format, metadata, onlyWithProperties == null ? false : onlyWithProperties);
+			this.graphService.learn(name, input, format, metadata,
+					onlyWithProperties == null ? true : onlyWithProperties, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -176,8 +184,12 @@ public final class GraphResource {
 	@Path("{name}/learnt")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties)
-			throws IOException {
+	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
+			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
+			final @QueryParam("collectContext") Boolean contextCollected,
+			final @QueryParam("onlyDeclaredAsContext") Boolean onlyDeclaredAsContext,
+			final @QueryParam("usedContextBases") Set<String> usedBases,
+			final @QueryParam("primaryContextBase") String primaryBase) throws IOException {
 		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
 		}
@@ -194,7 +206,7 @@ public final class GraphResource {
 		}
 
 		try {
-			this.graphService.learn(name, parsedTable, onlyWithProperties == null ? false : onlyWithProperties);
+			this.graphService.learn(name, parsedTable, onlyWithProperties == null ? true : onlyWithProperties, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -209,7 +221,12 @@ public final class GraphResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response annotate(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
-			final @QueryParam("learn") Boolean learn, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties) throws IOException {
+			final @QueryParam("learn") Boolean learn,
+			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
+			final @QueryParam("collectContext") Boolean contextCollected,
+			final @QueryParam("onlyDeclaredAsContext") Boolean onlyDeclaredAsContext,
+			final @QueryParam("usedContextBases") Set<String> usedBases,
+			final @QueryParam("primaryContextBase") String primaryBase) throws IOException {
 		if (input == null) {
 			throw new BadRequestException("No input provided!");
 		}
@@ -228,12 +245,12 @@ public final class GraphResource {
 		}
 
 		if (learn != null && learn) {
-			learn(name, input, formatValue, metadata, onlyWithProperties == null ? false : onlyWithProperties);
+			learn(name, input, formatValue, metadata, onlyWithProperties, contextCollected, onlyDeclaredAsContext, usedBases, primaryBase);
 		}
-		
+
 		final AnnotationResult result;
 		try {
-			result = this.graphService.annotate(name, input, format, metadata);
+			result = this.graphService.annotate(name, input, format, metadata, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -246,7 +263,12 @@ public final class GraphResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response annotate(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
-			final @QueryParam("learn") Boolean learn, final @QueryParam("onlyWithProperties") Boolean onlyWithProperties) throws IOException {
+			final @QueryParam("learn") Boolean learn,
+			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
+			final @QueryParam("collectContext") Boolean contextCollected,
+			final @QueryParam("onlyDeclaredAsContext") Boolean onlyDeclaredAsContext,
+			final @QueryParam("usedContextBases") Set<String> usedBases,
+			final @QueryParam("primaryContextBase") String primaryBase) throws IOException {
 		if (parsedTableValue == null) {
 			throw new BadRequestException("No table provided!");
 		}
@@ -259,31 +281,28 @@ public final class GraphResource {
 				parsedTableValue.getRows(), parsedTableValue.getMetadata());
 
 		if (learn != null && learn) {
-			learn(name, parsedTableValue, onlyWithProperties);
+			learn(name, parsedTableValue, onlyWithProperties, contextCollected, onlyDeclaredAsContext, usedBases, primaryBase);
 		}
 		
 		final AnnotationResult result;
 		try {
-			result = this.graphService.annotate(name, parsedTable);
+			result = this.graphService.annotate(name, parsedTable, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 
-
 		return Reply.data(Response.Status.OK, result, this.uriInfo).toResponse();
 	}
-	
+
 	@GET
 	@Path("{name}/search")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response search(final @PathParam("name") String name, final @QueryParam("pattern") String pattern,
-			final @QueryParam("flags") Integer flags,
-			final @QueryParam("limit") Integer limit)
-			throws IOException {
+			final @QueryParam("flags") Integer flags, final @QueryParam("limit") Integer limit) throws IOException {
 		if (pattern == null) {
 			throw new BadRequestException("No pattern provided!");
 		}
-		
+
 		final SearchResult result;
 		try {
 			result = this.graphService.search(name, pattern, flags, limit == null ? Integer.MAX_VALUE : limit);

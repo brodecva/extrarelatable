@@ -8,9 +8,12 @@ import eu.odalic.extrarelatable.model.table.SlicedTable;
 public interface PropertyTreeBuilder {
 
 	PropertyTree build(SlicedTable slicedTable, int columnIndex);
-	
+
 	PropertyTree build(SlicedTable slicedTable, int columnIndex,
 			Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
-			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses, boolean onlyWithProperties);
+			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
+			Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			Map<? extends Integer, ? extends DeclaredEntity> contextClasses, boolean onlyWithProperties,
+			boolean onlyDeclaredAsContext);
 
 }

@@ -10,6 +10,8 @@ import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 public interface PropertyTreesBuilder {
 	Set<PropertyTree> build(SlicedTable slicedTable);
 
-	Set<PropertyTree> build(SlicedTable slicedTable, Map<? extends Integer, ? extends DeclaredEntity> declaredPropertyUris,
-			Map<? extends Integer, ? extends DeclaredEntity> declaredClassUris, boolean onlyWithProperties);
+	Set<PropertyTree> build(SlicedTable slicedTable, Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
+			Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			Map<? extends Integer, ? extends DeclaredEntity> contextClasses, boolean onlyWithProperties, boolean onlyDeclaredAsContext);
 }

@@ -26,15 +26,16 @@ public class DefaultPropertyTreesBuilder implements PropertyTreesBuilder {
 
 	@Override
 	public Set<PropertyTree> build(final SlicedTable slicedTable) {
-		return build(slicedTable, ImmutableMap.of(), ImmutableMap.of(), false);
+		return build(slicedTable, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), false, false);
 	}
 
 	@Override
 	public Set<PropertyTree> build(final SlicedTable slicedTable, final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
-			final boolean onlyWithProperties) {
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext) {
 		return slicedTable.getDataColumns().keySet().stream().map(columnIndex -> 
-			this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties, declaredClasses, onlyWithProperties)
-		).filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
+		this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties, declaredClasses, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext)
+	).filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
 	}
 }

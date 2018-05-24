@@ -31,6 +31,7 @@ import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
+import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 
 @Component
@@ -64,6 +65,11 @@ public final class DefaultAnnotator implements Annotator {
 
 	@Override
 	public Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses,
+			final boolean onlyDeclaredAsContext,
 			final int k) {
 		checkNotNull(graph);
 		checkNotNull(slicedTable);
@@ -72,7 +78,7 @@ public final class DefaultAnnotator implements Annotator {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		slicedTable.getDataColumns().keySet().forEach(columnIndex -> {
-			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex, slicedTable.getMetadata().getCollectedProperties(), slicedTable.getMetadata().getCollectedClasses(), false);
+			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties, declaredClasses, contextProperties, contextClasses, false, onlyDeclaredAsContext);
 
 			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder();
 
@@ -135,7 +141,13 @@ public final class DefaultAnnotator implements Annotator {
 	}
 
 	@Override
-	public Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable) {
-		return annotate(graph, slicedTable, this.defaultK);
+	public Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses,
+			final boolean onlyDeclaredAsContext
+			) {
+		return annotate(graph, slicedTable, declaredProperties, declaredClasses, contextProperties, contextClasses, onlyDeclaredAsContext, this.defaultK);
 	}
 }

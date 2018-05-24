@@ -113,40 +113,60 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class DataGvAt {
 
-	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
+	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(
+			System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
 	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
 	private static final String INSTANCE_SUBPATH = "data.gv.at.1_annotated";
 	private static final String DECLARED_PROPERTIES_SUBPATH = "property";
-	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.minimumPartitionRelativeSize", "0.01"));
-	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.maximumPartitionRelativeSize", "0.99"));
-	private static final int TOP_K_NEGHBOURS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.topKNeighbours", "25"));;
-	private static final int TOP_K_AGGREGATED_RESULTS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.topKAggregatedResults", "5"));
+	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = Double
+			.parseDouble(System.getProperty("eu.odalic.extrarelatable.minimumPartitionRelativeSize", "0.01"));
+	private static final double MAXIMUM_PARTITION_RELATIVE_SIZE = Double
+			.parseDouble(System.getProperty("eu.odalic.extrarelatable.maximumPartitionRelativeSize", "0.99"));
+	private static final int TOP_K_NEGHBOURS = Integer
+			.parseInt(System.getProperty("eu.odalic.extrarelatable.topKNeighbours", "25"));;
+	private static final int TOP_K_AGGREGATED_RESULTS = Integer
+			.parseInt(System.getProperty("eu.odalic.extrarelatable.topKAggregatedResults", "5"));
 	private static final int MINIMUM_PARTITION_SIZE = 2;
-	private static final double SAMPLE_SIZE_STEP_RATIO = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.sampleSizeStepRatio", "0.1"));
-	private static final long SEED = Long.parseLong(System.getProperty("eu.odalic.extrarelatable.seed", String.valueOf(System.currentTimeMillis())));
+	private static final double SAMPLE_SIZE_STEP_RATIO = Double
+			.parseDouble(System.getProperty("eu.odalic.extrarelatable.sampleSizeStepRatio", "0.1"));
+	private static final long SEED = Long
+			.parseLong(System.getProperty("eu.odalic.extrarelatable.seed", String.valueOf(System.currentTimeMillis())));
 	private static final String PROFILES_DIRECTORY = "profiles";
 	private static final String CLEANED_INPUT_FILES_DIRECTORY = "cleaned";
 	private static final String CONTEXT_COLLECTION_RESULTS_SUBPATH = "context";
-	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
-	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
-	private static final boolean ONLY_DECLARED_AS_CONTEXT = Boolean.parseBoolean(System.getProperty("eu.odalic.extrarelatable.onlyDeclaredAsContext", "false"));
-	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices") == null ? null : Splitter.on(",").splitToList(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices")).stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
-	private static final int TEST_REPETITIONS = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
+	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
+	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
+	private static final boolean ONLY_DECLARED_AS_CONTEXT = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.onlyDeclaredAsContext", "false"));
+	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System
+			.getProperty("eu.odalic.extrarelatable.chosenSampleIndices") == null ? null
+					: Splitter.on(",").splitToList(System.getProperty("eu.odalic.extrarelatable.chosenSampleIndices"))
+							.stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
+	private static final int TEST_REPETITIONS = Integer
+			.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
 	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.of(
-		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
-		URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear")
-	);
-	private static final double VALUES_WEIGHT = Double.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
-	private static final Set<URI> STOP_ENTITIES = ImmutableSet.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
-	private static final Set<String> USED_BASES = System.getProperty("eu.odalic.extrarelatable.odalic.usedBases", "GermanDBpediaLocal") == null ? null : ImmutableSet.copyOf(Splitter.on(",").split(System.getProperty("eu.odalic.extrarelatable.odalic.usedBases", "GermanDBpediaLocal")));
-	private static final String PRIMARY_BASE = System.getProperty("eu.odalic.extrarelatable.odalic.primaryBase", "GermanDBpediaLocal");
-	private static final int MAXIMUM_COLUMN_SAMPLE_SIZE = Integer.parseInt(System.getProperty("eu.odalic.extrarelatable.maximumColumnSampleSize", "1000"));
+			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
+			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear"));
+	private static final double VALUES_WEIGHT = Double
+			.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
+	private static final Set<URI> STOP_ENTITIES = ImmutableSet
+			.of(URI.create("http://www.w3.org/2000/01/rdf-schema#label"));
+	private static final Set<String> USED_BASES = System.getProperty("eu.odalic.extrarelatable.odalic.usedBases",
+			"GermanDBpediaLocal") == null ? null
+					: ImmutableSet.copyOf(Splitter.on(",").split(
+							System.getProperty("eu.odalic.extrarelatable.odalic.usedBases", "GermanDBpediaLocal")));
+	private static final String PRIMARY_BASE = System.getProperty("eu.odalic.extrarelatable.odalic.primaryBase",
+			"GermanDBpediaLocal");
+	private static final int MAXIMUM_COLUMN_SAMPLE_SIZE = Integer
+			.parseInt(System.getProperty("eu.odalic.extrarelatable.maximumColumnSampleSize", "1000"));
 
 	@Autowired
 	@Lazy
 	@Qualifier("automatic")
 	private CsvTableParser csvTableParser;
-	
+
 	@Autowired
 	@Lazy
 	private TableAnalyzer tableAnalyzer;
@@ -180,31 +200,33 @@ public class DataGvAt {
 	@Autowired
 	@Lazy
 	private CsvCleanService csvCleanService;
-	
+
 	@Autowired
 	@Lazy
 	private CsvProfilerService csvProfilerService;
-	
+
 	@Autowired
+	@Lazy
 	private ContextCollectionService contextCollectionService;
 
 	private TestStatistics.Builder testStatisticsBuilder;
-	
+
 	@Before
 	public void setUp() {
 		this.testStatisticsBuilder = TestStatistics.builder();
 	}
-	
+
 	@Test
 	public void test() throws IOException {
 		final CsvWriterSettings csvWriterSettings = new com.univocity.parsers.csv.CsvWriterSettings();
 		final CsvWriter csvWriter = new CsvWriter(System.out, StandardCharsets.UTF_8, csvWriterSettings);
-		
+
 		final List<TestStatistics> results = new ArrayList<>();
-		
+
 		if (CHOSEN_SAMPLES_INDICES != null) {
 			for (final int sampleSizeIndex : CHOSEN_SAMPLES_INDICES) {
-				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex, TEST_REPETITIONS);
+				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
+						TEST_REPETITIONS);
 				csvWriter.flush();
 				if (testStatistics != null) {
 					results.add(testStatistics);
@@ -213,87 +235,65 @@ public class DataGvAt {
 		} else {
 			int sampleSizeIndex = 0;
 			while (true) {
-				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex, TEST_REPETITIONS);
+				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
+						TEST_REPETITIONS);
 				csvWriter.flush();
 				if (testStatistics == null) {
 					break;
 				}
-				
+
 				results.add(testStatistics);
 				sampleSizeIndex++;
-			};
+			}
+			;
 		}
-		
-		csvWriter.writeRow(
-				"Files",
-				"To learn",
-				"To test",
-				"Learnt",
-				"Tested",
-				"Columns",
-				"Context columns",
-				"Numeric columns to learn",
-				"Learnt numeric columns",
-				"Annotated numeric columns",
-				"Numeric columns to learn without property",
-				"Numeric columns to test without property",
-				"Unique numeric column properties",
-				"Unique numeric column properties learnt",
-				"Unique numeric column properties tested",
-				"Matching",
-				"Missing",
-				"Nonmatching",
-				"Nonmatching available"
-		);
+
+		csvWriter.writeRow("Files", "To learn", "To test", "Learnt", "Tested", "Columns", "Context columns",
+				"Numeric columns to learn", "Learnt numeric columns", "Annotated numeric columns",
+				"Numeric columns to learn without property", "Numeric columns to test without property",
+				"Unique numeric column properties", "Unique numeric column properties learnt",
+				"Unique numeric column properties tested", "Matching", "Missing", "Nonmatching",
+				"Nonmatching available");
 		for (final TestStatistics testStatistics : results) {
-			csvWriter.writeRow(
-					testStatistics.getFilesCount(),
-					testStatistics.getLearningFilesCount(),
-					testStatistics.getTestFilesCount(),
-					testStatistics.getLearntFiles(),
-					testStatistics.getTestedFiles(),
-					testStatistics.getLearningColumnsCount(),
-					testStatistics.getLearntContextColumnsCount(),
-					testStatistics.getAttemptedLearntNumericColumns(),
-					testStatistics.getLearntNumericColumns(),
-					testStatistics.getAnnotatedNumericColumns(),
+			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
+					testStatistics.getTestFilesCount(), testStatistics.getLearntFiles(),
+					testStatistics.getTestedFiles(), testStatistics.getLearningColumnsCount(),
+					testStatistics.getLearntContextColumnsCount(), testStatistics.getAttemptedLearntNumericColumns(),
+					testStatistics.getLearntNumericColumns(), testStatistics.getAnnotatedNumericColumns(),
 					testStatistics.getNoPropertyLearningNumericColumns(),
-					testStatistics.getNoPropertyTestingNumericColums(),
-					testStatistics.getUniqueProperties(),
-					testStatistics.getUniquePropertiesLearnt(),
-					testStatistics.getUniquePropertiesTested(),
-					testStatistics.getMatchingSolutions(),
-					testStatistics.getMissingSolutions(),
-					testStatistics.getNonmatchingSolutions(),
-					testStatistics.getNonmatchingAvailableSolutions()
-					);
+					testStatistics.getNoPropertyTestingNumericColums(), testStatistics.getUniqueProperties(),
+					testStatistics.getUniquePropertiesLearnt(), testStatistics.getUniquePropertiesTested(),
+					testStatistics.getMatchingSolutions(), testStatistics.getMissingSolutions(),
+					testStatistics.getNonmatchingSolutions(), testStatistics.getNonmatchingAvailableSolutions());
 		}
-		
+
 		csvWriter.flush();
 		csvWriter.close();
 	}
-	
-	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex, final int repetitions) throws IOException {
+
+	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio,
+			final int sampleSizeIndex, final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
 		testStatisticsBuilder.setSeed(SEED);
-		
+
 		testStatisticsBuilder.setRepetitions(repetitions);
 
 		for (int repetition = 0; repetition < repetitions; repetition++) {
 			final boolean succeeded = testSample(csvWriter, sampleSizeStepRatio, sampleSizeIndex, random, repetition);
-			
+
 			if (!succeeded) {
 				return null;
 			}
 		}
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished all sample repetitions.");
-		
+
 		return testStatisticsBuilder.build();
 	}
-	
-	private boolean testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex, final Random random, final int repetition) throws IOException {
+
+	private boolean testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex,
+			final Random random, final int repetition) throws IOException {
 		final Path resourcesPath = Paths.get(RESOURCES_PATH);
 		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
 
@@ -308,15 +308,15 @@ public class DataGvAt {
 		if (testPaths == null) {
 			return false;
 		}
-		
+
 		testStatisticsBuilder.addTestFilesCount(testPaths.size());
-		
+
 		final List<Path> learningPaths = getLearningFiles(files, testPaths);
 		testStatisticsBuilder.addLearningFilesCount(learningPaths.size());
 
 		final Path cleanedInputFilesPath = setPath.resolve(CLEANED_INPUT_FILES_DIRECTORY);
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
-		
+
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
 				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
@@ -325,14 +325,16 @@ public class DataGvAt {
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
-		
-		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
-		
+
+		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath,
+				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition,
+				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
-		
+
 		csvWriter.writeEmptyRow();
-		
+
 		return true;
 	}
 
@@ -340,17 +342,18 @@ public class DataGvAt {
 		return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
 	}
 
-	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio, final int sampleSizeIndex, final List<Path> files) {
+	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio,
+			final int sampleSizeIndex, final List<Path> files) {
 		final List<Path> filesCopy = new ArrayList<>(files);
-		
+
 		final int allFilesSize = files.size();
 		final double sampleSize = allFilesSize - sampleSizeIndex * sampleSizeStepRatio * allFilesSize;
 		if (sampleSize < 0) {
 			return null;
 		}
-		
+
 		final int wholeSampleSize = (int) sampleSize;
-		
+
 		final ImmutableList.Builder<Path> testPathsBuilder = ImmutableList.builder();
 		for (int i = 0; i < wholeSampleSize; i++) {
 			final int removedIndex = random.nextInt(filesCopy.size());
@@ -361,11 +364,11 @@ public class DataGvAt {
 		return testPaths;
 	}
 
-	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath, final boolean onlyWithProperties) throws IOException {
+	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath,
+			final boolean onlyWithProperties) throws IOException {
 		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath))
-				.filter(path -> path.toFile().isFile()
-						&& ((!onlyWithProperties) || getPropertiesPath(declaredPropertiesPath, path.getFileName().toString()) != null)
-				)
+				.filter(path -> path.toFile().isFile() && ((!onlyWithProperties)
+						|| getPropertiesPath(declaredPropertiesPath, path.getFileName().toString()) != null))
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		Collections.sort(paths);
@@ -374,14 +377,15 @@ public class DataGvAt {
 
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition,
-			final Random random, final int maxColumnSampleSize)
-			throws IOException {
+			final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final int maxColumnSampleSize) throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext,
+					repetition, random, maxColumnSampleSize);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -389,47 +393,46 @@ public class DataGvAt {
 		return graph;
 	}
 
-	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths, final BackgroundKnowledgeGraph graph,
-			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties,
+	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths,
+			final BackgroundKnowledgeGraph graph, final Path cleanedInputFilesDirectory, final Path profilesDirectory,
+			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize)
 			throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
 
 			final Map<Integer, DeclaredEntity> solution = getSolution(file, declaredPropertiesPath);
-			
+
 			final AnnotationResult result;
 			try {
 				result = annotateTable(csvWriter, file, graph, cleanedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext,
+						repetition, random, maxColumnSampleSize);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
 				return;
 			}
-			
+
 			final Map<Integer, Annotation> columnIndicesToAnnotations = result.getAnnotations();
 			final ParsedTable parsedTable = result.getParsedTable();
 
 			csvWriter.writeEmptyRow();
-			
+
 			csvWriter.addValue("Headers:");
 			csvWriter.addValues(parsedTable.getHeaders());
 			csvWriter.writeValuesToRow();
-			
+
 			csvWriter.addValue("Declared properties:");
 			csvWriter.addValues(solution);
 			csvWriter.writeValuesToRow();
-			
+
 			csvWriter.writeRow("First rows:");
-			csvWriter.writeRows(
-					parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream()
-					.map(row -> row.toArray()).collect(ImmutableList.toImmutableList())
-			);
-			
+			csvWriter.writeRows(parsedTable.getRows().subList(0, Math.min(parsedTable.getHeight(), 5)).stream()
+					.map(row -> row.toArray()).collect(ImmutableList.toImmutableList()));
+
 			csvWriter.writeRow("Numeric columns:");
-			
+
 			columnIndicesToAnnotations.entrySet().forEach(e -> {
 				final int index = e.getKey();
 				final Annotation annotation = e.getValue();
@@ -438,40 +441,42 @@ public class DataGvAt {
 
 				csvWriter.writeRow("Index:", index);
 				csvWriter.writeRow("Header:", parsedTable.getHeaders().get(index));
-				
+
 				csvWriter.addValue("First values:");
 				csvWriter.addValues(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5)));
 				csvWriter.writeValuesToRow();
-				
+
 				csvWriter.writeRow("Properties:");
-				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI", "Context properties");
+				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI",
+						"Context properties");
 				csvWriter.writeRows(annotation.getProperties().stream().map(property -> {
 					final Statistics statistics = propertiesStatistics.get(property);
 
-					return new Object[] { statistics.getAverage(), statistics.getMedian(),
-							statistics.getOccurence(), statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property)};
+					return new Object[] { statistics.getAverage(), statistics.getMedian(), statistics.getOccurence(),
+							statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property) };
 				}).collect(ImmutableList.toImmutableList()));
-				
+
 				final DeclaredEntity columnSolution = solution.get(index);
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
-				
+
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();
 				} else {
-					if (annotation.getProperties().stream().map(property -> property.getUri()).anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri()))) {
+					if (annotation.getProperties().stream().map(property -> property.getUri())
+							.anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri()))) {
 						testStatisticsBuilder.addMatchingSolution();
 					} else {
 						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution.getUri());
 					}
 				}
-				
+
 				testStatisticsBuilder.addAnnotatedNumericColumn();
-				
+
 				testStatisticsBuilder.addAnnotatedNumericColumn();
 			});
-			
+
 			testStatisticsBuilder.addTestedFile();
-			
+
 			csvWriter.writeEmptyRow();
 			csvWriter.writeEmptyRow();
 			csvWriter.writeEmptyRow();
@@ -479,44 +484,44 @@ public class DataGvAt {
 	}
 
 	private static Set<URI> getContextProperties(final Property property) {
-		return property.getInstances().stream().map(
-				i -> i.getContext().getDeclaredContextColumnProperties().values()).flatMap(e -> e.stream()).map(e -> e.getUri()).collect(ImmutableSet.toImmutableSet());
+		return property.getInstances().stream().map(i -> i.getContext().getDeclaredContextColumnProperties().values())
+				.flatMap(e -> e.stream()).map(e -> e.getUri()).collect(ImmutableSet.toImmutableSet());
 	}
 
 	private boolean isAcceptableFor(final URI first, final URI second) {
 		if (first == null || second == null) {
 			return false;
 		}
-		
-		return first.equals(second) || (
-			IS_ACCEPTABLE_FOR_PAIRS.get(first) != null &&
-			IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second)
-		);
+
+		return first.equals(second)
+				|| (IS_ACCEPTABLE_FOR_PAIRS.get(first) != null && IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
 	}
 
 	private static Map<Integer, DeclaredEntity> getSolution(final Path input, final Path declaredPropertiesPath) {
 		return getDeclaredProperties(declaredPropertiesPath, input.getFileName().toString());
 	}
 
-	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input, final Path cleanedInputFilesDirectory,
-			final Path profilesDirectory, final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
+	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final int maxColumnSampleSize) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
-		
+
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
 		final Format format = getFormat(csvProfile);
 
 		/* Parse the input file to table. */
-		
+
 		final ParsedTable parsedTable = parse(input, cleanedInput, format);
 		if (parsedTable.getHeight() < 2) {
 			csvWriter.writeRow("Too few rows in " + input + ". Skipping.");
-			
+
 			testStatisticsBuilder.addFewRowsFile();
-			
+
 			return ImmutableSet.of();
 		}
 
@@ -526,9 +531,9 @@ public class DataGvAt {
 		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.forLanguageTag("de-at"), hints);
 		if (typedTable.getHeight() < 2) {
 			csvWriter.writeRow("Too few typed rows in " + input + ". Skipping.");
-			
+
 			testStatisticsBuilder.addFewTypedRowsFile();
-			
+
 			return ImmutableSet.of();
 		}
 
@@ -542,7 +547,8 @@ public class DataGvAt {
 		final Map<Integer, DeclaredEntity> contextProperties;
 		final Map<Integer, DeclaredEntity> contextClasses;
 		if (!onlyDeclaredAsContext) {
-			final ResultValue collectedContext = getCollectedContext(csvWriter, parsedTable, input, collectionResultsDirectory, random);
+			final ResultValue collectedContext = getCollectedContext(csvWriter, parsedTable, input,
+					collectionResultsDirectory, random);
 			if (collectedContext == null) {
 				contextProperties = ImmutableMap.of();
 				contextClasses = ImmutableMap.of();
@@ -554,11 +560,12 @@ public class DataGvAt {
 			contextProperties = ImmutableMap.of();
 			contextClasses = ImmutableMap.of();
 		}
-		
-		Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
-		
+
+		final Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses,
+				onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+
 		testStatisticsBuilder.addLearntFile();
-		
+
 		return trees;
 	}
 
@@ -571,7 +578,7 @@ public class DataGvAt {
 
 		final CsvParserSettings parserSettings = new CsvParserSettings();
 		parserSettings.setLineSeparatorDetectionEnabled(true);
-		
+
 		final CsvFormat csvFormat = new CsvFormat();
 		csvFormat.setDelimiter(',');
 		csvFormat.setQuote('"');
@@ -586,10 +593,11 @@ public class DataGvAt {
 		parser.parse(propertiesPath.toFile(), StandardCharsets.UTF_8);
 
 		final List<String[]> rows = rowProcessor.getRows();
-		
+
 		try {
-		return rows.stream().collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields[fields.length - 1]),
-						fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableSet.of(fields[1]))));
+			return rows.stream()
+					.collect(ImmutableMap.toImmutableMap(fields -> Integer.parseInt(fields[fields.length - 1]),
+							fields -> new DeclaredEntity(URI.create(fields[0]), ImmutableSet.of(fields[1]))));
 		} catch (final ArrayIndexOutOfBoundsException e) {
 			return ImmutableMap.of();
 		}
@@ -600,12 +608,16 @@ public class DataGvAt {
 		if (!propertiesPath.toFile().exists()) {
 			return null;
 		}
-		
+
 		return propertiesPath;
 	}
 
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, Map<? extends Integer, ? extends DeclaredEntity> contextProperties, Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final int maxColumnSampleSize) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -616,24 +628,24 @@ public class DataGvAt {
 		final ImmutableSet.Builder<PropertyTree> propertyTreesBuilder = ImmutableSet.builder();
 
 		testStatisticsBuilder.addLearningColumnsCount(slicedTable.getWidth());
-		
+
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
-		
+
 		testStatisticsBuilder.addLearntContextColumnsCount(availableContextColumnIndices.size());
 
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			testStatisticsBuilder.addAttemptedLearntNumericColumn();
-			
+
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
 			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
-			
+
 			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				testStatisticsBuilder.addTooSmallNumericColumn();
-				
+
 				continue;
 			}
 
@@ -646,7 +658,7 @@ public class DataGvAt {
 			final DeclaredEntity declaredProperty = declaredProperties.get(columnIndex);
 			if (declaredProperty == null) {
 				testStatisticsBuilder.addNoPropertyLearningNumericColumn();
-				
+
 				if (onlyWithProperties) {
 					continue;
 				}
@@ -656,12 +668,16 @@ public class DataGvAt {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredProperty, onlyDeclaredAsContext ? getMeaningfulEntities(declaredProperties) : getMeaningfulEntities(contextProperties), onlyDeclaredAsContext ? ImmutableMap.of() : contextClasses, columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredProperty,
+					onlyDeclaredAsContext ? getMeaningfulEntities(declaredProperties)
+							: getMeaningfulEntities(contextProperties),
+					onlyDeclaredAsContext ? ImmutableMap.of() : contextClasses, columnIndex,
+					availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
 			propertyTreesBuilder.add(tree);
-			
+
 			testStatisticsBuilder.addLearntNumericColumn();
 		}
 
@@ -673,7 +689,7 @@ public class DataGvAt {
 		final List<Value> values = new ArrayList<>(numericColumn.getValue());
 		final int initialRowsSize = values.size();
 		final int toRemove = Math.max(0, initialRowsSize - maxColumnSampleSize);
-		
+
 		for (int i = 0; i < toRemove; i++) {
 			final int removedIndex = random.nextInt(values.size());
 			values.remove(removedIndex);
@@ -686,11 +702,13 @@ public class DataGvAt {
 		if (csvProfile == null) {
 			format = null;
 		} else {
-			format = new Format(Charset.forName(csvProfile.getEncoding()), csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true, csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
+			format = new Format(Charset.forName(csvProfile.getEncoding()),
+					csvProfile.getDelimiter() == null ? null : csvProfile.getDelimiter().charAt(0), true,
+					csvProfile.getQuotechar() == null ? null : csvProfile.getQuotechar().charAt(0), null, null);
 		}
 		return format;
 	}
-	
+
 	private ParsedTable parse(final Path input, final Path cleanedInput, final Format format) {
 		final ParsedTable table;
 		try (final InputStream inputStream = new BufferedInputStream(Files.newInputStream(cleanedInput))) {
@@ -700,7 +718,7 @@ public class DataGvAt {
 		}
 		return table;
 	}
-	
+
 	private Map<Integer, Type> getHints(final CsvProfile csvProfile) {
 		final Map<Integer, Type> hints;
 		if (csvProfile == null) {
@@ -712,11 +730,12 @@ public class DataGvAt {
 		return hints;
 	}
 
-	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory, final Path cleanedInput) {
+	private CsvProfile profile(final CsvWriter csvWriter, final Path input, final Path profilesDirectory,
+			final Path cleanedInput) {
 		CsvProfile csvProfile = null;
 		final Path profileInput = profilesDirectory.resolve(input.getFileName());
 		final Path failedProfileNotice = profilesDirectory.resolve(input.getFileName() + ".fail");
-		
+
 		if (profileInput.toFile().exists()) {
 			try {
 				csvProfile = loadProfile(profileInput);
@@ -751,7 +770,7 @@ public class DataGvAt {
 		}
 		return csvProfile;
 	}
-	
+
 	private Path clean(final Path input, final Path cleanedInputFilesDirectory) {
 		Path cleanedInput = cleanedInputFilesDirectory.resolve(input.getFileName());
 		final Path failedCleanNotice = cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail");
@@ -759,14 +778,14 @@ public class DataGvAt {
 			System.out.println("File " + input + " already cleaned.");
 		} else if (failedCleanNotice.toFile().exists()) {
 			System.out.println("Previously failed cleaning attempt for + " + input + ". Using original instead.");
-			
+
 			cleanedInput = input;
 		} else {
 			try (final InputStream cleanedInputStream = csvCleanService.clean(input.toFile())) {
 				Files.copy(cleanedInputStream, cleanedInput);
 			} catch (final IllegalStateException e) {
 				System.out.println("Failed clean attempt for + " + input + "!");
-				
+
 				cleanedInput = input;
 				try {
 					cacheFailedCleaning(cleanedInputFilesDirectory, input);
@@ -787,7 +806,7 @@ public class DataGvAt {
 	private void cacheFailedProfiling(Path profilesDirectory, Path input) throws IOException {
 		Files.createFile(profilesDirectory.resolve(input.getFileName() + ".fail"));
 	}
-	
+
 	private void cacheFailedContextCollection(Path collectionResultsDirectory, Path input) throws IOException {
 		Files.createFile(collectionResultsDirectory.resolve(input.getFileName() + ".fail"));
 	}
@@ -803,7 +822,7 @@ public class DataGvAt {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		mapper.writeValue(profileInput.toFile(), csvProfile);
 	}
-	
+
 	private void saveCollectionResult(final ResultValue result, final Path resultOutput)
 			throws IOException, JsonGenerationException, JsonMappingException {
 		final ObjectMapper mapper = new ObjectMapper();
@@ -818,7 +837,7 @@ public class DataGvAt {
 		csvProfile = mapper.readValue(profileInput.toFile(), CsvProfile.class);
 		return csvProfile;
 	}
-	
+
 	private ResultValue loadCollectionResult(final Path resultInput)
 			throws IOException, JsonParseException, JsonMappingException {
 		final ResultValue result;
@@ -877,15 +896,16 @@ public class DataGvAt {
 		return children.build();
 	}
 
-	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input, final BackgroundKnowledgeGraph graph,
-			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
+	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input,
+			final BackgroundKnowledgeGraph graph, final Path cleanedInputFilesDirectory, final Path profilesDirectory,
+			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
 		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
-		
+
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
 		final Format format = getFormat(csvProfile);
-		
+
 		/* Parse the input file to table. */
 		final ParsedTable parsedTable = parse(input, cleanedInput, format);
 		if (parsedTable.getHeight() < 2) {
@@ -906,11 +926,12 @@ public class DataGvAt {
 
 		final Map<Integer, DeclaredEntity> declaredPropertyUris = getDeclaredProperties(declaredPropertiesPath,
 				input.getFileName().toString());
-		
+
 		final Map<Integer, DeclaredEntity> contextProperties;
 		final Map<Integer, DeclaredEntity> contextClasses;
 		if (!onlyDeclaredAsContext) {
-			final ResultValue collectedContext = getCollectedContext(csvWriter, parsedTable, input, collectionResultsDirectory, random);
+			final ResultValue collectedContext = getCollectedContext(csvWriter, parsedTable, input,
+					collectionResultsDirectory, random);
 			if (collectedContext == null) {
 				contextProperties = ImmutableMap.of();
 				contextClasses = ImmutableMap.of();
@@ -922,34 +943,35 @@ public class DataGvAt {
 			contextProperties = ImmutableMap.of();
 			contextClasses = ImmutableMap.of();
 		}
-		
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
+
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties,
+				contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
 	}
 
 	private Map<Integer, DeclaredEntity> getContextClasses(final ResultValue collectedContext) {
-		final Map<Integer, DeclaredEntity> result =
-	        IntStream.range(0, collectedContext.getHeaderAnnotations().size()).filter(i -> {
-	          final HeaderAnnotationValue annotation = collectedContext.getHeaderAnnotations().get(i);
-	          if (annotation == null) {
-	            return false;
-	          }
+		final Map<Integer, DeclaredEntity> result = IntStream.range(0, collectedContext.getHeaderAnnotations().size())
+				.filter(i -> {
+					final HeaderAnnotationValue annotation = collectedContext.getHeaderAnnotations().get(i);
+					if (annotation == null) {
+						return false;
+					}
 
-	          final Map<String, Set<EntityCandidateValue>> chosen = annotation.getChosen();
-	          if (chosen == null) {
-	            return false;
-	          }
-	          
-	          final Set<EntityCandidateValue> baseChosen = chosen.get(PRIMARY_BASE);
-	          if (baseChosen == null || baseChosen.isEmpty()) {
-	            return false;
-	          }
+					final Map<String, Set<EntityCandidateValue>> chosen = annotation.getChosen();
+					if (chosen == null) {
+						return false;
+					}
 
-	          return true;
-	        }).mapToObj(i -> Integer.valueOf(i))
-	            .collect(Collectors.toMap(i -> i, i -> toDeclared(collectedContext.getHeaderAnnotations().get(i).getChosen()
-	                .get(PRIMARY_BASE).stream().findFirst().get().getEntity())));
+					final Set<EntityCandidateValue> baseChosen = chosen.get(PRIMARY_BASE);
+					if (baseChosen == null || baseChosen.isEmpty()) {
+						return false;
+					}
 
-	    return ImmutableMap.copyOf(result);
+					return true;
+				}).mapToObj(i -> Integer.valueOf(i))
+				.collect(Collectors.toMap(i -> i, i -> toDeclared(collectedContext.getHeaderAnnotations().get(i)
+						.getChosen().get(PRIMARY_BASE).stream().findFirst().get().getEntity())));
+
+		return ImmutableMap.copyOf(result);
 	}
 
 	private static DeclaredEntity toDeclared(final EntityValue entity) {
@@ -957,36 +979,35 @@ public class DataGvAt {
 	}
 
 	private Map<Integer, DeclaredEntity> getContextProperties(final ResultValue collectedContext) {
-		final Map<Integer, DeclaredEntity> result =
-				collectedContext.getColumnRelationAnnotationsAlternative().entrySet().stream().filter(entry -> {
-		          final ColumnRelationAnnotationValue annotation = entry.getValue();
-		          if (annotation == null) {
-		            return false;
-		          }
+		final Map<Integer, DeclaredEntity> result = collectedContext.getColumnRelationAnnotationsAlternative()
+				.entrySet().stream().filter(entry -> {
+					final ColumnRelationAnnotationValue annotation = entry.getValue();
+					if (annotation == null) {
+						return false;
+					}
 
-		          final Map<String, Set<EntityCandidateValue>> chosen = annotation.getChosen();
-		          if (chosen == null) {
-		            return false;
-		          }
+					final Map<String, Set<EntityCandidateValue>> chosen = annotation.getChosen();
+					if (chosen == null) {
+						return false;
+					}
 
-		          final Set<EntityCandidateValue> baseChosen = chosen.get(PRIMARY_BASE);
-		          if (baseChosen == null || baseChosen.isEmpty()) {
-		            return false;
-		          }
+					final Set<EntityCandidateValue> baseChosen = chosen.get(PRIMARY_BASE);
+					if (baseChosen == null || baseChosen.isEmpty()) {
+						return false;
+					}
 
-		          return true;
-		        })
-		        .collect(
-		                Collectors
-		                    .toMap(
-		                        entry -> entry.getKey().getSecond().getIndex(), entry -> toDeclared(entry.getValue().getChosen()
-		                            .get(PRIMARY_BASE).stream().findFirst().get().getEntity()),
-		                        (f, s) -> f));
-		
+					return true;
+				})
+				.collect(Collectors.toMap(entry -> entry.getKey().getSecond().getIndex(),
+						entry -> toDeclared(
+								entry.getValue().getChosen().get(PRIMARY_BASE).stream().findFirst().get().getEntity()),
+						(f, s) -> f));
+
 		return ImmutableMap.copyOf(result);
 	}
 
-	private ResultValue getCollectedContext(final CsvWriter csvWriter, final ParsedTable parsedTable, final Path input, final Path collectionResultsDirectory, final Random random) {
+	private ResultValue getCollectedContext(final CsvWriter csvWriter, final ParsedTable parsedTable, final Path input,
+			final Path collectionResultsDirectory, final Random random) {
 		ResultValue result = null;
 		final Path resultInput = collectionResultsDirectory.resolve(input.getFileName());
 		final Path failedCollectionNotice = collectionResultsDirectory.resolve(input.getFileName() + ".fail");
@@ -1024,8 +1045,11 @@ public class DataGvAt {
 	}
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, Map<? extends Integer, ? extends DeclaredEntity> contextProperties, Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final int maxColumnSampleSize) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -1035,7 +1059,7 @@ public class DataGvAt {
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
 			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
-			
+
 			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
@@ -1051,7 +1075,7 @@ public class DataGvAt {
 			final DeclaredEntity declaredProperty = declaredProperties.get(columnIndex);
 			if (declaredProperty == null) {
 				testStatisticsBuilder.addNoPropertyTestingNumericColumn();
-				
+
 				if (onlyWithProperties) {
 					continue;
 				}
@@ -1061,7 +1085,11 @@ public class DataGvAt {
 			}
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), declaredProperty, onlyDeclaredAsContext ? getMeaningfulEntities(declaredProperties) : getMeaningfulEntities(contextProperties), onlyDeclaredAsContext ? ImmutableMap.of() : contextClasses, columnIndex, availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), declaredProperty,
+					onlyDeclaredAsContext ? getMeaningfulEntities(declaredProperties)
+							: getMeaningfulEntities(contextProperties),
+					onlyDeclaredAsContext ? ImmutableMap.of() : contextClasses, columnIndex,
+					availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);
@@ -1069,7 +1097,8 @@ public class DataGvAt {
 			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder();
 
 			for (final Node node : tree) {
-				final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, node, VALUES_WEIGHT, TOP_K_NEGHBOURS);
+				final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, node, VALUES_WEIGHT,
+						TOP_K_NEGHBOURS);
 				treeMatchingNodesBuilder.addAll(matchingNodes);
 			}
 
@@ -1083,8 +1112,8 @@ public class DataGvAt {
 
 			final Map<Property, Statistics> propertiesStatistics = getStatistics(properties, propertyLevelAggregates);
 
-			builder.put(columnIndex, Annotation.of(properties, ImmutableList.of(), ImmutableList.of(), propertiesStatistics,
-					ImmutableMap.of(), ImmutableMap.of()));
+			builder.put(columnIndex, Annotation.of(properties, ImmutableList.of(), ImmutableList.of(),
+					propertiesStatistics, ImmutableMap.of(), ImmutableMap.of()));
 		}
 
 		return builder.build();
@@ -1092,9 +1121,8 @@ public class DataGvAt {
 
 	private Map<Integer, DeclaredEntity> getMeaningfulEntities(
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties) {
-		return declaredProperties.entrySet().stream().filter(
-				e -> !STOP_ENTITIES.contains(e.getValue().getUri())
-			).collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
+		return declaredProperties.entrySet().stream().filter(e -> !STOP_ENTITIES.contains(e.getValue().getUri()))
+				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
 	private static <T> Map<T, Statistics> getStatistics(final Iterable<T> aspects,
@@ -1118,7 +1146,6 @@ public class DataGvAt {
 	}
 
 	private <T> List<T> cutOff(final Collection<T> aggregates) {
-		return ImmutableList.copyOf(aggregates).subList(0,
-				Math.min(aggregates.size(), TOP_K_AGGREGATED_RESULTS));
+		return ImmutableList.copyOf(aggregates).subList(0, Math.min(aggregates.size(), TOP_K_AGGREGATED_RESULTS));
 	}
 }
