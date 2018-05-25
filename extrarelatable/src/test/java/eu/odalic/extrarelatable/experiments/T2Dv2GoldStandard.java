@@ -140,7 +140,7 @@ public class T2Dv2GoldStandard {
 	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
 	private static final String SANITIZE_WITH = "_";
 	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean
-			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "false"));
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
 	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean
 			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
 	private static final boolean ONLY_DECLARED_AS_CONTEXT = Boolean
@@ -337,14 +337,11 @@ public class T2Dv2GoldStandard {
 	}
 
 	private ImmutableList<Path> getLearningFiles(final List<Path> files, final List<Path> testPaths) {
-		return ImmutableList.copyOf(files);
-		//return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
+		return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
 	}
 
 	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio,
 			final int sampleSizeIndex, final List<Path> files) {
-		return ImmutableList.of();
-		/*
 		final List<Path> filesCopy = new ArrayList<>(files);
 
 		final int allFilesSize = files.size();
@@ -362,7 +359,7 @@ public class T2Dv2GoldStandard {
 			testPathsBuilder.add(filesCopy.remove(removedIndex));
 		}
 		final List<Path> testPaths = testPathsBuilder.build();
-		return testPaths;*/
+		return testPaths;
 	}
 
 	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath,

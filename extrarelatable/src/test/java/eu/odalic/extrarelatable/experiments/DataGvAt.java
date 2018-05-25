@@ -146,9 +146,16 @@ public class DataGvAt {
 							.stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
 	private static final int TEST_REPETITIONS = Integer
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
-	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.of(
-			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
-			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear"));
+	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.<URI, URI>builder()
+			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfEmployees"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfEmployees"), URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfDeaths"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfDeaths"), URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/popularVote"))
+			.put(URI.create("http://dbpedia.org/ontology/popularVote"), URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfHouses"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfHouses"), URI.create("http://dbpedia.org/ontology/population"))
+			.build();
 	private static final double VALUES_WEIGHT = Double
 			.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
 	private static final Set<URI> STOP_ENTITIES = ImmutableSet
