@@ -374,14 +374,14 @@ public class DefaultGraphService implements GraphService {
 		if (cleanedInput.toFile().exists()) {
 			System.out.println("File " + input + " already cleaned.");
 		} else if (failedCleanNotice.toFile().exists()) {
-			System.out.println("Previously failed cleaning attempt for + " + input + ". Using original instead.");
+			System.out.println("Previously failed cleaning attempt for " + input + ". Using original instead.");
 
 			cleanedInput = input;
 		} else {
 			try (final InputStream cleanedInputStream = this.csvCleanerService.clean(input.toFile())) {
 				Files.copy(cleanedInputStream, cleanedInput);
 			} catch (final IllegalStateException e) {
-				System.out.println("Failed clean attempt for + " + input + "!");
+				System.out.println("Failed clean attempt for " + input + "!");
 
 				cleanedInput = input;
 				try {
