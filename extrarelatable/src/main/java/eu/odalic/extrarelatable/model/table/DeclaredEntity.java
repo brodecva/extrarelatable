@@ -69,6 +69,6 @@ public final class DeclaredEntity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "DeclaredEntity [uri=" + uri + ", labels=" + labels + "]";
+		return uri + " " + labels;
 	}
 }

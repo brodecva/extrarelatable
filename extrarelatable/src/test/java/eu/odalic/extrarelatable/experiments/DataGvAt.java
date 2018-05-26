@@ -147,14 +147,22 @@ public class DataGvAt {
 	private static final int TEST_REPETITIONS = Integer
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
 	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.<URI, URI>builder()
-			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfEmployees"))
-			.put(URI.create("http://dbpedia.org/ontology/numberOfEmployees"), URI.create("http://dbpedia.org/ontology/population"))
-			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfDeaths"))
-			.put(URI.create("http://dbpedia.org/ontology/numberOfDeaths"), URI.create("http://dbpedia.org/ontology/population"))
-			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/popularVote"))
-			.put(URI.create("http://dbpedia.org/ontology/popularVote"), URI.create("http://dbpedia.org/ontology/population"))
-			.put(URI.create("http://dbpedia.org/ontology/population"), URI.create("http://dbpedia.org/ontology/numberOfHouses"))
-			.put(URI.create("http://dbpedia.org/ontology/numberOfHouses"), URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"),
+					URI.create("http://dbpedia.org/ontology/numberOfEmployees"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfEmployees"),
+					URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"),
+					URI.create("http://dbpedia.org/ontology/numberOfDeaths"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfDeaths"),
+					URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"),
+					URI.create("http://dbpedia.org/ontology/popularVote"))
+			.put(URI.create("http://dbpedia.org/ontology/popularVote"),
+					URI.create("http://dbpedia.org/ontology/population"))
+			.put(URI.create("http://dbpedia.org/ontology/population"),
+					URI.create("http://dbpedia.org/ontology/numberOfHouses"))
+			.put(URI.create("http://dbpedia.org/ontology/numberOfHouses"),
+					URI.create("http://dbpedia.org/ontology/population"))
 			.build();
 	private static final double VALUES_WEIGHT = Double
 			.parseDouble(System.getProperty("eu.odalic.extrarelatable.valuesWeight", "1"));
@@ -465,6 +473,13 @@ public class DataGvAt {
 
 				final DeclaredEntity columnSolution = solution.get(index);
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
+				csvWriter.writeRow("Solution matched:",
+						annotation.getProperties().stream().map(property -> property.getUri())
+								.filter(uri -> uri != null && uri.equals(columnSolution.getUri())).findAny()
+								.isPresent());
+				csvWriter.writeRow("Solution available:",
+						columnSolution != null && columnSolution.getUri() != null && testStatisticsBuilder
+								.getUniquePropertiesLearnt(repetition).contains(columnSolution.getUri()));
 
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();

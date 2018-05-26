@@ -318,15 +318,17 @@ public class T2Dv2GoldStandard {
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
 
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
-				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
+				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 
-		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory, 
-				NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath,
+				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition,
+				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
@@ -375,13 +377,15 @@ public class T2Dv2GoldStandard {
 
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize) throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext,
+					repetition, random, maxColumnSampleSize);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -391,7 +395,8 @@ public class T2Dv2GoldStandard {
 
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory,
-			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize)
+			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize)
 			throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
@@ -401,7 +406,8 @@ public class T2Dv2GoldStandard {
 			final AnnotationResult result;
 			try {
 				result = annotateTable(csvWriter, file, graph, convertedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext,
+						repetition, random, maxColumnSampleSize);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
@@ -452,6 +458,13 @@ public class T2Dv2GoldStandard {
 
 				final DeclaredEntity columnSolution = solution.get(index);
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
+				csvWriter.writeRow("Solution matched:",
+						annotation.getProperties().stream().map(property -> property.getUri())
+								.filter(uri -> uri != null && uri.equals(columnSolution.getUri())).findAny()
+								.isPresent());
+				csvWriter.writeRow("Solution available:",
+						columnSolution != null && columnSolution.getUri() != null && testStatisticsBuilder
+								.getUniquePropertiesLearnt(repetition).contains(columnSolution.getUri()));
 
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();
@@ -497,8 +510,8 @@ public class T2Dv2GoldStandard {
 
 	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input,
 			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, 
-			final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize) {
 		csvWriter.writeRow("Processing file:", input);
 
@@ -561,8 +574,9 @@ public class T2Dv2GoldStandard {
 			contextProperties = ImmutableMap.of();
 			contextClasses = ImmutableMap.of();
 		}
-		
-		final Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+
+		final Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses,
+				onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
 
 		testStatisticsBuilder.addLearntFile();
 
@@ -619,9 +633,11 @@ public class T2Dv2GoldStandard {
 	}
 
 	private Set<PropertyTree> buildTrees(final SlicedTable slicedTable,
-			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties, final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final int repetition, final Random random, final int maxColumnSampleSize) {
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
+			final int maxColumnSampleSize) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -644,7 +660,7 @@ public class T2Dv2GoldStandard {
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 
 			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
-			
+
 			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())
 					.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
@@ -700,7 +716,7 @@ public class T2Dv2GoldStandard {
 		}
 		return values;
 	}
-	
+
 	private Map<Integer, Type> getHints(final CsvProfile csvProfile) {
 		final Map<Integer, Type> hints;
 		if (csvProfile == null) {
@@ -710,7 +726,7 @@ public class T2Dv2GoldStandard {
 			hints = toHints(types);
 		}
 		return hints;
-	}	
+	}
 
 	private static ParsedTable toParsedTable(final Dataset dataset, final String fileName) {
 		final ParsedTable table = NestedListsParsedTable.fromColumns(Matrix.fromArray(dataset.getRelation()),
@@ -790,7 +806,7 @@ public class T2Dv2GoldStandard {
 	private void cacheFailedProfiling(Path profilesDirectory, Path input) throws IOException {
 		Files.createFile(profilesDirectory.resolve(input.getFileName() + ".fail"));
 	}
-	
+
 	private void cacheFailedContextCollection(Path collectionResultsDirectory, Path input) throws IOException {
 		Files.createFile(collectionResultsDirectory.resolve(input.getFileName() + ".fail"));
 	}
@@ -806,7 +822,7 @@ public class T2Dv2GoldStandard {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		mapper.writeValue(profileInput.toFile(), csvProfile);
 	}
-	
+
 	private void saveCollectionResult(final ResultValue result, final Path resultOutput)
 			throws IOException, JsonGenerationException, JsonMappingException {
 		final ObjectMapper mapper = new ObjectMapper();
@@ -821,7 +837,7 @@ public class T2Dv2GoldStandard {
 		csvProfile = mapper.readValue(profileInput.toFile(), CsvProfile.class);
 		return csvProfile;
 	}
-	
+
 	private ResultValue loadCollectionResult(final Path resultInput)
 			throws IOException, JsonParseException, JsonMappingException {
 		final ResultValue result;
@@ -882,7 +898,8 @@ public class T2Dv2GoldStandard {
 
 	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input,
 			final BackgroundKnowledgeGraph graph, final Path convertedInputFilesDirectory, final Path profilesDirectory,
-			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
+			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
 		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
@@ -913,7 +930,7 @@ public class T2Dv2GoldStandard {
 
 		final Map<Integer, DeclaredEntity> declaredPropertyUris = getDeclaredPropertyUris(declaredPropertiesPath,
 				input.getFileName().toString());
-		
+
 		final Map<Integer, DeclaredEntity> contextProperties;
 		final Map<Integer, DeclaredEntity> contextClasses;
 		if (!onlyDeclaredAsContext) {
@@ -931,9 +948,8 @@ public class T2Dv2GoldStandard {
 			contextClasses = ImmutableMap.of();
 		}
 
-		return new AnnotationResult(parsedTable,
-				annotate(graph, slicedTable, declaredPropertyUris, contextProperties,
-						contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
+		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties,
+				contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
 	}
 
 	private Map<Integer, DeclaredEntity> getContextClasses(final ResultValue collectedContext) {
@@ -997,9 +1013,9 @@ public class T2Dv2GoldStandard {
 	private ResultValue getCollectedContext(final CsvWriter csvWriter, final ParsedTable parsedTable, final Path input,
 			final Path collectionResultsDirectory, final Random random) {
 		ResultValue result = null;
-		
+
 		final String fileName = com.google.common.io.Files.getNameWithoutExtension(input.getFileName().toString());
-		
+
 		final Path resultInput = collectionResultsDirectory.resolve(fileName + ".json");
 		final Path failedCollectionNotice = collectionResultsDirectory.resolve(fileName + ".fail");
 		if (resultInput.toFile().exists()) {
@@ -1034,12 +1050,12 @@ public class T2Dv2GoldStandard {
 		}
 		return result;
 	}
-	
+
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext,final int repetition, final Random random,
+			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
@@ -1048,7 +1064,7 @@ public class T2Dv2GoldStandard {
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
-			
+
 			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
 
 			final Partition partition = new Partition(values.stream().filter(e -> e.isNumeric())

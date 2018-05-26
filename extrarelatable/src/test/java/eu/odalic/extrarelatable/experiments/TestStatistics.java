@@ -180,6 +180,10 @@ public final class TestStatistics {
 			
 			return this;
 		}
+		
+		public Set<URI> getUniquePropertiesLearnt(final int repetition) {
+			return testStatistics.uniquePropertiesLearnt.get(repetition);
+		}
 
 		public Builder addUniquePropertyTested(int repetition, URI propertyUri) {
 			testStatistics.uniquePropertiesTested.get(repetition).add(propertyUri);
