@@ -6,12 +6,10 @@ import java.util.SortedSet;
 
 import com.google.common.collect.SetMultimap;
 
-import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
-
-public interface ResultAggregator {
-	<T extends Comparable<T>> SortedSet<T> aggregate(SetMultimap<T, ? extends MeasuredNode> levelAggregates);
+public interface ResultAggregator<U> {
+	<T extends Comparable<T>> SortedSet<T> aggregate(SetMultimap<T, ? extends U> levelAggregates);
 	
-	<T> SortedSet<T> aggregate(SetMultimap<T, ? extends MeasuredNode> levelAggregates, Comparator<? super T> keysComparator);
+	<T> SortedSet<T> aggregate(SetMultimap<T, ? extends U> levelAggregates, Comparator<? super T> keysComparator);
 
 	static <T extends Comparable<? super T>, U extends Comparable<? super U>> Comparator<T> aggregatesComparator(final Map<T, U> map) {
 		return aggregatesComparator(map, Comparator.naturalOrder(), Comparator.naturalOrder());

@@ -12,19 +12,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.SetMultimap;
 
-import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
-
 @Immutable
 @Component("majorityVote")
-public class MajorityVoteResultAggregator implements ResultAggregator {
+public class MajorityVoteResultAggregator<U> implements ResultAggregator<U> {
 
 	@Override
-	public <T extends Comparable<T>> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates) {
+	public <T extends Comparable<T>> SortedSet<T> aggregate(final SetMultimap<T, ? extends U> levelAggregates) {
 		return aggregate(levelAggregates, Comparator.naturalOrder());
 	}
 
 	@Override
-	public <T> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates,
+	public <T> SortedSet<T> aggregate(final SetMultimap<T, ? extends U> levelAggregates,
 			final Comparator<? super T> generalKeysComparator) {
 		final Map<T, Integer> mappedAggregates = levelAggregates.asMap().entrySet().stream()
 				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue().size()));

@@ -16,7 +16,7 @@ import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 
 @Immutable
 @Component("averageDistance")
-public class AverageDistanceResultAggregator implements ResultAggregator {
+public class AverageDistanceResultAggregator implements ResultAggregator<MeasuredNode> {
 
 	@Override
 	public <T extends Comparable<T>> SortedSet<T> aggregate(final SetMultimap<T, ? extends MeasuredNode> levelAggregates) {

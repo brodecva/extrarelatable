@@ -117,17 +117,17 @@ public class Trivial {
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
-	private ResultAggregator propertiesResultAggregator;
+	private ResultAggregator<MeasuredNode> propertiesResultAggregator;
 	
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
-	private ResultAggregator labelsResultAggregator;
+	private ResultAggregator<MeasuredNode> labelsResultAggregator;
 	
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
-	private ResultAggregator pairsResultAggregator;
+	private ResultAggregator<MeasuredNode> pairsResultAggregator;
 	
 	@Autowired
 	@Lazy

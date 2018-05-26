@@ -121,7 +121,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 	@Autowired
 	@Lazy
 	@Qualifier("majorityVote")
-	private ResultAggregator labelsResultAggregator;
+	private ResultAggregator<MeasuredNode> labelsResultAggregator;
 	
 	@Autowired
 	@Lazy

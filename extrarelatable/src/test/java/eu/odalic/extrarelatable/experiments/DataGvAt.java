@@ -31,8 +31,8 @@ import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -113,6 +113,10 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class DataGvAt {
 
+	private static final String CSV_TABLE_PARSER_QUALIFIER = System.getProperty("eu.odalic.extrarelatable.csvTableParser", "automatic");
+	private static final String PROPERTIES_RESULT_AGGREGATOR_QUALIFIER = System.getProperty("eu.odalic.extrarelatable.propertiesResultAggregator", "averageDistance");
+	private static final String PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER = System.getProperty("eu.odalic.extrarelatable.propertyTreesMergingStrategy", "propertyUri");
+	
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(
 			System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
 	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
@@ -177,9 +181,8 @@ public class DataGvAt {
 	private static final int MAXIMUM_COLUMN_SAMPLE_SIZE = Integer
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.maximumColumnSampleSize", "1000"));
 
-	@Autowired
-	@Lazy
-	@Qualifier("automatic")
+	@Autowired BeanFactory beanFactory;
+	
 	private CsvTableParser csvTableParser;
 
 	@Autowired
@@ -202,14 +205,8 @@ public class DataGvAt {
 	@Lazy
 	private TopKNodesMatcher topKNodesMatcher;
 
-	@Autowired
-	@Lazy
-	@Qualifier("averageDistance")
-	private ResultAggregator propertiesResultAggregator;
+	private ResultAggregator<MeasuredNode> propertiesResultAggregator;
 
-	@Autowired
-	@Lazy
-	@Qualifier("propertyUri")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	@Autowired
@@ -226,8 +223,13 @@ public class DataGvAt {
 
 	private TestStatistics.Builder testStatisticsBuilder;
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
+		this.csvTableParser = beanFactory.getBean(CSV_TABLE_PARSER_QUALIFIER, CsvTableParser.class);
+		this.propertiesResultAggregator = beanFactory.getBean(PROPERTIES_RESULT_AGGREGATOR_QUALIFIER, ResultAggregator.class);
+		this.propertyTreesMergingStrategy = beanFactory.getBean(PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER, PropertyTreesMergingStrategy.class);
+		
 		this.testStatisticsBuilder = TestStatistics.builder();
 	}
 
@@ -267,8 +269,9 @@ public class DataGvAt {
 				"Numeric columns to learn", "Learnt numeric columns", "Annotated numeric columns",
 				"Numeric columns to learn without property", "Numeric columns to test without property",
 				"Unique numeric column properties", "Unique numeric column properties learnt",
-				"Unique numeric column properties tested", "Matching", "Missing", "Nonmatching",
-				"Nonmatching available", "Precision");
+				"Unique numeric column properties tested", "Missing", "Matching", "Nonmatching",
+				"Nonmatching available", "Precision", "Instance matching", "Instance nonmatching",
+				"Instance nonmatching available", "Instance precision");
 		for (final TestStatistics testStatistics : results) {
 			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
 					testStatistics.getTestFilesCount(), testStatistics.getLearntFiles(),
@@ -278,9 +281,13 @@ public class DataGvAt {
 					testStatistics.getNoPropertyLearningNumericColumns(),
 					testStatistics.getNoPropertyTestingNumericColums(), testStatistics.getUniqueProperties(),
 					testStatistics.getUniquePropertiesLearnt(), testStatistics.getUniquePropertiesTested(),
-					testStatistics.getMatchingSolutions(), testStatistics.getMissingSolutions(),
+					testStatistics.getMissingSolutions(), testStatistics.getMatchingSolutions(),
 					testStatistics.getNonmatchingSolutions(), testStatistics.getNonmatchingAvailableSolutions(),
-					testStatistics.getMatchingSolutions() / (testStatistics.getMatchingSolutions() + testStatistics.getNonmatchingAvailableSolutions()));
+					testStatistics.getMatchingSolutions() / (testStatistics.getMatchingSolutions() + testStatistics.getNonmatchingAvailableSolutions()),
+					testStatistics.getInstanceMatchingSolutions(),
+					testStatistics.getInstanceNonmatchingSolutions(), testStatistics.getInstanceNonmatchingAvailableSolutions(),
+					testStatistics.getInstanceMatchingSolutions() / (testStatistics.getInstanceMatchingSolutions() + testStatistics.getInstanceNonmatchingAvailableSolutions())
+					);
 		}
 
 		csvWriter.flush();
@@ -476,11 +483,17 @@ public class DataGvAt {
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
 				csvWriter.writeRow("Solution matched:",
 						annotation.getProperties().stream().map(property -> property.getUri())
-								.filter(uri -> uri != null && uri.equals(columnSolution.getUri())).findAny()
-								.isPresent());
+						.anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri())));
+				csvWriter.writeRow("Solution matched in an instance:",
+						annotation.getProperties().stream().flatMap(property -> property.getInstances().stream()).map(instance -> instance.getContext().getDeclaredProperty())
+								.filter(declaredProperty -> declaredProperty != null)
+								.map(declaredProperty -> declaredProperty.getUri())
+								.anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri())));
 				csvWriter.writeRow("Solution available:",
 						columnSolution != null && columnSolution.getUri() != null && testStatisticsBuilder
-								.getUniquePropertiesLearnt(repetition).contains(columnSolution.getUri()));
+								.getUniquePropertiesLearnt(repetition)
+								.stream()
+								.anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri())));
 
 				if (columnSolution == null) {
 					testStatisticsBuilder.addMissingSolution();
@@ -491,9 +504,16 @@ public class DataGvAt {
 					} else {
 						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution.getUri());
 					}
+					
+					if (annotation.getProperties().stream().flatMap(property -> property.getInstances().stream()).map(instance -> instance.getContext().getDeclaredProperty())
+							.filter(declaredProperty -> declaredProperty != null)
+							.map(declaredProperty -> declaredProperty.getUri())
+							.anyMatch(uri -> isAcceptableFor(uri, columnSolution.getUri()))) {
+						testStatisticsBuilder.addInstanceMatchingSolution();
+					} else {
+						testStatisticsBuilder.addInstanceNonmatchingSolution(repetition, columnSolution.getUri());
+					}
 				}
-
-				testStatisticsBuilder.addAnnotatedNumericColumn();
 
 				testStatisticsBuilder.addAnnotatedNumericColumn();
 			});

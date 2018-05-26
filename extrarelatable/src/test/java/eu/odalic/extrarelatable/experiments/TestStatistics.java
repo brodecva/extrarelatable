@@ -30,7 +30,9 @@ public final class TestStatistics {
 	private int annotatedNumericColumns;
 	private int missingSolutions;
 	private int matchingSolutions;
+	private int instanceMatchingSolutions;
 	private Map<Integer, Multiset<URI>> nonmatchingSolutions = new HashMap<>();// HashMultiset.create();
+	private Map<Integer, Multiset<URI>> instanceNonmatchingSolutions = new HashMap<>();// HashMultiset.create();
 	private int noPropertyLearningNumericColumns;
 	private int noPropertyTestingNumericColums;
 	private Map<Integer, Set<URI>> uniqueProperties = new HashMap<>();
@@ -150,9 +152,21 @@ public final class TestStatistics {
 			
 			return this;				
 		}
+		
+		public Builder addInstanceMatchingSolution() {
+			testStatistics.instanceMatchingSolutions++;
+			
+			return this;				
+		}
 
 		public Builder addNonmatchingSolution(int repetition, URI columnSolution) {
 			testStatistics.nonmatchingSolutions.get(repetition).add(columnSolution);
+			
+			return this;
+		}
+		
+		public Builder addInstanceNonmatchingSolution(int repetition, URI columnSolution) {
+			testStatistics.instanceNonmatchingSolutions.get(repetition).add(columnSolution);
 			
 			return this;
 		}
@@ -199,6 +213,7 @@ public final class TestStatistics {
 				testStatistics.uniquePropertiesTested.put(repetition, new HashSet<>());
 				testStatistics.uniqueProperties.put(repetition, new HashSet<>());
 				testStatistics.nonmatchingSolutions.put(repetition, HashMultiset.create());
+				testStatistics.instanceNonmatchingSolutions.put(repetition, HashMultiset.create());
 			}
 			
 			return this;
@@ -279,9 +294,17 @@ public final class TestStatistics {
 	public double getMatchingSolutions() {
 		return matchingSolutions / (double) repetitions;
 	}
+	
+	public double getInstanceMatchingSolutions() {
+		return instanceMatchingSolutions / (double) repetitions;
+	}
 
 	public double getNonmatchingSolutions() {
 		return nonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+	}
+	
+	public double getInstanceNonmatchingSolutions() {
+		return instanceNonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
 	}
 
 	public double getNoPropertyLearningNumericColumns() {
@@ -309,6 +332,19 @@ public final class TestStatistics {
 		
 		for (int repetition = 0; repetition < repetitions; repetition++) {
 			final Multiset<URI> nonmatchingAvailable = HashMultiset.create(nonmatchingSolutions.get(repetition));
+			nonmatchingAvailable.retainAll(uniquePropertiesLearnt.get(repetition));
+			
+			nonmatchingAvailableSum += nonmatchingAvailable.size();
+		}
+				
+		return nonmatchingAvailableSum / (double) repetitions;
+	}
+	
+	public double getInstanceNonmatchingAvailableSolutions() {
+		int nonmatchingAvailableSum = 0;
+		
+		for (int repetition = 0; repetition < repetitions; repetition++) {
+			final Multiset<URI> nonmatchingAvailable = HashMultiset.create(instanceNonmatchingSolutions.get(repetition));
 			nonmatchingAvailable.retainAll(uniquePropertiesLearnt.get(repetition));
 			
 			nonmatchingAvailableSum += nonmatchingAvailable.size();

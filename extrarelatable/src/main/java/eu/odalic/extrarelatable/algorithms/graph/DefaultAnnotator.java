@@ -39,15 +39,15 @@ public final class DefaultAnnotator implements Annotator {
 
 	private final PropertyTreeBuilder propertyTreeBuilder;
 	private final TopKNodesMatcher topKNodesMatcher;
-	private final ResultAggregator labelsResultAggregator;
-	private final ResultAggregator propertiesResultAggregator;
-	private final ResultAggregator pairsResultAggregator;
+	private final ResultAggregator<MeasuredNode> labelsResultAggregator;
+	private final ResultAggregator<MeasuredNode> propertiesResultAggregator;
+	private final ResultAggregator<MeasuredNode> pairsResultAggregator;
 	private final int defaultK;
 
 	public DefaultAnnotator(final PropertyTreeBuilder propertyTreeBuilder, final TopKNodesMatcher topKNodesMatcher,
-			@Qualifier("averageDistance") final ResultAggregator propertiesResultAggregator,
-			@Qualifier("averageDistance") final ResultAggregator labelsResultAggregator,
-			@Qualifier("averageDistance") final ResultAggregator pairsResultAggregator, @Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
+			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> propertiesResultAggregator,
+			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> labelsResultAggregator,
+			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> pairsResultAggregator, @Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
 		checkNotNull(propertyTreeBuilder);
 		checkNotNull(topKNodesMatcher);
 		checkNotNull(propertiesResultAggregator);
