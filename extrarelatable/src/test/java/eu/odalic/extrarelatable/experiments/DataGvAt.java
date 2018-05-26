@@ -268,7 +268,7 @@ public class DataGvAt {
 				"Numeric columns to learn without property", "Numeric columns to test without property",
 				"Unique numeric column properties", "Unique numeric column properties learnt",
 				"Unique numeric column properties tested", "Matching", "Missing", "Nonmatching",
-				"Nonmatching available");
+				"Nonmatching available", "Precision");
 		for (final TestStatistics testStatistics : results) {
 			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
 					testStatistics.getTestFilesCount(), testStatistics.getLearntFiles(),
@@ -279,7 +279,8 @@ public class DataGvAt {
 					testStatistics.getNoPropertyTestingNumericColums(), testStatistics.getUniqueProperties(),
 					testStatistics.getUniquePropertiesLearnt(), testStatistics.getUniquePropertiesTested(),
 					testStatistics.getMatchingSolutions(), testStatistics.getMissingSolutions(),
-					testStatistics.getNonmatchingSolutions(), testStatistics.getNonmatchingAvailableSolutions());
+					testStatistics.getNonmatchingSolutions(), testStatistics.getNonmatchingAvailableSolutions(),
+					testStatistics.getMatchingSolutions() / (testStatistics.getMatchingSolutions() + testStatistics.getNonmatchingAvailableSolutions()));
 		}
 
 		csvWriter.flush();
