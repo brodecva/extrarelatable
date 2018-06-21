@@ -41,8 +41,9 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-import eu.odalic.extrarelatable.algorithms.graph.ResultAggregator;
-import eu.odalic.extrarelatable.algorithms.graph.TopKNodesMatcher;
+
+import eu.odalic.extrarelatable.algorithms.graph.aggregation.ResultAggregator;
+import eu.odalic.extrarelatable.algorithms.graph.matching.TopKNodesMatcher;
 import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextCompiler;
 import eu.odalic.extrarelatable.algorithms.subcontext.SubcontextMatcher;
 import eu.odalic.extrarelatable.algorithms.table.TableAnalyzer;

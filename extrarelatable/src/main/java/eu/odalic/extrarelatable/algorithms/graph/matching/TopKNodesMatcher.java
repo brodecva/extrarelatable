@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.graph;
+package eu.odalic.extrarelatable.algorithms.graph.matching;
 
 import java.util.Collection;
 import java.util.SortedSet;

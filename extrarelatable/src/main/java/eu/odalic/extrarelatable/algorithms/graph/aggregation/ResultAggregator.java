@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.graph;
+package eu.odalic.extrarelatable.algorithms.graph.aggregation;
 
 import java.util.Comparator;
 import java.util.Map;

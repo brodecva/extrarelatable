@@ -13,6 +13,8 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSetMultimap;
 
+import eu.odalic.extrarelatable.algorithms.graph.aggregation.MajorityVoteResultAggregator;
+
 /**
  * @author brodecva
  *
@@ -20,7 +22,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 public class MajorityVoteResultAggregatorTest {
 
 	/**
-	 * Test method for {@link eu.odalic.extrarelatable.algorithms.graph.MajorityVoteResultAggregator#aggregate(com.google.common.collect.SetMultimap, java.util.Comparator)}.
+	 * Test method for {@link eu.odalic.extrarelatable.algorithms.graph.aggregation.MajorityVoteResultAggregator#aggregate(com.google.common.collect.SetMultimap, java.util.Comparator)}.
 	 */
 	@Test
 	public final void testAggregateSetMultimapOfTQextendsUComparatorOfQsuperT() {

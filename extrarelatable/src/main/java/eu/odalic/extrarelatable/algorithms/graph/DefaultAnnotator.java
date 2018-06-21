@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SetMultimap;
 
+import eu.odalic.extrarelatable.algorithms.graph.aggregation.ResultAggregator;
+import eu.odalic.extrarelatable.algorithms.graph.matching.TopKNodesMatcher;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 import eu.odalic.extrarelatable.model.annotation.Statistics;
@@ -45,9 +47,9 @@ public final class DefaultAnnotator implements Annotator {
 	private final int defaultK;
 
 	public DefaultAnnotator(final PropertyTreeBuilder propertyTreeBuilder, final TopKNodesMatcher topKNodesMatcher,
-			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> propertiesResultAggregator,
-			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> labelsResultAggregator,
-			@Qualifier("averageDistance") final ResultAggregator<MeasuredNode> pairsResultAggregator, @Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
+			@Qualifier("PropertiesResultAggregator") final ResultAggregator<MeasuredNode> propertiesResultAggregator,
+			@Qualifier("LabelsResultAggregator") final ResultAggregator<MeasuredNode> labelsResultAggregator,
+			@Qualifier("PairsResultAggregator") final ResultAggregator<MeasuredNode> pairsResultAggregator, @Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
 		checkNotNull(propertyTreeBuilder);
 		checkNotNull(topKNodesMatcher);
 		checkNotNull(propertiesResultAggregator);

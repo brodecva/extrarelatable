@@ -11,7 +11,12 @@
 	<context:component-scan base-package="eu.odalic.extrarelatable.util
 										eu.odalic.extrarelatable.model
 										eu.odalic.extrarelatable.services.odalic
-										eu.odalic.extrarelatable.algorithms
+										eu.odalic.extrarelatable.algorithms.bag
+										eu.odalic.extrarelatable.algorithms.distance
+										eu.odalic.extrarelatable.algorithms.graph.aggregation
+										eu.odalic.extrarelatable.algorithms.graph.matching
+										eu.odalic.extrarelatable.algorithms.subcontext
+										eu.odalic.extrarelatable.algorithms.table
 										eu.odalic.extrarelatable.services.csvengine
 										eu.odalic.extrarelatable.services.dwtc" />
 

@@ -172,9 +172,9 @@ public class DefaultGraphService implements GraphService {
 
 	@Autowired
 	public DefaultGraphService(
-			@Qualifier("propertyUriLabelTextFallback") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
+			@Qualifier("PropertyTreesMergingStrategy") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
 			FileCachingService fileCachingService, CsvProfilerService csvProfilerService,
-			CsvCleanService csvCleanerService, @Qualifier("automatic") CsvTableParser csvTableParser,
+			CsvCleanService csvCleanerService, @Qualifier("CsvTableParser") CsvTableParser csvTableParser,
 			TableAnalyzer tableAnalyzer, PropertyTreesBuilder propertyTreesBuilder, TableSlicer tableSlicer,
 			Annotator annotator, CsvTableWriter csvTableWriter, DwtcToCsvService dwtcToCsvService,
 			final GraphsPersitingService graphsPersitingService,

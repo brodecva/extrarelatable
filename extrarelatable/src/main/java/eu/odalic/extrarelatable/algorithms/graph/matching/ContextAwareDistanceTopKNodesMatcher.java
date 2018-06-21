@@ -1,4 +1,4 @@
-package eu.odalic.extrarelatable.algorithms.graph;
+package eu.odalic.extrarelatable.algorithms.graph.matching;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
