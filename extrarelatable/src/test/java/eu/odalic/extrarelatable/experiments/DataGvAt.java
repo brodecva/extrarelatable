@@ -122,8 +122,7 @@ public class DataGvAt {
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(
 			System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
-	private static final String RESOURCES_PATH = System.getProperty("eu.odalic.extrarelatable.resourcesPath");
-	private static final String INSTANCE_SUBPATH = "data.gv.at.1_annotated";
+	private static final String INSTANCE_SUBPATH = System.getProperty("eu.odalic.extrarelatable.instancePath");
 	private static final String DECLARED_PROPERTIES_SUBPATH = "property";
 	private static final double MINIMUM_PARTITION_RELATIVE_SIZE = Double
 			.parseDouble(System.getProperty("eu.odalic.extrarelatable.minimumPartitionRelativeSize", "0.01"));
@@ -144,7 +143,7 @@ public class DataGvAt {
 	private static final boolean FILES_ONLY_WITH_PROPERTIES = Boolean
 			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.filesOnlyWithProperties", "true"));
 	private static final boolean NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES = Boolean
-			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.numericColumnsOnlyWithProperties", "true"));
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.onlyWithProperties", "true"));
 	private static final boolean ONLY_DECLARED_AS_CONTEXT = Boolean
 			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.onlyDeclaredAsContext", "false"));
 	private static final List<Integer> CHOSEN_SAMPLES_INDICES = System
@@ -328,8 +327,11 @@ public class DataGvAt {
 
 	private boolean testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int sampleSizeIndex,
 			final Random random, final int repetition) throws IOException {
-		final Path resourcesPath = Paths.get(RESOURCES_PATH);
-		final Path instancePath = resourcesPath.resolve(INSTANCE_SUBPATH);
+		if (INSTANCE_SUBPATH == null) {
+			throw new IllegalArgumentException("No instance path provided!");
+		}
+
+		final Path instancePath = Paths.get(INSTANCE_SUBPATH);
 
 		final Path setPath = instancePath;
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
