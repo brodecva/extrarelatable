@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multiset;
 
 public final class TestStatistics {
@@ -39,6 +42,13 @@ public final class TestStatistics {
 	private Map<Integer, Set<URI>> uniquePropertiesLearnt = new HashMap<>();
 	private Map<Integer, Set<URI>> uniquePropertiesTested = new HashMap<>();// = new HashSet<>();
 	private int repetitions;
+	
+	private Map<Integer, Map<URI, Integer>> truePositives = new HashMap<>();
+	private Map<Integer, Map<URI, Integer>> falsePositives = new HashMap<>();
+	private Map<Integer, Map<URI, Integer>> falseNegatives = new HashMap<>();
+	private Map<Integer, Map<URI, Integer>> occurencesCount = new HashMap<>();
+	private Map<Integer, Integer> totalOccurencesCount = new HashMap<>();
+	private Map<Integer, Integer> errors = new HashMap<>();
 	
 	public final static class Builder {
 
@@ -198,9 +208,42 @@ public final class TestStatistics {
 		public Set<URI> getUniquePropertiesLearnt(final int repetition) {
 			return testStatistics.uniquePropertiesLearnt.get(repetition);
 		}
+		
+		public Set<URI> getUniquePropertiesTested(final int repetition) {
+			return testStatistics.uniquePropertiesTested.get(repetition);
+		}
 
 		public Builder addUniquePropertyTested(int repetition, URI propertyUri) {
 			testStatistics.uniquePropertiesTested.get(repetition).add(propertyUri);
+			
+			return this;
+		}
+		
+		public Builder addTrue(int repetition, URI propertyUri) {
+			final Map<URI, Integer> repetitionTruePositives = testStatistics.truePositives.get(repetition);
+			
+			repetitionTruePositives.compute(propertyUri, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			return this;
+		}
+		
+		public Builder addFalse(int repetition, URI assigned, URI correct) {
+			final Map<URI, Integer> repetitionFalsePositives = testStatistics.falsePositives.get(repetition);
+			repetitionFalsePositives.compute(assigned, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			final Map<URI, Integer> repetitionFalseNegatives = testStatistics.falseNegatives.get(repetition);
+			repetitionFalseNegatives.compute(correct, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			testStatistics.errors.compute(repetition, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			return this;
+		}
+		
+		public Builder addPropertyOccurence(int repetition, URI propertyUri) {
+			final Map<URI, Integer> repetitionOccurencesCount = testStatistics.occurencesCount.get(repetition);
+			repetitionOccurencesCount.compute(propertyUri, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			testStatistics.totalOccurencesCount.compute(repetition, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
 			
 			return this;
 		}
@@ -214,6 +257,12 @@ public final class TestStatistics {
 				testStatistics.uniqueProperties.put(repetition, new HashSet<>());
 				testStatistics.nonmatchingSolutions.put(repetition, HashMultiset.create());
 				testStatistics.instanceNonmatchingSolutions.put(repetition, HashMultiset.create());
+				testStatistics.truePositives.put(repetition, new HashMap<>());
+				testStatistics.falsePositives.put(repetition, new HashMap<>());
+				testStatistics.falseNegatives.put(repetition, new HashMap<>());
+				testStatistics.occurencesCount.put(repetition, new HashMap<>());
+				testStatistics.totalOccurencesCount.put(repetition, 0);
+				testStatistics.errors.put(repetition, 0);
 			}
 			
 			return this;
@@ -351,5 +400,165 @@ public final class TestStatistics {
 		}
 				
 		return nonmatchingAvailableSum / (double) repetitions;
+	}
+	
+	private double getAverageWeightedMeasure(final Map<Integer, Map<URI, Double>> measures) {
+		double weightedMeasuresSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final Map<URI, Double> repetitionMeasures = measures.get(repetition);
+			final Map<URI, Integer> repetitionInstancesCount = this.occurencesCount.get(repetition);
+			
+			final double repetitionMeasuresSum = repetitionMeasures.entrySet().stream().map(e -> {
+				final Integer instancesCount = repetitionInstancesCount.get(e.getKey());
+				
+				return e.getValue() * (instancesCount == null ? 0 : instancesCount);
+			}).collect(Collectors.summingDouble(Double::doubleValue));
+			
+			final int repetitionTotalInstancesCount = this.totalOccurencesCount.get(repetition);
+			
+			final double repetitionWeightedMeasure = repetitionMeasuresSum / (double) repetitionTotalInstancesCount;
+			
+			weightedMeasuresSum += repetitionWeightedMeasure;
+		}
+				
+		return weightedMeasuresSum / (double) repetitions;
+	}
+	
+	private Map<URI, Double> getAveragedMeasures(final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> measures) {
+		final Map<URI, Double> measuresSums = new HashMap<>();
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final Map<? extends URI, ? extends Number> repetitionMeasures = measures.get(repetition);
+			
+			repetitionMeasures.forEach((key, value) -> {
+				measuresSums.compute(key, (oldKey, oldValue) -> (oldValue == null ?  value.doubleValue() : oldValue + value.doubleValue())); 
+			});
+		}
+				
+		return measuresSums.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue() / (double) repetitions));
+	}
+	
+	public Map<URI, Double> getAverageTruePositives() {
+		return getAveragedMeasures(this.truePositives);
+	}
+	
+	public Map<URI, Double> getAverageFalsePositives() {
+		return getAveragedMeasures(this.falsePositives);
+	}
+	
+	public Map<URI, Double> getAverageFalseNegatives() {
+		return getAveragedMeasures(this.falseNegatives);
+	}
+	
+	private Map<Integer, Map<URI, Double>> getRecalls() {
+		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+			final int iteration = e.getKey();
+			
+			final Map<URI,Integer> iterationAll = e.getValue();
+			
+			final Map<URI, Integer> iterationTruePositives = this.truePositives.get(iteration);
+			final Map<URI, Integer> iterationFalseNegatives = this.falseNegatives.get(iteration);
+			
+			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+				final int propertyTruePositives = iterationTruePositives.get(property) == null ? 0 : iterationTruePositives.get(property);
+				final int propertyFalseNegatives = iterationFalseNegatives.get(property) == null ? 0 : iterationFalseNegatives.get(property);
+				
+				final int propertyAllSum = propertyTruePositives + propertyFalseNegatives;
+				if (propertyAllSum == 0) {
+					return 0d;
+				}
+				
+				return ((double) propertyTruePositives) / ((double) propertyAllSum);
+			}));
+		}));
+	}
+	
+	private Map<Integer, Map<URI, Double>> getPrecisions() {
+		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+			final int iteration = e.getKey();
+			
+			final Map<URI,Integer> iterationAll = e.getValue();
+			
+			final Map<URI, Integer> iterationTruePositives = this.truePositives.get(iteration);
+			final Map<URI, Integer> iterationFalsePositives = this.falsePositives.get(iteration);
+			
+			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+				final int propertyTruePositives = iterationTruePositives.get(property) == null ? 0 : iterationTruePositives.get(property);
+				final int propertyFalsePositives = iterationFalsePositives.get(property) == null ? 0 : iterationFalsePositives.get(property);
+				
+				final int propertyAllSum = propertyTruePositives + propertyFalsePositives;
+				if (propertyAllSum == 0) {
+					return 1d;
+				}
+				
+				return ((double) propertyTruePositives) / ((double) propertyAllSum);
+			}));
+		}));
+	}
+	
+	private Map<Integer, Map<URI, Double>> getFMeasures() {
+		final Map<Integer, Map<URI, Double>> precisions = getPrecisions();
+		final Map<Integer, Map<URI, Double>> recalls = getRecalls();
+		
+		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+			final int iteration = e.getKey();
+			
+			final Map<URI,Integer> iterationAll = e.getValue();
+			
+			final Map<URI, Double> iterationPrecisions = precisions.get(iteration);
+			final Map<URI, Double> iterationRecalls = recalls.get(iteration);
+			
+			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+				final double propertyPrecision = iterationPrecisions.get(property);
+				final double propertyRecall = iterationRecalls.get(property);
+				
+				final double fMeasure = 2 * propertyPrecision * propertyRecall / (propertyPrecision + propertyRecall);
+				if (Double.isNaN(fMeasure)) {
+					throw new IllegalStateException();
+				}
+				
+				return fMeasure;
+			}));
+		}));
+	}
+	
+	public double getAverageWeightedPrecision() {
+		return getAverageWeightedMeasure(getPrecisions());
+	}
+	
+	public Map<URI, Double> getAveragePrecisions() {
+		return getAveragedMeasures(getPrecisions());
+	}
+	
+	public double getAverageWeightedRecall() {
+		return getAverageWeightedMeasure(getRecalls());
+	}
+	
+	public Map<URI, Double> getAverageRecalls() {
+		return getAveragedMeasures(getRecalls());
+	}
+	
+	public double getAverageWeightedFMeasure() {
+		return getAverageWeightedMeasure(getFMeasures());
+	}
+	
+	public Map<URI, Double> getAverageFMeasures() {
+		return getAveragedMeasures(getFMeasures());
+	}
+	
+	public double getAverageErrorRate() {
+		double errorRatesSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final int repetitionErrors = this.errors.get(repetition);
+			final int repetitionInstancesCount = this.totalOccurencesCount.get(repetition);
+			
+			final double repetitionErrorRate = (double) repetitionErrors / (double) repetitionInstancesCount; 
+			
+			errorRatesSum += repetitionErrorRate;
+		}
+				
+		return errorRatesSum / (double) repetitions;
 	}
 }
