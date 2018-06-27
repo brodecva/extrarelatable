@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
@@ -526,13 +527,14 @@ public class T2Dv2GoldStandard {
 					if (testStatisticsBuilder.getUniquePropertiesLearnt(repetition).contains(columnSolution.getUri())) {
 						testStatisticsBuilder.addPropertyOccurence(repetition, columnSolution.getUri());
 
-						annotatedProperties.stream().map(property -> property.getUri()).forEach(uri -> {
-							if (isAcceptableFor(uri, columnSolution.getUri())) {
-								testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
-							} else {
-								testStatisticsBuilder.addFalse(repetition, uri, columnSolution.getUri());
-							}
-						});
+						final Optional<URI> match = annotatedProperties.stream().map(property -> property.getUri())
+								.filter(uri -> isAcceptableFor(uri, columnSolution.getUri()))
+								.findFirst();
+						if (match.isPresent()) {
+							testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
+						} else {
+							testStatisticsBuilder.addFalse(repetition, annotatedProperties.get(0).getUri(), columnSolution.getUri());
+						}
 					}
 
 					if (annotatedProperties.stream().flatMap(property -> property.getInstances().stream())

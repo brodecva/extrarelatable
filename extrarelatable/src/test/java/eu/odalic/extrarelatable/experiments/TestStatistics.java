@@ -513,10 +513,12 @@ public final class TestStatistics {
 				final double propertyPrecision = iterationPrecisions.get(property);
 				final double propertyRecall = iterationRecalls.get(property);
 				
-				final double fMeasure = 2 * propertyPrecision * propertyRecall / (propertyPrecision + propertyRecall);
-				if (Double.isNaN(fMeasure)) {
-					throw new IllegalStateException();
+				final double propertyAllSum = propertyPrecision + propertyRecall;
+				if (propertyAllSum == 0) {
+					return 0d;
 				}
+				
+				final double fMeasure = 2 * propertyPrecision * propertyRecall / (propertyPrecision + propertyRecall);
 				
 				return fMeasure;
 			}));
