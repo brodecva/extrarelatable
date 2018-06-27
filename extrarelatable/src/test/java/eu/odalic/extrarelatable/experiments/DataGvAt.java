@@ -299,6 +299,13 @@ public class DataGvAt {
 					testStatistics.getInstanceMatchingSolutions() / (testStatistics.getInstanceMatchingSolutions()
 							+ testStatistics.getInstanceNonmatchingAvailableSolutions()));
 		}
+		
+		csvWriter.writeRow("Weighted average precision", "Weighted average recall", "Weighter average F-measure",
+				"Error rate");
+		for (final TestStatistics testStatistics : results) {
+			csvWriter.writeRow(testStatistics.getAverageWeightedPrecision(), testStatistics.getAverageWeightedRecall(),
+					testStatistics.getAverageWeightedFMeasure(), testStatistics.getAverageErrorRate());
+		}
 
 		csvWriter.flush();
 		csvWriter.close();
@@ -352,10 +359,18 @@ public class DataGvAt {
 
 		final Path cleanedInputFilesPath = setPath.resolve(CLEANED_INPUT_FILES_DIRECTORY);
 		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
-
+		
+		final Set<URI> testProperties;
+		if (NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES) {
+			testProperties = getTestProperties(csvWriter, testPaths, cleanedInputFilesPath, profilesPath,
+					declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
+		} else {
+			testProperties = ImmutableSet.of();
+		}
+		
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
-				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
 
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
@@ -415,13 +430,13 @@ public class DataGvAt {
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
-			final int maxColumnSampleSize) throws IOException {
+			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) throws IOException {
 		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
 					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, onlyDeclaredAsContext,
-					repetition, random, maxColumnSampleSize);
+					repetition, random, maxColumnSampleSize, whitelistedProperties);
 
 			graph.addPropertyTrees(trees);
 		});
@@ -482,6 +497,12 @@ public class DataGvAt {
 				csvWriter.addValues(parsedTable.getColumn(index).subList(0, Math.min(parsedTable.getHeight(), 5)));
 				csvWriter.writeValuesToRow();
 
+				final DeclaredEntity columnSolution = solution.get(index);
+				final List<Property> annotatedProperties = annotation.getProperties();
+				if (annotatedProperties.isEmpty()) {
+					throw new IllegalStateException();
+				}
+				
 				csvWriter.writeRow("Properties:");
 				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI",
 						"Context properties");
@@ -492,7 +513,6 @@ public class DataGvAt {
 							statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property) };
 				}).collect(ImmutableList.toImmutableList()));
 
-				final DeclaredEntity columnSolution = solution.get(index);
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());
 				csvWriter.writeRow("Solution matched:",
 						annotation.getProperties().stream().map(property -> property.getUri())
@@ -516,6 +536,18 @@ public class DataGvAt {
 						testStatisticsBuilder.addMatchingSolution();
 					} else {
 						testStatisticsBuilder.addNonmatchingSolution(repetition, columnSolution.getUri());
+					}
+					
+					if (testStatisticsBuilder.getUniquePropertiesLearnt(repetition).contains(columnSolution.getUri())) {
+						testStatisticsBuilder.addPropertyOccurence(repetition, columnSolution.getUri());
+
+						annotatedProperties.stream().map(property -> property.getUri()).forEach(uri -> {
+							if (isAcceptableFor(uri, columnSolution.getUri())) {
+								testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
+							} else {
+								testStatisticsBuilder.addFalse(repetition, uri, columnSolution.getUri());
+							}
+						});
 					}
 
 					if (annotation.getProperties().stream().flatMap(property -> property.getInstances().stream())
@@ -562,7 +594,7 @@ public class DataGvAt {
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
-			final int maxColumnSampleSize) {
+			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
@@ -619,7 +651,7 @@ public class DataGvAt {
 		}
 
 		final Set<PropertyTree> trees = buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses,
-				onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize);
+				onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize, whitelistedProperties);
 
 		testStatisticsBuilder.addLearntFile();
 
@@ -674,7 +706,7 @@ public class DataGvAt {
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
-			final int maxColumnSampleSize) {
+			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -720,6 +752,12 @@ public class DataGvAt {
 					continue;
 				}
 			} else {
+				if (onlyWithProperties) {
+					if (!whitelistedProperties.contains(declaredProperty.getUri())) {
+						continue;
+					}
+				}
+				
 				testStatisticsBuilder.addUniqueProperty(repetition, declaredProperty.getUri());
 				testStatisticsBuilder.addUniquePropertyLearnt(repetition, declaredProperty.getUri());
 			}
@@ -1004,6 +1042,51 @@ public class DataGvAt {
 		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, declaredPropertyUris, contextProperties,
 				contextClasses, onlyWithProperties, onlyDeclaredAsContext, repetition, random, maxColumnSampleSize));
 	}
+	
+	private List<URI> getTestProperties(final CsvWriter csvWriter, final Path input,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory,
+			final Path declaredPropertiesPath, final boolean onlyWithProperties) {
+		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+
+		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
+
+		final Format format = getFormat(csvProfile);
+
+		/* Parse the input file to table. */
+		final ParsedTable parsedTable = parse(input, cleanedInput, format);
+		if (parsedTable.getHeight() < 2) {
+			throw new IllegalArgumentException("Too few rows in " + input + ". Skipping.");
+		}
+
+		/* Assign data types to each table cell. */
+		final Map<Integer, Type> hints = getHints(csvProfile);
+
+		final TypedTable typedTable = tableAnalyzer.infer(parsedTable, Locale.forLanguageTag("de-at"), hints);
+		if (typedTable.getHeight() < 2) {
+			throw new IllegalArgumentException("The table to annotate must have at least two rows!");
+		}
+
+		/* Determine the column types. */
+		final SlicedTable slicedTable = tableSlicer.slice(RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD, typedTable,
+				hints);
+
+		final Map<Integer, DeclaredEntity> declaredPropertyUris = getDeclaredProperties(declaredPropertiesPath,
+				input.getFileName().toString());
+
+		final Set<Integer> numericIndices = slicedTable.getDataColumns().keySet();
+
+		return declaredPropertyUris.entrySet().stream().filter(e -> numericIndices.contains(e.getKey()))
+				.filter(e -> {
+					final int index = e.getKey();
+					final List<Value> values = slicedTable.getColumn(index);
+					
+					final Partition partition = new Partition(values.stream().filter(v -> v.isNumeric())
+							.map(v -> (NumericValue) v).collect(ImmutableList.toImmutableList()));
+					return partition.size() >= MINIMUM_PARTITION_SIZE;
+				})
+				.map(e -> e.getValue().getUri()).filter(uri -> uri != null)
+				.collect(ImmutableList.toImmutableList());
+	}
 
 	private Map<Integer, DeclaredEntity> getContextClasses(final ResultValue collectedContext) {
 		final Map<Integer, DeclaredEntity> result = IntStream.range(0, collectedContext.getHeaderAnnotations().size())
@@ -1035,6 +1118,24 @@ public class DataGvAt {
 		return new DeclaredEntity(URI.create(entity.getResource()), ImmutableSet.of(entity.getLabel()));
 	}
 
+	private Set<URI> getTestProperties(final CsvWriter csvWriter, final Collection<? extends Path> paths,
+			final Path cleanedInputFilesDirectory, final Path profilesDirectory,
+			final Path declaredPropertiesPath, final boolean onlyWithProperties) throws IOException {
+		final ImmutableList.Builder<URI> resultBuilder = ImmutableList.builder();
+		paths.forEach(file -> {
+			csvWriter.writeRow("File:", file);
+			
+			try {
+				resultBuilder.addAll(getTestProperties(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
+						declaredPropertiesPath, onlyWithProperties));
+			} catch (final IllegalArgumentException e) {
+				csvWriter.writeRow("Error:", e.getMessage());
+			}
+		});
+
+		return resultBuilder.build().stream().distinct().collect(ImmutableSet.toImmutableSet());
+	}
+	
 	private Map<Integer, DeclaredEntity> getContextProperties(final ResultValue collectedContext) {
 		final Map<Integer, DeclaredEntity> result = collectedContext.getColumnRelationAnnotationsAlternative()
 				.entrySet().stream().filter(entry -> {
