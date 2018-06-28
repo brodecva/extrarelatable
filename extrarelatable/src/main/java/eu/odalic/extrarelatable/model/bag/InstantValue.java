@@ -7,10 +7,8 @@ import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public final class InstantValue extends AbstractValue implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8198368132975821586L;
+	
 	private final Instant instant;
 
 	public static final InstantValue of(Instant instant) {
@@ -28,6 +26,11 @@ public final class InstantValue extends AbstractValue implements Serializable {
 	@Override
 	public String getText() {
 		return instant.toString();
+	}
+	
+	@Override
+	public double getFigure() {
+		return (double) instant.toEpochMilli();
 	}
 
 	@Override

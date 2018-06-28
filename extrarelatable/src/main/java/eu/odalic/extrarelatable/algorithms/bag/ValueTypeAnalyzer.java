@@ -8,4 +8,6 @@ public interface ValueTypeAnalyzer {
 	boolean isEmpty(final String value);
 
 	boolean isInstant(String value, Locale locale);
+
+	boolean isUnit(String value, Locale locale);
 }

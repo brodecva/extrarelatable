@@ -55,7 +55,7 @@ import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
@@ -271,7 +271,7 @@ public class TreeMajorityVoteDataGvAt {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(v-> v.isNumberLike()).map(v -> (NumberLikeValue) v).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				continue;
 			}
@@ -371,7 +371,7 @@ public class TreeMajorityVoteDataGvAt {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(v-> v.isNumberLike()).map(v -> (NumberLikeValue) v).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				continue;
 			}

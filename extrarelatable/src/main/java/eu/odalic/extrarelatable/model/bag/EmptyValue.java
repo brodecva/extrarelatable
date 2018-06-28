@@ -12,8 +12,13 @@ public enum EmptyValue implements Value {
 	}
 
 	@Override
+	public double getFigure() {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public String getText() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -48,6 +53,11 @@ public enum EmptyValue implements Value {
 
 	@Override
 	public boolean isUnit() {
+		return false;
+	}
+
+	@Override
+	public boolean isNumberLike() {
 		return false;
 	}
 }

@@ -25,7 +25,7 @@ import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.CommonNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTree.RootNode;
@@ -128,8 +128,8 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 		
 		final List<eu.odalic.extrarelatable.model.bag.Value> numericColumn = slicedTable.getDataColumns().get(columnIndex);
 		
-		final Partition partition = new Partition(numericColumn.stream().filter(e -> e.isNumeric())
-				.map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+		final Partition partition = new Partition(numericColumn.stream().filter(e -> e.isNumberLike())
+				.map(e -> (NumberLikeValue) e).collect(ImmutableList.toImmutableList()));
 		if (partition.size() < MINIMUM_PARTITION_SIZE) {
 			return null;
 		}

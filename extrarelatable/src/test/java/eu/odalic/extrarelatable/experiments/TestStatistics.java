@@ -26,9 +26,13 @@ public final class TestStatistics {
 	private int learntFiles;
 	private int learningColumnsCount;
 	private int learntContextColumnsCount;
+	public int testingColumnsCount;
+	public int testedContextColumnsCount;
 	private int learntNumericColumns;
 	private int attemptedLearntNumericColumns;
-	private int tooSmallNumericColumns;
+	private int attemptedTestedNumericColumns;
+	private int tooSmallLearningNumericColumns;
+	private int tooSmallTestingNumericColumns;
 	private int testedFiles;
 	private int annotatedNumericColumns;
 	private int missingSolutions;
@@ -38,9 +42,13 @@ public final class TestStatistics {
 	private Map<Integer, Multiset<URI>> instanceNonmatchingSolutions = new HashMap<>();// HashMultiset.create();
 	private int noPropertyLearningNumericColumns;
 	private int noPropertyTestingNumericColums;
+	private int inTestMissingColumns;
+	private int inLearningMissingColumns;
 	private Map<Integer, Set<URI>> uniqueProperties = new HashMap<>();
 	private Map<Integer, Set<URI>> uniquePropertiesLearnt = new HashMap<>();
 	private Map<Integer, Set<URI>> uniquePropertiesTested = new HashMap<>();// = new HashSet<>();
+	private long learningTime;
+	private long testingTime;
 	private int repetitions;
 	
 	private Map<Integer, Map<URI, Integer>> truePositives = new HashMap<>();
@@ -120,6 +128,18 @@ public final class TestStatistics {
 			
 			return this;				
 		}
+		
+		public Builder addTestingColumnsCount(int testingColumnsCount) {
+			testStatistics.testingColumnsCount += testingColumnsCount;
+			
+			return this;
+		}
+
+		public Builder addTestedContextColumnsCount(int testedContextColumnsCount) {
+			testStatistics.testedContextColumnsCount += testedContextColumnsCount;
+			
+			return this;
+		}
 
 		public Builder addLearntNumericColumn() {
 			testStatistics.learntNumericColumns++;
@@ -132,9 +152,21 @@ public final class TestStatistics {
 			
 			return this;				
 		}
+		
+		public Builder addAttemptedTestedNumericColumn() {
+			testStatistics.attemptedTestedNumericColumns++;
+			
+			return this;				
+		}
 
-		public Builder addTooSmallNumericColumn() {
-			testStatistics.tooSmallNumericColumns++;
+		public Builder addTooSmallLearningNumericColumn() {
+			testStatistics.tooSmallLearningNumericColumns++;
+			
+			return this;				
+		}
+		
+		public Builder addTooSmallTestingNumericColumn() {
+			testStatistics.tooSmallTestingNumericColumns++;
 			
 			return this;				
 		}
@@ -183,6 +215,18 @@ public final class TestStatistics {
 
 		public Builder addNoPropertyLearningNumericColumn() {
 			testStatistics.noPropertyLearningNumericColumns++;
+			
+			return this;
+		}
+		
+		public Builder addInTestMissingColumn() {
+			testStatistics.inTestMissingColumns++;
+			
+			return this;
+		}
+		
+		public Builder addInLearningMissingColumn() {
+			testStatistics.inLearningMissingColumns++;
 			
 			return this;
 		}
@@ -244,6 +288,18 @@ public final class TestStatistics {
 			repetitionOccurencesCount.compute(propertyUri, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
 			
 			testStatistics.totalOccurencesCount.compute(repetition, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			
+			return this;
+		}
+		
+		public Builder addLearningTime(long time) {
+			testStatistics.learningTime += time;
+			
+			return this;
+		}
+		
+		public Builder addTestingTime(long time) {
+			testStatistics.testingTime += time;
 			
 			return this;
 		}
@@ -315,6 +371,14 @@ public final class TestStatistics {
 	public double getLearntContextColumnsCount() {
 		return learntContextColumnsCount / (double) repetitions;
 	}
+	
+	public double getTestingColumnsCount() {
+		return testingColumnsCount / (double) repetitions;
+	}
+
+	public double getTestedContextColumnsCount() {
+		return testedContextColumnsCount / (double) repetitions;
+	}
 
 	public double getLearntNumericColumns() {
 		return learntNumericColumns / (double) repetitions;
@@ -323,9 +387,17 @@ public final class TestStatistics {
 	public double getAttemptedLearntNumericColumns() {
 		return attemptedLearntNumericColumns / (double) repetitions;
 	}
+	
+	public double getAttemptedTestedNumericColumns() {
+		return attemptedTestedNumericColumns / (double) repetitions;
+	}
 
-	public double getTooSmallNumericColumns() {
-		return tooSmallNumericColumns / (double) repetitions;
+	public double getTooSmallLearningNumericColumns() {
+		return tooSmallLearningNumericColumns / (double) repetitions;
+	}
+	
+	public double getTooSmallTestingNumericColumns() {
+		return tooSmallTestingNumericColumns / (double) repetitions;
 	}
 
 	public double getTestedFiles() {
@@ -362,6 +434,14 @@ public final class TestStatistics {
 
 	public double getNoPropertyTestingNumericColums() {
 		return noPropertyTestingNumericColums / (double) repetitions;
+	}
+	
+	public double getInTestMissingColumns() {
+		return inTestMissingColumns / (double) repetitions;
+	}
+	
+	public double getInLearningMissingColumns() {
+		return inLearningMissingColumns / (double) repetitions;
 	}
 
 	public double getUniqueProperties() {
@@ -562,5 +642,13 @@ public final class TestStatistics {
 		}
 				
 		return errorRatesSum / (double) repetitions;
+	}
+	
+	public double getLearningTime() {
+		return this.learningTime / (double) repetitions;
+	}
+	
+	public double getTestingTime() {
+		return this.testingTime / (double) repetitions;
 	}
 }

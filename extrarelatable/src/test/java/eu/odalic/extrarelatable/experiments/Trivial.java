@@ -54,7 +54,7 @@ import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
@@ -256,7 +256,7 @@ public class Trivial {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(v-> v.isNumberLike()).map(v -> (NumberLikeValue) v).collect(ImmutableList.toImmutableList()));
 			
 			final Set<CommonNode> children = buildChildren(partition, availableContextColumnIndices, slicedTable);
 			
@@ -340,7 +340,7 @@ public class Trivial {
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
 			
-			final List<NumericValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList());
+			final List<NumberLikeValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumberLike()).map(e -> (NumberLikeValue) e).collect(ImmutableList.toImmutableList());
 			
 			final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, numericValues, TOP_K_NEGHBOURS);
 			

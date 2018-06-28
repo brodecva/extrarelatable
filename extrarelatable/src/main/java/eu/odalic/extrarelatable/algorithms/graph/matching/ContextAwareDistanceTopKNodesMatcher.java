@@ -22,7 +22,7 @@ import com.google.common.collect.Sets.SetView;
 
 import eu.odalic.extrarelatable.algorithms.distance.Distance;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.PropertyTree;
@@ -77,13 +77,13 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	}
 
 	@Override
-	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Collection<? extends NumericValue> values,
+	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Collection<? extends NumberLikeValue> values,
 			int k) {
 		return match(graph, values, ImmutableList.of(), ImmutableList.of(), 1, 0, 0, k);
 	}
 
 	private SortedSet<MeasuredNode> match(final BackgroundKnowledgeGraph graph,
-			final Collection<? extends NumericValue> matchedValues,
+			final Collection<? extends NumberLikeValue> matchedValues,
 			final Collection<? extends DeclaredEntity> matchedContextProperties,
 			final Collection<? extends DeclaredEntity> matchedContextClasses, final double valuesWeight,
 			final double propertiesWeight, final double classesWeight, final int k) {
@@ -176,7 +176,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	}
 
 	@Override
-	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Collection<? extends NumericValue> values) {
+	public SortedSet<MeasuredNode> match(BackgroundKnowledgeGraph graph, Collection<? extends NumberLikeValue> values) {
 		return match(graph, values, defaultK);
 	}
 }

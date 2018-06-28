@@ -54,7 +54,7 @@ import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
@@ -269,7 +269,7 @@ public class BaselineDataOpenDataPortalAt {
 			final int columnIndex = numericColumn.getKey();
 			final Label label = slicedTable.getHeaders().get(columnIndex);
 			
-			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList()));
+			final Partition partition = new Partition(numericColumn.getValue().stream().filter(e -> e.isNumberLike()).map(e -> (NumberLikeValue) e).collect(ImmutableList.toImmutableList()));
 			if (partition.size() < MINIMUM_PARTITION_SIZE) {
 				continue;
 			}
@@ -356,7 +356,7 @@ public class BaselineDataOpenDataPortalAt {
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			final int columnIndex = numericColumn.getKey();
 			
-			final List<NumericValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumeric()).map(e -> (NumericValue) e).collect(ImmutableList.toImmutableList());
+			final List<NumberLikeValue> numericValues = numericColumn.getValue().stream().filter(e -> e.isNumberLike()).map(e -> (NumberLikeValue) e).collect(ImmutableList.toImmutableList());
 			
 			final SortedSet<MeasuredNode> matchingNodes = topKNodesMatcher.match(graph, numericValues, TOP_K_NEGHBOURS);
 			

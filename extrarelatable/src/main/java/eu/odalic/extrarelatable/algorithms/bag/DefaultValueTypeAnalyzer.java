@@ -13,13 +13,16 @@ public final class DefaultValueTypeAnalyzer implements ValueTypeAnalyzer {
 
 	private final NumericValueParser numericValueParser;
 	private final InstantValueParser dateValueParser;
+	private final UnitValueParser unitValueParser;
 	
-	public DefaultValueTypeAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser dateValueParser) {
+	public DefaultValueTypeAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser dateValueParser, final UnitValueParser unitValueParser) {
 		checkNotNull(numericValueParser);
 		checkNotNull(dateValueParser);
+		checkNotNull(unitValueParser);
 		
 		this.numericValueParser = numericValueParser;
 		this.dateValueParser = dateValueParser;
+		this.unitValueParser = unitValueParser;
 	}
 	
 	@Override
@@ -46,6 +49,22 @@ public final class DefaultValueTypeAnalyzer implements ValueTypeAnalyzer {
 		
 		try {
 			dateValueParser.parse(value, locale);
+		} catch (final IllegalArgumentException e) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public boolean isUnit(final String value, @Nullable final Locale locale) {
+		checkNotNull(locale);
+		if (isEmpty(value)) {
+			return false;
+		}
+		
+		try {
+			unitValueParser.parse(value, locale);
 		} catch (final IllegalArgumentException e) {
 			return false;
 		}

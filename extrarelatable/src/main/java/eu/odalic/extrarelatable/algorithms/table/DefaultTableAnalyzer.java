@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.algorithms.bag.InstantValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.NumericValueParser;
+import eu.odalic.extrarelatable.algorithms.bag.UnitValueParser;
 import eu.odalic.extrarelatable.algorithms.bag.ValueTypeAnalyzer;
 import eu.odalic.extrarelatable.model.bag.EmptyValue;
 import eu.odalic.extrarelatable.model.bag.EntityValue;
@@ -39,14 +40,17 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	
 	private final NumericValueParser numericValueParser;
 	private final InstantValueParser instantValueParser;
+	private final UnitValueParser unitValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
 	
-	public DefaultTableAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser instantValueParser, final ValueTypeAnalyzer valueTypeAnalyzer) {
+	public DefaultTableAnalyzer(final NumericValueParser numericValueParser, final InstantValueParser instantValueParser, final UnitValueParser unitValueParser, final ValueTypeAnalyzer valueTypeAnalyzer) {
 		checkNotNull(numericValueParser);
+		checkNotNull(unitValueParser);
 		checkNotNull(instantValueParser);
 		checkNotNull(valueTypeAnalyzer);
 		
 		this.numericValueParser = numericValueParser;
+		this.unitValueParser = unitValueParser;
 		this.instantValueParser = instantValueParser;
 		this.valueTypeAnalyzer = valueTypeAnalyzer;
 	}
@@ -98,12 +102,14 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 					case ID:
 						builder.add(IdValue.of(cell));
 						break;
-					case UNIT:
-						builder.add(UnitValue.of(cell));
-						break;
 					case ENTITY:
 						builder.add(EntityValue.of(cell));
 						break;
+					case UNIT:
+						if (valueTypeAnalyzer.isUnit(cell, locale)) {
+							builder.add(UnitValue.of(unitValueParser.parse(cell, locale), cell));
+							break;
+						}
 					case NUMERIC:
 						if (valueTypeAnalyzer.isNumeric(cell, locale)) {
 							builder.add(NumericValue.of(numericValueParser.parse(cell, locale)));
@@ -118,11 +124,13 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 						builder.add(TextValue.of(cell));
 					}
 				} else {
-					/*if (valueTypeAnalyzer.isInstant(cell, forcedLocale)) {
-						builder.add(InstantValue.of(instantValueParser.parse(cell, forcedLocale)));
-					} else */if (valueTypeAnalyzer.isNumeric(cell, locale)) {
+					if (valueTypeAnalyzer.isNumeric(cell, locale)) {
 						builder.add(NumericValue.of(numericValueParser.parse(cell, locale)));
-					}  else {
+					} else if (valueTypeAnalyzer.isInstant(cell, locale)) {
+						builder.add(InstantValue.of(instantValueParser.parse(cell, locale)));
+					} else if (valueTypeAnalyzer.isUnit(cell, locale)) {
+						builder.add(UnitValue.of(unitValueParser.parse(cell, locale), cell));
+					} else {
 						builder.add(TextValue.of(cell));
 					}
 				}

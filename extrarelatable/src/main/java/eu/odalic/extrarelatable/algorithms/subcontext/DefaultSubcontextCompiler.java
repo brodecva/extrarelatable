@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableSet;
 
 import eu.odalic.extrarelatable.model.bag.Attribute;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
-import eu.odalic.extrarelatable.model.bag.TextValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.subcontext.NumericCell;
 import eu.odalic.extrarelatable.model.subcontext.Partition;
@@ -78,16 +77,13 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 		final Subcontext.Builder builder = Subcontext.builder();
 		final List<Value> contextColumn = table.getColumn(contextValuesColumnIndex);
 		boolean found = false;
-		for (final Entry<Integer, NumericValue> entry : partition.getCells().entrySet()) {
+		for (final Entry<Integer, NumberLikeValue> entry : partition.getCells().entrySet()) {
 			final int rowIndex = entry.getKey();
 			checkArgument(rowIndex < contextColumn.size());
 			
 			final Value contextColumnValue = contextColumn.get(rowIndex);
-			if (!contextColumnValue.isTextual()) {
-				continue;
-			}
 			
-			builder.put((TextValue) contextColumnValue, new NumericCell(rowIndex, entry.getValue()));
+			builder.put(contextColumnValue, new NumericCell(rowIndex, entry.getValue()));
 			found = true;
 		}
 		if (!found) {

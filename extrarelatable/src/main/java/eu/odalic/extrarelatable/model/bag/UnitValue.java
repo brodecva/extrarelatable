@@ -5,23 +5,29 @@ import java.io.Serializable;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
-public final class UnitValue extends AbstractValue implements Serializable {
+public final class UnitValue extends NumberLikeValue implements Serializable {
 	
-	private static final long serialVersionUID = -1401228725139455726L;
+private static final long serialVersionUID = -25440715468458309L;
 	
-	private final String unit;
+	private final double figure;
+	private final String text;
 
-	public static UnitValue of(final String unit) {
-		return new UnitValue(unit);
+	public static final UnitValue of(double figure, String text) {
+		return new UnitValue(figure, text);
 	}
 	
-	private UnitValue(final String unit) {
-		this.unit = unit;
+	private UnitValue(double figure, String text) {
+		this.figure = figure;
+		this.text = text;
 	}	
-
+	
+	public double getFigure() {
+		return figure;
+	}
+	
 	@Override
 	public String getText() {
-		return unit;
+		return text;
 	}
 
 	@Override
@@ -29,20 +35,16 @@ public final class UnitValue extends AbstractValue implements Serializable {
 		return true;
 	}
 	
-	public String getUnit() {
-		return unit;
-	}
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+		result = prime * result + ((text == null) ? 0 : text.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -52,12 +54,12 @@ public final class UnitValue extends AbstractValue implements Serializable {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final UnitValue other = (UnitValue) obj;
-		if (unit == null) {
-			if (other.unit != null) {
+		UnitValue other = (UnitValue) obj;
+		if (text == null) {
+			if (other.text != null) {
 				return false;
 			}
-		} else if (!unit.equals(other.unit)) {
+		} else if (!text.equals(other.text)) {
 			return false;
 		}
 		return true;
@@ -65,6 +67,6 @@ public final class UnitValue extends AbstractValue implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UnitValue [unit=" + unit + "]";
+		return "UnitValue [figure=" + figure + ", text=" + text + "]";
 	}
 }

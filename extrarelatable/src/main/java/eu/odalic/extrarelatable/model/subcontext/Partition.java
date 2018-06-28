@@ -14,13 +14,13 @@ import javax.annotation.concurrent.Immutable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 
 @Immutable
 public final class Partition {
-	private final Map<Integer, NumericValue> cells;
+	private final Map<Integer, NumberLikeValue> cells;
 
-	public Partition(final List<? extends NumericValue> cells) {
+	public Partition(final List<? extends NumberLikeValue> cells) {
 		this(Streams.mapWithIndex(cells.stream(), (e, i) -> new NumericCell((int) i, e)).collect(toImmutableMap(e -> e.getRowIndex(), e -> e.getValue())));
 	}
 	
@@ -30,7 +30,7 @@ public final class Partition {
 		this.cells = cells.stream().collect(toImmutableMap(k -> k.getRowIndex(), v -> v.getValue()));
 	}
 	
-	public Partition(final Map<? extends Integer, ? extends NumericValue> cells) {
+	public Partition(final Map<? extends Integer, ? extends NumberLikeValue> cells) {
 		checkNotNull(cells);
 		cells.keySet().stream().forEach(e -> {
 			checkNotNull(e);
@@ -40,11 +40,11 @@ public final class Partition {
 		this.cells = ImmutableMap.copyOf(cells);
 	}
 
-	public Map<Integer, NumericValue> getCells() {
+	public Map<Integer, NumberLikeValue> getCells() {
 		return cells;
 	}
 	
-	public Collection<NumericValue> getValues() {
+	public Collection<NumberLikeValue> getValues() {
 		return cells.values();
 	}
 	

@@ -61,28 +61,19 @@ public class DefaultTableSlicer implements TableSlicer {
 		for (int index = 0; index < width; index++) {
 			final Type hint = columnTypeHints.get(index);
 			if (hint == null) {
-				/*if (columnTypeAnalyzer.isId(index, table) >= threshold) {
+				if (columnTypeAnalyzer.isId(index, table) >= threshold) {
 					contextColumnsIndices.add(index);
-				}
-				
-				if (columnTypeAnalyzer.isInstant(index, table) >= threshold) {
+				} else if (columnTypeAnalyzer.isInstant(index, table) >= threshold) {
 					dataColumnsIndicesBuilder.add(index);
-				}*/
-				
-				if (columnTypeAnalyzer.isNumeric(index, table) >= threshold) {
+				} else if (columnTypeAnalyzer.isNumeric(index, table) >= threshold) {
 					dataColumnsIndicesBuilder.add(index);
-				}
-				
-				/*
-				if (columnTypeAnalyzer.isEntity(index, table) >= threshold) {
+				} else if (columnTypeAnalyzer.isEntity(index, table) >= threshold) {
 					contextColumnsIndices.add(index);
-				}
-				
-				if (columnTypeAnalyzer.isUnit(index, table) >= threshold) {
+				} else if (columnTypeAnalyzer.isUnit(index, table) >= threshold) {
+					dataColumnsIndicesBuilder.add(index);
+				} else if (columnTypeAnalyzer.isTextual(index, table) >= threshold) {
 					contextColumnsIndices.add(index);
-				}*/
-				
-				if (columnTypeAnalyzer.isTextual(index, table) >= threshold) {
+				} else {
 					contextColumnsIndices.add(index);
 				}
 			} else {
@@ -100,7 +91,7 @@ public class DefaultTableSlicer implements TableSlicer {
 					dataColumnsIndicesBuilder.add(index);
 					break;
 				case UNIT:
-					contextColumnsIndices.add(index);
+					dataColumnsIndicesBuilder.add(index);
 					break;
 				case TEXT:
 					contextColumnsIndices.add(index);

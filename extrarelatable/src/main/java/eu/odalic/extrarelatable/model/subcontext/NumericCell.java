@@ -5,14 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.concurrent.Immutable;
 
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 
 @Immutable
 public final class NumericCell {
 	private final int rowIndex;
-	private final NumericValue value;
+	private final NumberLikeValue value;
 	
-	public NumericCell(final int rowIndex, final NumericValue value) {
+	public NumericCell(final int rowIndex, final NumberLikeValue value) {
 		checkArgument(rowIndex >= 0);
 		checkNotNull(value);
 		
@@ -24,7 +24,7 @@ public final class NumericCell {
 		return rowIndex;
 	}
 
-	public NumericValue getValue() {
+	public NumberLikeValue getValue() {
 		return value;
 	}
 

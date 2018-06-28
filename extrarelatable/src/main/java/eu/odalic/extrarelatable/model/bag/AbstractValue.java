@@ -3,6 +3,10 @@ package eu.odalic.extrarelatable.model.bag;
 abstract class AbstractValue implements Value {
 	public abstract String getText();
 	
+	public double getFigure() {
+		throw new UnsupportedOperationException();
+	}
+	
 	public boolean isEmpty() {
 		return false;
 	}
@@ -28,6 +32,10 @@ abstract class AbstractValue implements Value {
 	}
 	
 	public boolean isUnit() {
+		return false;
+	}
+	
+	public boolean isNumberLike() {
 		return false;
 	}
 }

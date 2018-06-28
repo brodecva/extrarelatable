@@ -18,7 +18,7 @@ import com.google.common.collect.Multiset;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Context;
 import eu.odalic.extrarelatable.model.bag.Label;
-import eu.odalic.extrarelatable.model.bag.NumericValue;
+import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 
 public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializable {
 	
@@ -28,18 +28,18 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		
 		private static final long serialVersionUID = -4572082835480257596L;
 
-		private final Multiset<NumericValue> values;
+		private final Multiset<NumberLikeValue> values;
 		
 		private final Set<CommonNode> children;
 		
-		public Node(final Multiset<? extends NumericValue> values) {
+		public Node(final Multiset<? extends NumberLikeValue> values) {
 			checkNotNull(values);
 			
 			this.values = ImmutableMultiset.copyOf(values);
 			this.children = new HashSet<>();
 		}
 
-		public Multiset<NumericValue> getValues() {
+		public Multiset<NumberLikeValue> getValues() {
 			return values;
 		}
 
@@ -81,7 +81,7 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		
 		private Node parent;
 		
-		public CommonNode(final Multiset<? extends NumericValue> values) {
+		public CommonNode(final Multiset<? extends NumberLikeValue> values) {
 			super(values);
 		}
 
@@ -118,7 +118,7 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		
 		private PropertyTree propertyTree;
 		
-		public RootNode(final Label label, final Multiset<? extends NumericValue> values) {
+		public RootNode(final Label label, final Multiset<? extends NumberLikeValue> values) {
 			super(values);
 			
 			checkNotNull(label);
@@ -172,7 +172,7 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		
 		private final AttributeValuePair pair;
 		
-		public SharedPairNode(final AttributeValuePair pair, final Multiset<? extends NumericValue> values) {
+		public SharedPairNode(final AttributeValuePair pair, final Multiset<? extends NumberLikeValue> values) {
 			super(values);
 			
 			checkNotNull(pair);
