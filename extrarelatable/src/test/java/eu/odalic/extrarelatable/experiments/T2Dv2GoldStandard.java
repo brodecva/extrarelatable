@@ -178,6 +178,8 @@ public class T2Dv2GoldStandard {
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.maximumColumnSampleSize", "1000"));
 	private static final boolean AVOID_HINTS = Boolean
 			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.avoidHints", "false"));
+	private static final boolean FOLDING = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.folding", "true"));
 
 	@Autowired
 	BeanFactory beanFactory;
@@ -238,27 +240,33 @@ public class T2Dv2GoldStandard {
 
 		final List<TestStatistics> results = new ArrayList<>();
 
-		if (CHOSEN_SAMPLES_INDICES != null) {
-			for (final int sampleSizeIndex : CHOSEN_SAMPLES_INDICES) {
-				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
-						TEST_REPETITIONS);
-				csvWriter.flush();
-				if (testStatistics != null) {
+		if (FOLDING) {
+			final TestStatistics testStatistics = testFolding(csvWriter, SAMPLE_SIZE_STEP_RATIO, TEST_REPETITIONS);
+			csvWriter.flush();
+			results.add(testStatistics);
+		} else {		
+			if (CHOSEN_SAMPLES_INDICES != null) {
+				for (final int sampleSizeIndex : CHOSEN_SAMPLES_INDICES) {
+					final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
+							TEST_REPETITIONS);
+					csvWriter.flush();
+					if (testStatistics != null) {
+						results.add(testStatistics);
+					}
+				}
+			} else {
+				int sampleSizeIndex = 0;
+				while (true) {
+					final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
+							TEST_REPETITIONS);
+					csvWriter.flush();
+					if (testStatistics == null) {
+						break;
+					}
+	
 					results.add(testStatistics);
+					sampleSizeIndex++;
 				}
-			}
-		} else {
-			int sampleSizeIndex = 0;
-			while (true) {
-				final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
-						TEST_REPETITIONS);
-				csvWriter.flush();
-				if (testStatistics == null) {
-					break;
-				}
-
-				results.add(testStatistics);
-				sampleSizeIndex++;
 			}
 		}
 
@@ -323,6 +331,45 @@ public class T2Dv2GoldStandard {
 		csvWriter.close();
 	}
 
+	private TestStatistics testFolding(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int repetitions) throws IOException {
+		final Random random = new Random(SEED);
+		testStatisticsBuilder.setSeed(SEED);
+		
+		if (INSTANCE_SUBPATH == null) {
+			throw new IllegalArgumentException("No instance path provided!");
+		}
+
+		final Path instancePath = Paths.get(INSTANCE_SUBPATH);
+
+		final Path setPath = instancePath.resolve(SET_SUBPATH);
+		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
+
+		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
+		
+		final int foldsCount = (int) Math.round(1d / sampleSizeStepRatio);
+		final int foldSize = (int) Math.round(files.size() * sampleSizeStepRatio);
+		
+		final int foldedRepetitions = foldsCount * repetitions;
+		testStatisticsBuilder.setRepetitions(foldedRepetitions);
+		
+		int foldedRepetition = 0;
+		for (int repetition = 0; repetition < repetitions; repetition++) {
+			final List<List<Path>> folds = getFolds(random, foldsCount, foldSize, files);
+			
+			for (int fold = 0; fold < foldsCount; fold++) {
+				testStatisticsBuilder.addFilesCount(files.size());
+				
+				testSample(csvWriter, fold, files, folds, random, foldedRepetition);
+				foldedRepetition++;
+			}
+		}
+
+		csvWriter.writeEmptyRow();
+		csvWriter.writeRow("Finished all sample repetitions.");
+
+		return testStatisticsBuilder.build();
+	}
+	
 	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio,
 			final int sampleSizeIndex, final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
@@ -411,6 +458,62 @@ public class T2Dv2GoldStandard {
 
 		return true;
 	}
+	
+	private void testSample(final CsvWriter csvWriter, final int fold, final List<Path> files, final List<List<Path>> folds,
+			final Random random, final int repetition) throws IOException {
+		final Path instancePath = Paths.get(INSTANCE_SUBPATH);
+
+		final Path setPath = instancePath.resolve(SET_SUBPATH);
+		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
+		final Path collectionResultsDirectory = instancePath.resolve(CONTEXT_COLLECTION_RESULTS_SUBPATH);
+
+		final List<Path> testPaths = folds.get(fold);
+
+		testStatisticsBuilder.addTestFilesCount(testPaths.size());
+
+		final List<Path> learningPaths = getLearningFiles(files, testPaths);
+		testStatisticsBuilder.addLearningFilesCount(learningPaths.size());
+
+		final Path inputFilesPath = setPath.resolve(CONVERTED_INPUT_FILES_DIRECTORY);
+		final Path profilesPath = setPath.resolve(PROFILES_DIRECTORY);
+
+		final Set<URI> testProperties;
+		if (NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES) {
+			testProperties = getTestProperties(csvWriter, testPaths, inputFilesPath, profilesPath,
+					declaredPropertiesPath, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES);
+		} else {
+			testProperties = ImmutableSet.of();
+		}
+
+		final long learningStart = System.nanoTime();
+		
+		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
+				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
+				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
+
+		final long learningStop = System.nanoTime();
+		
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+		csvWriter.writeEmptyRow();
+
+		final long testStart = System.nanoTime();
+		
+		test(csvWriter, testPaths, graph, inputFilesPath, profilesPath, declaredPropertiesPath,
+				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition,
+				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+
+		final long testStop = System.nanoTime();
+		
+		testStatisticsBuilder.addLearningTime(learningStop - learningStart);
+		testStatisticsBuilder.addTestingTime(testStop - testStart);
+		
+		csvWriter.writeEmptyRow();
+		csvWriter.writeRow("Finished.");
+
+		csvWriter.writeEmptyRow();
+	}
 
 	private ImmutableList<Path> getLearningFiles(final List<Path> files, final List<Path> testPaths) {
 		return files.stream().filter(e -> !testPaths.contains(e)).collect(ImmutableList.toImmutableList());
@@ -436,6 +539,26 @@ public class T2Dv2GoldStandard {
 		}
 		final List<Path> testPaths = testPathsBuilder.build();
 		return testPaths;
+	}
+	
+	private static List<List<Path>> getFolds(final Random random, final int foldsCount, final int foldSize, final List<Path> files) {
+		final List<Path> filesCopy = new ArrayList<>(files);
+		
+		final List<List<Path>> folds = new ArrayList<>(foldsCount);
+		for (int fold = 0; fold < foldsCount - 1; fold++) {
+			final ImmutableList.Builder<Path> foldPathsBuilder = ImmutableList.builder();
+			for (int i = 0; i < foldSize; i++) {
+				final int removedIndex = random.nextInt(filesCopy.size());
+
+				foldPathsBuilder.add(filesCopy.remove(removedIndex));
+			}
+			final List<Path> foldPaths = foldPathsBuilder.build();
+			
+			folds.add(foldPaths);
+		}
+		folds.add(ImmutableList.copyOf(filesCopy));
+		
+		return folds;
 	}
 
 	private static List<Path> getFiles(final Path setPath, final Path declaredPropertiesPath,
