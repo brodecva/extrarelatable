@@ -327,7 +327,7 @@ public class DefaultGraphService implements GraphService {
 			final Set<String> usedBases = ImmutableSet.copyOf(Splitter.on(USED_BASES_CONTEXT_BASES_CONFIGURATION_DELIMITER).split(basesConfigurationEntries.get(USED_BASES_CONTEXT_BASES_CONFIGURATION_INDEX)));
 			final String primaryBase = basesConfigurationEntries.get(PRIMARY_BASE_CONTEXT_BASES_CONFIGURATION_INDEX);
 				
-			final ResultValue collectedContext = getCollectedContext(table, tablePath,
+			final ResultValue collectedContext = geCollectedTableContext(table, tablePath,
 					collectionResultsDirectory, this.random, usedBases, primaryBase);
 			if (collectedContext == null) {
 				contextProperties = ImmutableMap.of();
@@ -466,7 +466,7 @@ public class DefaultGraphService implements GraphService {
 			final Set<String> usedBases = ImmutableSet.copyOf(Splitter.on(USED_BASES_CONTEXT_BASES_CONFIGURATION_DELIMITER).split(basesConfigurationEntries.get(USED_BASES_CONTEXT_BASES_CONFIGURATION_INDEX)));
 			final String primaryBase = basesConfigurationEntries.get(PRIMARY_BASE_CONTEXT_BASES_CONFIGURATION_INDEX);
 				
-			final ResultValue collectedContext = getCollectedContext(table, tablePath,
+			final ResultValue collectedContext = getCollectedDwtcContext(table, tablePath,
 					collectionResultsDirectory, this.random, usedBases, primaryBase);
 			if (collectedContext == null) {
 				contextProperties = ImmutableMap.of();
@@ -841,7 +841,7 @@ public class DefaultGraphService implements GraphService {
 		graph.addPropertyTrees(trees);
 	}
 	
-	private ResultValue getCollectedContext(final ParsedTable table, final Path input,
+	private ResultValue getCollectedDwtcContext(final ParsedTable table, final Path input,
 			final Path collectionResultsDirectory, final Random random, final Set<? extends String> usedBases, final String primaryBase) {
 		ResultValue result = null;
 		
@@ -849,6 +849,45 @@ public class DefaultGraphService implements GraphService {
 		
 		final Path resultInput = collectionResultsDirectory.resolve(fileName + ".json");
 		final Path failedCollectionNotice = collectionResultsDirectory.resolve(fileName + ".fail");
+		if (resultInput.toFile().exists()) {
+			try {
+				result = loadCollectionResult(resultInput);
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to load context collection result for " + input + "!", e);
+			}
+		} else if (failedCollectionNotice.toFile().exists()) {
+			LOGGER.warn("Previously failed context collection attempt for " + input + "!");
+
+			result = null;
+		} else {
+			try {
+				result = contextCollectionService.process(table, usedBases, primaryBase, random);
+
+				try {
+					saveCollectionResult(result, resultInput);
+				} catch (final IOException e) {
+					throw new RuntimeException("Failed to save collected context for " + input + "!", e);
+				}
+			} catch (final Exception e) {
+				LOGGER.error("Failed context collection attempt for " + input + "! Cause: " + e.getMessage());
+
+				result = null;
+				try {
+					cacheFailedContextCollection(collectionResultsDirectory, input);
+				} catch (IOException e1) {
+					throw new RuntimeException("Failed to note failed context collection for " + input + "!", e1);
+				}
+			}
+		}
+		return result;
+	}
+	
+	private ResultValue geCollectedTableContext(final ParsedTable table, final Path input,
+			final Path collectionResultsDirectory, final Random random, final Set<? extends String> usedBases, final String primaryBase) {
+		ResultValue result = null;
+		
+		final Path resultInput = collectionResultsDirectory.resolve(input.getFileName());
+		final Path failedCollectionNotice = collectionResultsDirectory.resolve(input.getFileName() + ".fail");
 		if (resultInput.toFile().exists()) {
 			try {
 				result = loadCollectionResult(resultInput);

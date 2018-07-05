@@ -48,7 +48,7 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	public DefaultTableAnalyzer(final NumericValueParser numericValueParser,
 			final InstantValueParser instantValueParser, final UnitValueParser unitValueParser,
 			final ValueTypeAnalyzer valueTypeAnalyzer,
-			final @org.springframework.beans.factory.annotation.Value("${eu.odalic.extrarelatable.datesParsed:true}") boolean datesParsed) {
+			final @org.springframework.beans.factory.annotation.Value("${eu.odalic.extrarelatable.datesParsed:false}") boolean datesParsed) {
 		checkNotNull(numericValueParser);
 		checkNotNull(unitValueParser);
 		checkNotNull(instantValueParser);
