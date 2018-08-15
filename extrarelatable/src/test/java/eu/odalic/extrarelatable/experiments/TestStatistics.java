@@ -337,123 +337,123 @@ public final class TestStatistics {
 	}
 
 	public double getFilesCount() {
-		return filesCount / (double) repetitions;
+		return filesCount / ((double) repetitions);
 	}
 
 	public double getTestFilesCount() {
-		return testFilesCount / (double) repetitions;
+		return testFilesCount / ((double) repetitions);
 	}
 
 	public double getLearningFilesCount() {
-		return learningFilesCount / (double) repetitions;
+		return learningFilesCount / ((double) repetitions);
 	}
 
 	public double getIrregularHeaderFiles() {
-		return irregularHeaderFiles / (double) repetitions;
+		return irregularHeaderFiles / ((double) repetitions);
 	}
 
 	public double getFewRowsFiles() {
-		return fewRowsFiles / (double) repetitions;
+		return fewRowsFiles / ((double) repetitions);
 	}
 
 	public double getFewTypedRowsFiles() {
-		return fewTypedRowsFiles / (double) repetitions;
+		return fewTypedRowsFiles / ((double) repetitions);
 	}
 
 	public double getLearntFiles() {
-		return learntFiles / (double) repetitions;
+		return learntFiles / ((double) repetitions);
 	}
 
 	public double getLearningColumnsCount() {
-		return learningColumnsCount / (double) repetitions;
+		return learningColumnsCount / ((double) repetitions);
 	}
 
 	public double getLearntContextColumnsCount() {
-		return learntContextColumnsCount / (double) repetitions;
+		return learntContextColumnsCount / ((double) repetitions);
 	}
 	
 	public double getTestingColumnsCount() {
-		return testingColumnsCount / (double) repetitions;
+		return testingColumnsCount / ((double) repetitions);
 	}
 
 	public double getTestedContextColumnsCount() {
-		return testedContextColumnsCount / (double) repetitions;
+		return testedContextColumnsCount / ((double) repetitions);
 	}
 
 	public double getLearntNumericColumns() {
-		return learntNumericColumns / (double) repetitions;
+		return learntNumericColumns / ((double) repetitions);
 	}
 
 	public double getAttemptedLearntNumericColumns() {
-		return attemptedLearntNumericColumns / (double) repetitions;
+		return attemptedLearntNumericColumns / ((double) repetitions);
 	}
 	
 	public double getAttemptedTestedNumericColumns() {
-		return attemptedTestedNumericColumns / (double) repetitions;
+		return attemptedTestedNumericColumns / ((double) repetitions);
 	}
 
 	public double getTooSmallLearningNumericColumns() {
-		return tooSmallLearningNumericColumns / (double) repetitions;
+		return tooSmallLearningNumericColumns / ((double) repetitions);
 	}
 	
 	public double getTooSmallTestingNumericColumns() {
-		return tooSmallTestingNumericColumns / (double) repetitions;
+		return tooSmallTestingNumericColumns / ((double) repetitions);
 	}
 
 	public double getTestedFiles() {
-		return testedFiles / (double) repetitions;
+		return testedFiles / ((double) repetitions);
 	}
 
 	public double getAnnotatedNumericColumns() {
-		return annotatedNumericColumns / (double) repetitions;
+		return annotatedNumericColumns / ((double) repetitions);
 	}
 
 	public double getMissingSolutions() {
-		return missingSolutions / (double) repetitions;
+		return missingSolutions / ((double) repetitions);
 	}
 
 	public double getMatchingSolutions() {
-		return matchingSolutions / (double) repetitions;
+		return matchingSolutions / ((double) repetitions);
 	}
 	
 	public double getInstanceMatchingSolutions() {
-		return instanceMatchingSolutions / (double) repetitions;
+		return instanceMatchingSolutions / ((double) repetitions);
 	}
 
 	public double getNonmatchingSolutions() {
-		return nonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+		return nonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 	
 	public double getInstanceNonmatchingSolutions() {
-		return instanceNonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+		return instanceNonmatchingSolutions.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 
 	public double getNoPropertyLearningNumericColumns() {
-		return noPropertyLearningNumericColumns / (double) repetitions;
+		return noPropertyLearningNumericColumns / ((double) repetitions);
 	}
 
 	public double getNoPropertyTestingNumericColums() {
-		return noPropertyTestingNumericColums / (double) repetitions;
+		return noPropertyTestingNumericColums / ((double) repetitions);
 	}
 	
 	public double getInTestMissingColumns() {
-		return inTestMissingColumns / (double) repetitions;
+		return inTestMissingColumns / ((double) repetitions);
 	}
 	
 	public double getInLearningMissingColumns() {
-		return inLearningMissingColumns / (double) repetitions;
+		return inLearningMissingColumns / ((double) repetitions);
 	}
 
 	public double getUniqueProperties() {
-		return uniqueProperties.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+		return uniqueProperties.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 
 	public double getUniquePropertiesLearnt() {
-		return uniquePropertiesLearnt.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+		return uniquePropertiesLearnt.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 
 	public double getUniquePropertiesTested() {
-		return uniquePropertiesTested.values().stream().mapToInt(e -> e.size()).sum() / (double) repetitions;
+		return uniquePropertiesTested.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 
 	public double getNonmatchingAvailableSolutions() {
@@ -466,7 +466,7 @@ public final class TestStatistics {
 			nonmatchingAvailableSum += nonmatchingAvailable.size();
 		}
 				
-		return nonmatchingAvailableSum / (double) repetitions;
+		return nonmatchingAvailableSum / ((double) repetitions);
 	}
 	
 	public double getInstanceNonmatchingAvailableSolutions() {
@@ -479,7 +479,7 @@ public final class TestStatistics {
 			nonmatchingAvailableSum += nonmatchingAvailable.size();
 		}
 				
-		return nonmatchingAvailableSum / (double) repetitions;
+		return nonmatchingAvailableSum / ((double) repetitions);
 	}
 	
 	private double getAverageWeightedMeasure(final Map<Integer, Map<URI, Double>> measures) {
@@ -497,12 +497,97 @@ public final class TestStatistics {
 			
 			final int repetitionTotalInstancesCount = this.totalOccurencesCount.get(repetition);
 			
-			final double repetitionWeightedMeasure = repetitionMeasuresSum / (double) repetitionTotalInstancesCount;
+			final double repetitionWeightedMeasure = repetitionMeasuresSum / ((double) repetitionTotalInstancesCount);
 			
 			weightedMeasuresSum += repetitionWeightedMeasure;
 		}
 				
-		return weightedMeasuresSum / (double) repetitions;
+		return weightedMeasuresSum / ((double) repetitions);
+	}
+	
+	private double getAverageMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures) {
+		double macroAveragedMeasuresSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionMacroAveragedMeasure = getRepetitionMacroAveragedMeasure(measures, repetition);
+			
+			macroAveragedMeasuresSum += repetitionMacroAveragedMeasure;
+		}
+				
+		return macroAveragedMeasuresSum / ((double) repetitions);
+	}
+
+	private double getRepetitionMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures, int repetition) {
+		final Map<URI, Double> repetitionMeasures = measures.get(repetition);
+		
+		final Set<URI> repetitionClasses = measures.get(repetition).keySet();
+		final int repetitionClassesCount = repetitionClasses.size();			
+					
+		double repetitionMeasuresSum = 0;
+		
+		for (final URI repetitionClass : repetitionClasses) {
+			repetitionMeasuresSum += repetitionMeasures.get(repetitionClass);
+		}
+		
+		return repetitionMeasuresSum / ((double) repetitionClassesCount);
+	}
+	
+	private double getAverageMicroAveragedMeasure(
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> numerator,
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> denominator,
+			final double zeroDenominatorValue) {
+		double microAveragedMeasuresSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionResult = getRepetitionMicroAveragedMeasure(numerator, denominator,
+					zeroDenominatorValue, repetition);
+			
+			microAveragedMeasuresSum += repetitionResult;
+		}
+				
+		return microAveragedMeasuresSum / ((double) repetitions);
+	}
+
+	private double getRepetitionMicroAveragedMeasure(
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> numerator,
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> denominator,
+			final double zeroDenominatorValue, int repetition) {
+		final Map<? extends URI, ? extends Number> repetitionNumerator = numerator.get(repetition);
+		final Map<? extends URI, ? extends Number> repetitionDenominator = denominator.get(repetition);
+		
+		final Set<? extends URI> repetitionClasses = repetitionNumerator.keySet();
+					
+		double repetitionNumeratorSum = 0;
+		for (final URI repetitionClass : repetitionClasses) {
+			repetitionNumeratorSum += repetitionNumerator.get(repetitionClass).doubleValue();
+		}
+		
+		double repetitionDenominatorSum = 0;
+		for (final URI repetitionClass : repetitionClasses) {
+			repetitionDenominatorSum += repetitionDenominator.get(repetitionClass).doubleValue();
+		}
+		
+		if (repetitionDenominatorSum == 0) {
+			return zeroDenominatorValue;
+		} else {
+			return repetitionNumeratorSum / repetitionDenominatorSum;
+		}
+	}
+	
+	private double getRepetitionMicroAveragedPrecision(int repetition) {
+		return getRepetitionMicroAveragedMeasure(this.truePositives, sum(this.truePositives, this.falsePositives), 0, repetition);
+	}
+	
+	private double getRepetitionMicroAveragedRecall(int repetition) {
+		return getRepetitionMicroAveragedMeasure(this.truePositives, sum(this.truePositives, this.falseNegatives), 1, repetition);
+	}
+	
+	private double getRepetitionMacroAveragedPrecision(int repetition) {
+		return getRepetitionMacroAveragedMeasure(getPrecisions(), repetition);
+	}
+	
+	private double getRepetitionMacroAveragedRecall(int repetition) {
+		return getRepetitionMacroAveragedMeasure(getRecalls(), repetition);
 	}
 	
 	private Map<URI, Double> getAveragedMeasures(final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> measures) {
@@ -516,7 +601,7 @@ public final class TestStatistics {
 			});
 		}
 				
-		return measuresSums.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue() / (double) repetitions));
+		return measuresSums.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue() / ((double) repetitions)));
 	}
 	
 	public Map<URI, Double> getAverageTruePositives() {
@@ -598,15 +683,71 @@ public final class TestStatistics {
 					return 0d;
 				}
 				
-				final double fMeasure = 2 * propertyPrecision * propertyRecall / (propertyPrecision + propertyRecall);
+				final double fMeasure = 2 * propertyPrecision * propertyRecall / propertyAllSum;
 				
 				return fMeasure;
 			}));
 		}));
 	}
 	
+	private Map<Integer, Map<URI, Double>> sum(
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> first,
+			final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> second) {
+		final Map<Integer, Map<URI, Double>> result = new HashMap<>();
+		
+		first.entrySet().stream().forEach(iterationEntry -> {
+			final Integer iteration = iterationEntry.getKey();
+			
+			final Map<? extends URI, ? extends Number> iterationFirst = iterationEntry.getValue();
+			final Map<? extends URI, ? extends Number> iterationSecond = second.get(iteration);
+			
+			final Map<URI, Double> iterationResult = new HashMap<>();
+			
+			iterationFirst.entrySet().stream().forEach(firstPropertyEntry -> {
+				final URI property = firstPropertyEntry.getKey();
+				final Number firstPropertyValue = firstPropertyEntry.getValue();
+				
+				final Number secondPropertyValue = iterationSecond.get(property);
+				if (secondPropertyValue == null) {
+					iterationResult.put(property, firstPropertyValue.doubleValue());
+				} else {
+					iterationResult.put(property, firstPropertyValue.doubleValue() + secondPropertyValue.doubleValue());
+				}
+			});
+			iterationSecond.entrySet().stream().forEach(secondPropertyEntry -> {
+				final URI property = secondPropertyEntry.getKey();
+				final Number secondPropertyValue = secondPropertyEntry.getValue();
+				
+				if (!iterationFirst.containsKey(property)) {
+					iterationResult.put(property, secondPropertyValue.doubleValue());
+				}
+			});
+			
+			
+			result.put(iteration, ImmutableMap.copyOf(iterationResult));
+		});
+		
+		return ImmutableMap.copyOf(result);
+	}
+	
 	public double getAverageWeightedPrecision() {
 		return getAverageWeightedMeasure(getPrecisions());
+	}
+	
+	public double getAverageMacroAveragedPrecision() {
+		return getAverageMacroAveragedMeasure(getPrecisions());
+	}
+	
+	public double getAverageMicroAveragedPrecision() {
+		return getAverageMicroAveragedMeasure(this.truePositives, sum(this.truePositives, this.falsePositives), 1);
+	}
+	
+	public double getAverageMacroAveragedRecall() {
+		return getAverageMacroAveragedMeasure(getRecalls());
+	}
+	
+	public double getAverageMicroAveragedRecall() {
+		return getAverageMicroAveragedMeasure(this.truePositives, sum(this.truePositives, this.falseNegatives), 0);
 	}
 	
 	public Map<URI, Double> getAveragePrecisions() {
@@ -629,26 +770,153 @@ public final class TestStatistics {
 		return getAveragedMeasures(getFMeasures());
 	}
 	
-	public double getAverageErrorRate() {
-		double errorRatesSum = 0;
+	public double getAverageMacroAveragedFMeasure() {
+		double microAveragedMeasuresSum = 0;
 		
 		for (int repetition = 0; repetition < this.repetitions; repetition++) {
-			final int repetitionErrors = this.errors.get(repetition);
-			final int repetitionInstancesCount = this.totalOccurencesCount.get(repetition);
+			final double precision = getRepetitionMacroAveragedPrecision(repetition);
+			final double recall = getRepetitionMacroAveragedRecall(repetition);
 			
-			final double repetitionErrorRate = (double) repetitionErrors / (double) repetitionInstancesCount; 
+			final double repetitionResult;
+			final double denominator = precision + recall;
+			if (denominator == 0) {
+				 repetitionResult = 0;
+			} else {
+				repetitionResult = 2 * precision * recall / denominator;
+			}
 			
-			errorRatesSum += repetitionErrorRate;
+			microAveragedMeasuresSum += repetitionResult;
 		}
 				
-		return errorRatesSum / (double) repetitions;
+		return microAveragedMeasuresSum / ((double) repetitions);
 	}
 	
+	public double getAverageMicroAveragedFMeasure() {
+		double microAveragedMeasuresSum = 0;
+			
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double precision = getRepetitionMicroAveragedPrecision(repetition);
+			final double recall = getRepetitionMicroAveragedRecall(repetition);
+			
+			final double repetitionResult;
+			final double denominator = precision + recall;
+			if (denominator == 0) {
+				 repetitionResult = 0;
+			} else {
+				repetitionResult = 2 * precision * recall / denominator;
+			}
+			
+			microAveragedMeasuresSum += repetitionResult;
+		}
+				
+		return microAveragedMeasuresSum / ((double) repetitions);
+	}
+	
+	public double getAverageAccuracy() {
+		double averageAccuraciesSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionAverageAccuracy = getRepetitionAverageAccuracy(repetition); 
+			
+			averageAccuraciesSum += repetitionAverageAccuracy;
+		}
+				
+		return averageAccuraciesSum / ((double) repetitions);
+	}
+
+	private double getRepetitionAverageAccuracy(int repetition) {
+		final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+		final int repetitionClassesCount = repetitionClasses.size();
+		
+		double repetitionAccuraciesSum = 0;
+		
+		for (final URI repetitionClass : repetitionClasses) {
+			final int classOccurencesCount = this.occurencesCount.get(repetition).get(repetitionClass);
+			final Integer classFalsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+			final Integer classFalseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+			final int classFalseCount = (classFalsePositives == null ? 0 : classFalsePositives) + (classFalseNegatives == null ? 0 : classFalseNegatives);
+			final int classTrueCount = classOccurencesCount - classFalseCount;
+			
+			repetitionAccuraciesSum += (((double) classTrueCount) / ((double) classOccurencesCount));
+		}
+					
+		final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount;
+		return repetitionAverageAccuracy;
+	}
+	
+	public double getAverageErrorRate() {
+		double averageErrorRatesSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+			final int repetitionClassesCount = repetitionClasses.size();
+			
+			double repetitionAccuraciesSum = 0;
+			
+			for (final URI repetitionClass : repetitionClasses) {
+				final int classOccurencesCount = this.occurencesCount.get(repetition).get(repetitionClass);
+				final Integer classFalsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+				final Integer classFalseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+				final int classFalseCount = (classFalsePositives == null ? 0 : classFalsePositives) + (classFalseNegatives == null ? 0 : classFalseNegatives);
+				
+				repetitionAccuraciesSum += (((double) classFalseCount) / ((double) classOccurencesCount));
+			}
+						
+			final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount; 
+			averageErrorRatesSum += repetitionAverageAccuracy;
+		}
+				
+		return averageErrorRatesSum / ((double) repetitions);
+	}
+	
+	public double getAverageKappa() {
+		double kappasSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionKappa = getRepetitionKappa(repetition); 
+			
+			kappasSum += repetitionKappa;
+		}
+				
+		return kappasSum / ((double) repetitions);
+	}
+	
+	private double getRepetitionKappa(final int repetition) {
+		final double pObserved = getPObserved(repetition);
+		final double pExpected = getPExpected(repetition);
+		
+		return 1 - ((1 - pObserved) / (1 - pExpected)); 
+	}
+	
+	private double getPObserved(final int repetition) {
+		return getRepetitionAverageAccuracy(repetition);
+	}
+	
+	private double getPExpected(final int repetition) {
+		final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+		
+		int cumulativeProduct = 0;
+		int N = 0;
+		for (final URI repetitionClass : repetitionClasses) {
+			final Integer truePositives = this.truePositives.get(repetition).get(repetitionClass);
+			final Integer falsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+			final Integer falseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+			
+			final int nClassAlgo = (truePositives == null ? 0 : truePositives) + (falsePositives == null ? 0 : falsePositives);
+			final int nClassManual = (truePositives == null ? 0 : truePositives) + (falseNegatives == null ? 0 : falseNegatives);
+			
+			cumulativeProduct += nClassAlgo * nClassManual;
+			N += this.occurencesCount.get(repetition).get(repetitionClass);
+		}
+		
+		return ((double) (cumulativeProduct)) / ((double) (N * N));
+	}
+
 	public double getLearningTime() {
-		return this.learningTime / (double) repetitions;
+		return this.learningTime / ((double) repetitions);
 	}
 	
 	public double getTestingTime() {
-		return this.testingTime / (double) repetitions;
+		return this.testingTime / ((double) repetitions);
 	}
 }

@@ -403,7 +403,7 @@ public class TreeMajorityVoteLabelsOnlyRandomDataGvAt {
 			final double average = new Mean().evaluate(distances);
 			final double median = new Median().evaluate(distances);
 			final int occurence = nodes.size();
-			final double relativeOccurence = occurence / (double) (labelLevelAggregates.size());
+			final double relativeOccurence = occurence / ((double) (labelLevelAggregates.size()));
 			
 			final Statistics statistics = Statistics.of(average, median, occurence, relativeOccurence);
 			builder.put(label, statistics);

@@ -331,10 +331,23 @@ public class DataGvAt {
 					testStatistics.getInstanceMatchingSolutions() / (testStatistics.getInstanceMatchingSolutions()
 							+ testStatistics.getInstanceNonmatchingAvailableSolutions()));
 
-			csvWriter.writeRow("Weighted average precision", "Weighted average recall", "Weighter average F-measure",
-					"Error rate");
+			csvWriter.writeRow("Weighted average precision", "Weighted average recall", "Weighted average F-measure");
 			csvWriter.writeRow(testStatistics.getAverageWeightedPrecision(), testStatistics.getAverageWeightedRecall(),
-					testStatistics.getAverageWeightedFMeasure(), testStatistics.getAverageErrorRate());
+					testStatistics.getAverageWeightedFMeasure());
+			
+			csvWriter.writeRow("Average accuracy", "Error rate");
+			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate());
+			
+			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "mRecall");
+			csvWriter.writeRow(testStatistics.getAverageMicroAveragedPrecision(),
+					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(), testStatistics.getAverageMacroAveragedRecall());
+			
+			csvWriter.writeRow("uF-measure", "MF-measure", "Kappa");
+			csvWriter.writeRow(testStatistics.getAverageMicroAveragedFMeasure(), testStatistics.getAverageMacroAveragedFMeasure(), testStatistics.getAverageKappa());
+			
+			
+			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
+			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(), Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
 
 			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
 			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(),
@@ -1477,7 +1490,7 @@ public class DataGvAt {
 			final double average = new Mean().evaluate(distances);
 			final double median = new Median().evaluate(distances);
 			final int occurence = nodes.size();
-			final double relativeOccurence = occurence / (double) (aspectLevelAggregates.size());
+			final double relativeOccurence = occurence / ((double) (aspectLevelAggregates.size()));
 
 			final Statistics statistics = Statistics.of(average, median, occurence, relativeOccurence);
 			builder.put(aspect, statistics);
