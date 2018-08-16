@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -51,12 +50,10 @@ public final class TestStatistics {
 	private long testingTime;
 	private int repetitions;
 	
+	private Map<Integer, Set<URI>> presentClasses = new HashMap<>();
 	private Map<Integer, Map<URI, Integer>> truePositives = new HashMap<>();
 	private Map<Integer, Map<URI, Integer>> falsePositives = new HashMap<>();
 	private Map<Integer, Map<URI, Integer>> falseNegatives = new HashMap<>();
-	private Map<Integer, Map<URI, Integer>> occurencesCount = new HashMap<>();
-	private Map<Integer, Integer> totalOccurencesCount = new HashMap<>();
-	private Map<Integer, Integer> errors = new HashMap<>();
 	
 	public final static class Builder {
 
@@ -278,16 +275,11 @@ public final class TestStatistics {
 			final Map<URI, Integer> repetitionFalseNegatives = testStatistics.falseNegatives.get(repetition);
 			repetitionFalseNegatives.compute(correct, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
 			
-			testStatistics.errors.compute(repetition, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
-			
 			return this;
 		}
 		
 		public Builder addPropertyOccurence(int repetition, URI propertyUri) {
-			final Map<URI, Integer> repetitionOccurencesCount = testStatistics.occurencesCount.get(repetition);
-			repetitionOccurencesCount.compute(propertyUri, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
-			
-			testStatistics.totalOccurencesCount.compute(repetition, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			testStatistics.presentClasses.get(repetition).add(propertyUri);
 			
 			return this;
 		}
@@ -313,12 +305,10 @@ public final class TestStatistics {
 				testStatistics.uniqueProperties.put(repetition, new HashSet<>());
 				testStatistics.nonmatchingSolutions.put(repetition, HashMultiset.create());
 				testStatistics.instanceNonmatchingSolutions.put(repetition, HashMultiset.create());
+				testStatistics.presentClasses.put(repetition, new HashSet<>());
 				testStatistics.truePositives.put(repetition, new HashMap<>());
 				testStatistics.falsePositives.put(repetition, new HashMap<>());
 				testStatistics.falseNegatives.put(repetition, new HashMap<>());
-				testStatistics.occurencesCount.put(repetition, new HashMap<>());
-				testStatistics.totalOccurencesCount.put(repetition, 0);
-				testStatistics.errors.put(repetition, 0);
 			}
 			
 			return this;
@@ -456,6 +446,28 @@ public final class TestStatistics {
 		return uniquePropertiesTested.values().stream().mapToInt(e -> e.size()).sum() / ((double) repetitions);
 	}
 
+	private Map<Integer, Map<URI, Integer>> getTrueNegatives() {
+		return this.presentClasses.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+			final int repetition = e.getKey();
+			final Map<URI, Integer> truePositives = this.truePositives.get(repetition);
+			
+			final Map<URI, Integer> trueNegatives = new HashMap<>();
+			final Set<URI> presentClasses = this.presentClasses.get(repetition);
+			truePositives.entrySet().stream().forEach(tp -> {
+				final URI truePositiveClass = tp.getKey();
+				final int truePositivesCount = tp.getValue();
+				
+				for (final URI presentClass : presentClasses) {
+					if (!presentClass.equals(truePositiveClass)) {
+						trueNegatives.compute(presentClass, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + truePositivesCount));
+					}
+				}
+			});
+			
+			return ImmutableMap.copyOf(trueNegatives);
+		}));
+	}
+	
 	public double getNonmatchingAvailableSolutions() {
 		int nonmatchingAvailableSum = 0;
 		
@@ -487,15 +499,18 @@ public final class TestStatistics {
 		
 		for (int repetition = 0; repetition < this.repetitions; repetition++) {
 			final Map<URI, Double> repetitionMeasures = measures.get(repetition);
-			final Map<URI, Integer> repetitionInstancesCount = this.occurencesCount.get(repetition);
 			
-			final double repetitionMeasuresSum = repetitionMeasures.entrySet().stream().map(e -> {
-				final Integer instancesCount = repetitionInstancesCount.get(e.getKey());
+			double repetitionMeasuresSum = 0;
+			int repetitionTotalInstancesCount = 0;
+			
+			for (final Map.Entry<URI, Double> entry : repetitionMeasures.entrySet()) {
+				final Integer truePositives = this.truePositives.get(repetition).get(entry.getKey());
+				final Integer falseNegatives = this.falseNegatives.get(repetition).get(entry.getKey());
+				final int classInstancesCount = (truePositives == null ? 0 : truePositives) + (falseNegatives == null ? 0 : falseNegatives);
 				
-				return e.getValue() * (instancesCount == null ? 0 : instancesCount);
-			}).collect(Collectors.summingDouble(Double::doubleValue));
-			
-			final int repetitionTotalInstancesCount = this.totalOccurencesCount.get(repetition);
+				repetitionTotalInstancesCount += classInstancesCount;
+				repetitionMeasuresSum += (entry.getValue() * classInstancesCount);
+			};
 			
 			final double repetitionWeightedMeasure = repetitionMeasuresSum / ((double) repetitionTotalInstancesCount);
 			
@@ -617,15 +632,15 @@ public final class TestStatistics {
 	}
 	
 	private Map<Integer, Map<URI, Double>> getRecalls() {
-		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+		return this.presentClasses.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
 			final int iteration = e.getKey();
 			
-			final Map<URI,Integer> iterationAll = e.getValue();
+			final Set<URI> iterationAll = e.getValue();
 			
 			final Map<URI, Integer> iterationTruePositives = this.truePositives.get(iteration);
 			final Map<URI, Integer> iterationFalseNegatives = this.falseNegatives.get(iteration);
 			
-			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+			return iterationAll.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
 				final int propertyTruePositives = iterationTruePositives.get(property) == null ? 0 : iterationTruePositives.get(property);
 				final int propertyFalseNegatives = iterationFalseNegatives.get(property) == null ? 0 : iterationFalseNegatives.get(property);
 				
@@ -640,15 +655,15 @@ public final class TestStatistics {
 	}
 	
 	private Map<Integer, Map<URI, Double>> getPrecisions() {
-		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+		return this.presentClasses.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
 			final int iteration = e.getKey();
 			
-			final Map<URI,Integer> iterationAll = e.getValue();
+			final Set<URI> iterationAll = e.getValue();
 			
 			final Map<URI, Integer> iterationTruePositives = this.truePositives.get(iteration);
 			final Map<URI, Integer> iterationFalsePositives = this.falsePositives.get(iteration);
 			
-			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+			return iterationAll.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
 				final int propertyTruePositives = iterationTruePositives.get(property) == null ? 0 : iterationTruePositives.get(property);
 				final int propertyFalsePositives = iterationFalsePositives.get(property) == null ? 0 : iterationFalsePositives.get(property);
 				
@@ -666,15 +681,15 @@ public final class TestStatistics {
 		final Map<Integer, Map<URI, Double>> precisions = getPrecisions();
 		final Map<Integer, Map<URI, Double>> recalls = getRecalls();
 		
-		return this.occurencesCount.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
+		return this.presentClasses.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> {
 			final int iteration = e.getKey();
 			
-			final Map<URI,Integer> iterationAll = e.getValue();
+			final Set<URI> iterationAll = e.getValue();
 			
 			final Map<URI, Double> iterationPrecisions = precisions.get(iteration);
 			final Map<URI, Double> iterationRecalls = recalls.get(iteration);
 			
-			return iterationAll.keySet().stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
+			return iterationAll.stream().collect(ImmutableMap.toImmutableMap(Function.identity(), property -> {
 				final double propertyPrecision = iterationPrecisions.get(property);
 				final double propertyRecall = iterationRecalls.get(property);
 				
@@ -825,19 +840,23 @@ public final class TestStatistics {
 	}
 
 	private double getRepetitionAverageAccuracy(int repetition) {
-		final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+		final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
 		final int repetitionClassesCount = repetitionClasses.size();
 		
 		double repetitionAccuraciesSum = 0;
 		
+		final Map<Integer, Map<URI, Integer>> computedTrueNegatives = getTrueNegatives();
+		
 		for (final URI repetitionClass : repetitionClasses) {
-			final int classOccurencesCount = this.occurencesCount.get(repetition).get(repetitionClass);
-			final Integer classFalsePositives = this.falsePositives.get(repetition).get(repetitionClass);
-			final Integer classFalseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
-			final int classFalseCount = (classFalsePositives == null ? 0 : classFalsePositives) + (classFalseNegatives == null ? 0 : classFalseNegatives);
-			final int classTrueCount = classOccurencesCount - classFalseCount;
+			final Integer truePositives = this.truePositives.get(repetition).get(repetitionClass);
+			final Integer trueNegatives = computedTrueNegatives.get(repetition).get(repetitionClass);
+			final Integer falsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+			final Integer falseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+			final int classTrueCount = (truePositives == null ? 0 : truePositives) + (trueNegatives == null ? 0 : trueNegatives);
+			final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
+			final int classPredicitionsCount = classTrueCount + classFalseCount;
 			
-			repetitionAccuraciesSum += (((double) classTrueCount) / ((double) classOccurencesCount));
+			repetitionAccuraciesSum += (((double) classTrueCount) / ((double) classPredicitionsCount));
 		}
 					
 		final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount;
@@ -847,19 +866,24 @@ public final class TestStatistics {
 	public double getAverageErrorRate() {
 		double averageErrorRatesSum = 0;
 		
+		final Map<Integer, Map<URI, Integer>> computedTrueNegatives = getTrueNegatives();
+		
 		for (int repetition = 0; repetition < this.repetitions; repetition++) {
-			final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+			final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
 			final int repetitionClassesCount = repetitionClasses.size();
 			
 			double repetitionAccuraciesSum = 0;
 			
 			for (final URI repetitionClass : repetitionClasses) {
-				final int classOccurencesCount = this.occurencesCount.get(repetition).get(repetitionClass);
-				final Integer classFalsePositives = this.falsePositives.get(repetition).get(repetitionClass);
-				final Integer classFalseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
-				final int classFalseCount = (classFalsePositives == null ? 0 : classFalsePositives) + (classFalseNegatives == null ? 0 : classFalseNegatives);
+				final Integer truePositives = this.truePositives.get(repetition).get(repetitionClass);
+				final Integer trueNegatives = computedTrueNegatives.get(repetition).get(repetitionClass);
+				final Integer falsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+				final Integer falseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+				final int classTrueCount = (truePositives == null ? 0 : truePositives) + (trueNegatives == null ? 0 : trueNegatives);
+				final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
+				final int classPredicitionsCount = classTrueCount + classFalseCount;
 				
-				repetitionAccuraciesSum += (((double) classFalseCount) / ((double) classOccurencesCount));
+				repetitionAccuraciesSum += (((double) classFalseCount) / ((double) classPredicitionsCount));
 			}
 						
 			final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount; 
@@ -893,7 +917,7 @@ public final class TestStatistics {
 	}
 	
 	private double getPExpected(final int repetition) {
-		final Set<URI> repetitionClasses = this.occurencesCount.get(repetition).keySet();
+		final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
 		
 		int cumulativeProduct = 0;
 		int N = 0;
@@ -906,7 +930,9 @@ public final class TestStatistics {
 			final int nClassManual = (truePositives == null ? 0 : truePositives) + (falseNegatives == null ? 0 : falseNegatives);
 			
 			cumulativeProduct += nClassAlgo * nClassManual;
-			N += this.occurencesCount.get(repetition).get(repetitionClass);
+			
+			final int classInstancesCount = nClassManual;
+			N += classInstancesCount;
 		}
 		
 		return ((double) (cumulativeProduct)) / ((double) (N * N));

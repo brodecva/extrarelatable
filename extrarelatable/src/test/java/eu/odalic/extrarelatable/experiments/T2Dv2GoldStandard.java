@@ -702,6 +702,8 @@ public class T2Dv2GoldStandard {
 						if (match.isPresent()) {
 							testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
 						} else {
+							testStatisticsBuilder.addPropertyOccurence(repetition, annotatedProperties.get(0).getUri());
+							
 							testStatisticsBuilder.addFalse(repetition, annotatedProperties.get(0).getUri(),
 									columnSolution.getUri());
 						}
