@@ -335,8 +335,9 @@ public class DataGvAt {
 			csvWriter.writeRow(testStatistics.getAverageWeightedPrecision(), testStatistics.getAverageWeightedRecall(),
 					testStatistics.getAverageWeightedFMeasure());
 			
-			csvWriter.writeRow("Average accuracy", "Error rate");
-			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate());
+			csvWriter.writeRow("Average accuracy", "Average error rate", "Overall accuracy", "Overall error rate");
+			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate(),
+					testStatistics.getAverageOverallAccuracy(), testStatistics.getAverageOverallErrorRate());
 			
 			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "mRecall");
 			csvWriter.writeRow(testStatistics.getAverageMicroAveragedPrecision(),

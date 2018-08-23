@@ -838,6 +838,30 @@ public final class TestStatistics {
 				
 		return averageAccuraciesSum / ((double) repetitions);
 	}
+	
+	public double getAverageOverallAccuracy() {
+		double averageAccuraciesSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionAverageAccuracy = getRepetitionOverallAccuracy(repetition); 
+			
+			averageAccuraciesSum += repetitionAverageAccuracy;
+		}
+				
+		return averageAccuraciesSum / ((double) repetitions);
+	}
+	
+	public double getAverageOverallErrorRate() {
+		double averageAccuraciesSum = 0;
+		
+		for (int repetition = 0; repetition < this.repetitions; repetition++) {
+			final double repetitionAverageAccuracy = getRepetitionOverallErrorRate(repetition); 
+			
+			averageAccuraciesSum += repetitionAverageAccuracy;
+		}
+				
+		return averageAccuraciesSum / ((double) repetitions);
+	}
 
 	private double getRepetitionAverageAccuracy(int repetition) {
 		final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
@@ -861,6 +885,56 @@ public final class TestStatistics {
 					
 		final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount;
 		return repetitionAverageAccuracy;
+	}
+	
+	private double getRepetitionOverallErrorRate(int repetition) {
+		final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
+		
+		int repetitionFailuresSum = 0;
+		int repetitionPredicitionsCountSum = 0;
+		
+		final Map<Integer, Map<URI, Integer>> computedTrueNegatives = getTrueNegatives();
+		
+		for (final URI repetitionClass : repetitionClasses) {
+			final Integer truePositives = this.truePositives.get(repetition).get(repetitionClass);
+			final Integer trueNegatives = computedTrueNegatives.get(repetition).get(repetitionClass);
+			final Integer falsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+			final Integer falseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+			final int classTrueCount = (truePositives == null ? 0 : truePositives) + (trueNegatives == null ? 0 : trueNegatives);
+			final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
+			final int classPredicitionsCount = classTrueCount + classFalseCount;
+			
+			repetitionFailuresSum += classFalseCount;
+			repetitionPredicitionsCountSum += classPredicitionsCount;
+		}
+					
+		final double repetitionOverallErrorRate = ((double) repetitionFailuresSum) / ((double) repetitionPredicitionsCountSum);
+		return repetitionOverallErrorRate;
+	}
+	
+	private double getRepetitionOverallAccuracy(int repetition) {
+		final Set<URI> repetitionClasses = this.presentClasses.get(repetition);
+		
+		int repetitionSuccessesSum = 0;
+		int repetitionPredicitionsCountSum = 0;
+		
+		final Map<Integer, Map<URI, Integer>> computedTrueNegatives = getTrueNegatives();
+		
+		for (final URI repetitionClass : repetitionClasses) {
+			final Integer truePositives = this.truePositives.get(repetition).get(repetitionClass);
+			final Integer trueNegatives = computedTrueNegatives.get(repetition).get(repetitionClass);
+			final Integer falsePositives = this.falsePositives.get(repetition).get(repetitionClass);
+			final Integer falseNegatives = this.falseNegatives.get(repetition).get(repetitionClass);
+			final int classTrueCount = (truePositives == null ? 0 : truePositives) + (trueNegatives == null ? 0 : trueNegatives);
+			final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
+			final int classPredicitionsCount = classTrueCount + classFalseCount;
+			
+			repetitionSuccessesSum += classTrueCount;
+			repetitionPredicitionsCountSum += classPredicitionsCount;
+		}
+					
+		final double repetitionOverallAccuracy = ((double) repetitionSuccessesSum) / ((double) repetitionPredicitionsCountSum);
+		return repetitionOverallAccuracy;
 	}
 	
 	public double getAverageErrorRate() {
@@ -913,7 +987,7 @@ public final class TestStatistics {
 	}
 	
 	private double getPObserved(final int repetition) {
-		return getRepetitionAverageAccuracy(repetition);
+		return getRepetitionOverallAccuracy(repetition);
 	}
 	
 	private double getPExpected(final int repetition) {
