@@ -304,12 +304,13 @@ public class DataGvAt {
 					testStatistics.getAttemptedTestedNumericColumns(), testStatistics.getLearntNumericColumns(),
 					testStatistics.getAnnotatedNumericColumns());
 
-			csvWriter.writeRow("Numeric columns to learn without property", "Numeric columns to test without property",
-					"In test missing property columns", "In learning missing property columns",
-					"Not enough numeric learning columns", "Not enough numeric testing columns");
+			csvWriter.writeRow("Numeric columns to learn without property", "Numeric columns to test without property");
 			csvWriter.writeRow(testStatistics.getNoPropertyLearningNumericColumns(),
-					testStatistics.getNoPropertyTestingNumericColums(), testStatistics.getInTestMissingColumns(),
-					testStatistics.getInLearningMissingColumns(), testStatistics.getTooSmallLearningNumericColumns(),
+					testStatistics.getNoPropertyTestingNumericColums());
+			csvWriter.writeRow("In test missing property columns", "In learning missing property columns");
+			csvWriter.writeRow(testStatistics.getInTestMissingColumns(), testStatistics.getInLearningMissingColumns());
+			csvWriter.writeRow("Not enough numeric learning columns", "Not enough numeric testing columns");
+			csvWriter.writeRow(testStatistics.getTooSmallLearningNumericColumns(),
 					testStatistics.getTooSmallTestingNumericColumns());
 
 			csvWriter.writeRow("Unique numeric column properties", "Unique numeric column properties learnt",
@@ -324,7 +325,7 @@ public class DataGvAt {
 							+ testStatistics.getNonmatchingAvailableSolutions()));
 
 			csvWriter.writeRow("Instance matching", "Instance nonmatching", "Instance nonmatching available",
-					"Instance precision");
+					"Instance success ratio");
 			csvWriter.writeRow(testStatistics.getInstanceMatchingSolutions(),
 					testStatistics.getInstanceNonmatchingSolutions(),
 					testStatistics.getInstanceNonmatchingAvailableSolutions(),
@@ -339,7 +340,7 @@ public class DataGvAt {
 			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate(),
 					testStatistics.getAverageOverallAccuracy(), testStatistics.getAverageOverallErrorRate());
 			
-			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "mRecall");
+			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "MRecall");
 			csvWriter.writeRow(testStatistics.getAverageMicroAveragedPrecision(),
 					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(), testStatistics.getAverageMacroAveragedRecall());
 			
