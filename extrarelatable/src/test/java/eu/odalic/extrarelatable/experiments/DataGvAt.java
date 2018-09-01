@@ -678,9 +678,6 @@ public class DataGvAt {
 
 				final DeclaredEntity columnSolution = solution.get(index);
 				final List<Property> annotatedProperties = annotation.getProperties();
-				if (annotatedProperties.isEmpty()) {
-					throw new IllegalStateException();
-				}
 
 				csvWriter.writeRow("Properties:");
 				csvWriter.writeRow("Mean distance", "Median distance", "Occurence", "Relative occurence", "URI",
