@@ -494,7 +494,7 @@ public final class TestStatistics {
 		return nonmatchingAvailableSum / ((double) repetitions);
 	}
 	
-	private double getAverageWeightedMeasure(final Map<Integer, Map<URI, Double>> measures) {
+	private double getAverageWeightedMeasure(final Map<Integer, Map<URI, Double>> measures, final double zeroTotalInstancesCountValue) {
 		double weightedMeasuresSum = 0;
 		
 		for (int repetition = 0; repetition < this.repetitions; repetition++) {
@@ -512,19 +512,22 @@ public final class TestStatistics {
 				repetitionMeasuresSum += (entry.getValue() * classInstancesCount);
 			};
 			
-			final double repetitionWeightedMeasure = repetitionMeasuresSum / ((double) repetitionTotalInstancesCount);
-			
-			weightedMeasuresSum += repetitionWeightedMeasure;
+			if (repetitionTotalInstancesCount == 0) {
+				weightedMeasuresSum += zeroTotalInstancesCountValue;
+			} else {
+				final double repetitionWeightedMeasure = repetitionMeasuresSum / ((double) repetitionTotalInstancesCount);
+				weightedMeasuresSum += repetitionWeightedMeasure;
+			}
 		}
 				
 		return weightedMeasuresSum / ((double) repetitions);
 	}
 	
-	private double getAverageMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures) {
+	private double getAverageMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures, final double zeroClassesCountValue) {
 		double macroAveragedMeasuresSum = 0;
 		
 		for (int repetition = 0; repetition < this.repetitions; repetition++) {
-			final double repetitionMacroAveragedMeasure = getRepetitionMacroAveragedMeasure(measures, repetition);
+			final double repetitionMacroAveragedMeasure = getRepetitionMacroAveragedMeasure(measures, repetition, zeroClassesCountValue);
 			
 			macroAveragedMeasuresSum += repetitionMacroAveragedMeasure;
 		}
@@ -532,11 +535,14 @@ public final class TestStatistics {
 		return macroAveragedMeasuresSum / ((double) repetitions);
 	}
 
-	private double getRepetitionMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures, int repetition) {
+	private double getRepetitionMacroAveragedMeasure(final Map<Integer, Map<URI, Double>> measures, final int repetition, final double zeroClassesCountValue) {
 		final Map<URI, Double> repetitionMeasures = measures.get(repetition);
 		
 		final Set<URI> repetitionClasses = measures.get(repetition).keySet();
-		final int repetitionClassesCount = repetitionClasses.size();			
+		final int repetitionClassesCount = repetitionClasses.size();
+		if (repetitionClassesCount == 0) {
+			return zeroClassesCountValue;
+		}
 					
 		double repetitionMeasuresSum = 0;
 		
@@ -598,11 +604,11 @@ public final class TestStatistics {
 	}
 	
 	private double getRepetitionMacroAveragedPrecision(int repetition) {
-		return getRepetitionMacroAveragedMeasure(getPrecisions(), repetition);
+		return getRepetitionMacroAveragedMeasure(getPrecisions(), repetition, 0);
 	}
 	
 	private double getRepetitionMacroAveragedRecall(int repetition) {
-		return getRepetitionMacroAveragedMeasure(getRecalls(), repetition);
+		return getRepetitionMacroAveragedMeasure(getRecalls(), repetition, 1);
 	}
 	
 	private Map<URI, Double> getAveragedMeasures(final Map<? extends Integer, ? extends Map<? extends URI, ? extends Number>> measures) {
@@ -746,11 +752,11 @@ public final class TestStatistics {
 	}
 	
 	public double getAverageWeightedPrecision() {
-		return getAverageWeightedMeasure(getPrecisions());
+		return getAverageWeightedMeasure(getPrecisions(), 0);
 	}
 	
 	public double getAverageMacroAveragedPrecision() {
-		return getAverageMacroAveragedMeasure(getPrecisions());
+		return getAverageMacroAveragedMeasure(getPrecisions(), 0);
 	}
 	
 	public double getAverageMicroAveragedPrecision() {
@@ -758,7 +764,7 @@ public final class TestStatistics {
 	}
 	
 	public double getAverageMacroAveragedRecall() {
-		return getAverageMacroAveragedMeasure(getRecalls());
+		return getAverageMacroAveragedMeasure(getRecalls(), 1);
 	}
 	
 	public double getAverageMicroAveragedRecall() {
@@ -770,7 +776,7 @@ public final class TestStatistics {
 	}
 	
 	public double getAverageWeightedRecall() {
-		return getAverageWeightedMeasure(getRecalls());
+		return getAverageWeightedMeasure(getRecalls(), 1);
 	}
 	
 	public Map<URI, Double> getAverageRecalls() {
@@ -778,7 +784,7 @@ public final class TestStatistics {
 	}
 	
 	public double getAverageWeightedFMeasure() {
-		return getAverageWeightedMeasure(getFMeasures());
+		return getAverageWeightedMeasure(getFMeasures(), 0.5);
 	}
 	
 	public Map<URI, Double> getAverageFMeasures() {
@@ -880,9 +886,17 @@ public final class TestStatistics {
 			final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
 			final int classPredicitionsCount = classTrueCount + classFalseCount;
 			
-			repetitionAccuraciesSum += (((double) classTrueCount) / ((double) classPredicitionsCount));
+			if (classPredicitionsCount == 0) {
+				repetitionAccuraciesSum += 1;
+			} else {
+				repetitionAccuraciesSum += (((double) classTrueCount) / ((double) classPredicitionsCount));
+			}
 		}
 					
+		if (repetitionClassesCount == 0) {
+			return 1;
+		}
+		
 		final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount;
 		return repetitionAverageAccuracy;
 	}
@@ -906,6 +920,10 @@ public final class TestStatistics {
 			
 			repetitionFailuresSum += classFalseCount;
 			repetitionPredicitionsCountSum += classPredicitionsCount;
+		}
+		
+		if (repetitionPredicitionsCountSum == 0) {
+			return 0;
 		}
 					
 		final double repetitionOverallErrorRate = ((double) repetitionFailuresSum) / ((double) repetitionPredicitionsCountSum);
@@ -933,6 +951,10 @@ public final class TestStatistics {
 			repetitionPredicitionsCountSum += classPredicitionsCount;
 		}
 					
+		if (repetitionPredicitionsCountSum == 0) {
+			return 1;
+		}
+		
 		final double repetitionOverallAccuracy = ((double) repetitionSuccessesSum) / ((double) repetitionPredicitionsCountSum);
 		return repetitionOverallAccuracy;
 	}
@@ -957,11 +979,19 @@ public final class TestStatistics {
 				final int classFalseCount = (falsePositives == null ? 0 : falsePositives) + (falseNegatives == null ? 0 : falseNegatives);
 				final int classPredicitionsCount = classTrueCount + classFalseCount;
 				
+				if (classPredicitionsCount == 0) {
+					return 0;
+				}
+				
 				repetitionAccuraciesSum += (((double) classFalseCount) / ((double) classPredicitionsCount));
 			}
-						
-			final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount; 
-			averageErrorRatesSum += repetitionAverageAccuracy;
+			
+			if (repetitionClassesCount == 0) {
+				averageErrorRatesSum += 0;
+			} else {
+				final double repetitionAverageAccuracy = repetitionAccuraciesSum / repetitionClassesCount; 
+				averageErrorRatesSum += repetitionAverageAccuracy;
+			}
 		}
 				
 		return averageErrorRatesSum / ((double) repetitions);
@@ -983,7 +1013,19 @@ public final class TestStatistics {
 		final double pObserved = getPObserved(repetition);
 		final double pExpected = getPExpected(repetition);
 		
-		return 1 - ((1 - pObserved) / (1 - pExpected)); 
+		final double pDifference = pObserved - pExpected;
+		
+		if (pExpected == 1) {
+			if (pDifference == 0) {
+				return 0;
+			} else if (pDifference > 0) {
+				return 1;
+			} else {
+				return Double.NEGATIVE_INFINITY;
+			}
+		}
+		
+		return pDifference / (1 - pExpected); 
 	}
 	
 	private double getPObserved(final int repetition) {
@@ -1007,6 +1049,10 @@ public final class TestStatistics {
 			
 			final int classInstancesCount = nClassManual;
 			N += classInstancesCount;
+		}
+		
+		if (N == 0) {
+			return 1;
 		}
 		
 		return ((double) (cumulativeProduct)) / ((double) (N * N));
