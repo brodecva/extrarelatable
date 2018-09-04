@@ -8,18 +8,30 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 
 @Component("propertyUriLabelTextFallback")
 public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy, Serializable {
 
 	private static final long serialVersionUID = 596148026170222626L;
 
+	private final UuidGenerator uuidGenerator;
+	
+	@Autowired
+	public PropertyUriLabelTextFallbackPropertyTreesMergingStrategy(@Qualifier("UuidGenerator") final UuidGenerator uuidGenerator) {
+		checkNotNull(uuidGenerator);
+		
+		this.uuidGenerator = uuidGenerator;
+	}
+	
 	@Override
 	public Property merge(final PropertyTree propertyTree, final Set<? extends Property> properties) {
 		checkNotNull(propertyTree);
@@ -46,7 +58,7 @@ public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy impl
 				).findFirst().orElse(null);
 				
 				if (mergedByText == null) {
-					final Property newProperty = new Property();
+					final Property newProperty = new Property(this.uuidGenerator.generate());
 					newProperty.add(propertyTree);
 					newProperty.setUri(declaredPropertyUri);
 					newProperty.setDeclaredLabels(declaredPropertyLabels);
@@ -59,7 +71,7 @@ public final class PropertyUriLabelTextFallbackPropertyTreesMergingStrategy impl
 					return null;
 				}
 			} else {
-				final Property newProperty = new Property();
+				final Property newProperty = new Property(this.uuidGenerator.generate());
 				newProperty.add(propertyTree);
 				newProperty.setUri(declaredPropertyUri);
 				newProperty.setDeclaredLabels(declaredPropertyLabels);

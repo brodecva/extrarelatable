@@ -22,21 +22,24 @@ public final class AttributeValuePair implements Comparable<AttributeValuePair>,
 	 */
 	private static final long serialVersionUID = -1003177810058153064L;
 
-	private final UUID uuid = UUID.randomUUID();
+	private final UUID uuid;
 	
 	private final Attribute attribute;
 	private final Value value;
 	
 	@SuppressWarnings("unused")
 	private AttributeValuePair() {
+		this.uuid = null;
 		this.attribute = null;
 		this.value = null;
 	}
 	
-	public AttributeValuePair(Attribute attribute, Value value) {
+	public AttributeValuePair(final UUID uuid, Attribute attribute, Value value) {
+		checkNotNull(uuid);
 		checkNotNull(attribute);
 		checkNotNull(value);
 		
+		this.uuid = uuid;
 		this.attribute = attribute;
 		this.value = value;
 	}

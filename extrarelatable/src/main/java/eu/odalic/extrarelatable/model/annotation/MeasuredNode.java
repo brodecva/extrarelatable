@@ -25,10 +25,6 @@ public final class MeasuredNode implements Comparable<MeasuredNode> {
 		this.distance = distance;
 	}
 	
-	public MeasuredNode(final Node node, final double distance) {
-		this(UUID.randomUUID(), node, distance);
-	}
-
 	public UUID getUuid() {
 		return uuid;
 	}

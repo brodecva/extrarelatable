@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -102,6 +103,7 @@ import eu.odalic.extrarelatable.services.odalic.values.EntityValue;
 import eu.odalic.extrarelatable.services.odalic.values.HeaderAnnotationValue;
 import eu.odalic.extrarelatable.services.odalic.values.ResultValue;
 import eu.odalic.extrarelatable.util.Matrix;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 import webreduce.data.Dataset;
 import webreduce.data.HeaderPosition;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
@@ -116,11 +118,6 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class T2Dv2GoldStandard {
-
-	private static final String PROPERTIES_RESULT_AGGREGATOR_QUALIFIER = System
-			.getProperty("eu.odalic.extrarelatable.propertiesResultAggregator", "averageDistance");
-	private static final String PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER = System
-			.getProperty("eu.odalic.extrarelatable.propertyTreesMergingStrategy", "propertyUri");
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(
 			System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
@@ -186,6 +183,11 @@ public class T2Dv2GoldStandard {
 
 	@Autowired
 	@Lazy
+	@Qualifier("UuidGenerator")
+	private UuidGenerator uuidGenerator;
+	
+	@Autowired
+	@Lazy
 	private TableAnalyzer tableAnalyzer;
 
 	@Autowired
@@ -204,8 +206,14 @@ public class T2Dv2GoldStandard {
 	@Lazy
 	private TopKNodesMatcher topKNodesMatcher;
 
+	@Autowired
+	@Lazy
+	@Qualifier("PropertiesResultAggregator")
 	private ResultAggregator<MeasuredNode> propertiesResultAggregator;
 
+	@Autowired
+	@Lazy
+	@Qualifier("PropertyTreesMergingStrategy")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	@Autowired
@@ -219,17 +227,11 @@ public class T2Dv2GoldStandard {
 	@Autowired
 	@Lazy
 	private ContextCollectionService contextCollectionService;
-
+	
 	private TestStatistics.Builder testStatisticsBuilder;
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
-		this.propertiesResultAggregator = beanFactory.getBean(PROPERTIES_RESULT_AGGREGATOR_QUALIFIER,
-				ResultAggregator.class);
-		this.propertyTreesMergingStrategy = beanFactory.getBean(PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER,
-				PropertyTreesMergingStrategy.class);
-
 		this.testStatisticsBuilder = TestStatistics.builder();
 	}
 
@@ -639,7 +641,7 @@ public class T2Dv2GoldStandard {
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) throws IOException {
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(), propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
@@ -1205,7 +1207,7 @@ public class T2Dv2GoldStandard {
 					minimumPartitionRelativeSize, maximumPartitionRelativeSize, minimumPartitionSize);
 
 			final Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue),
+			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
 					ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 

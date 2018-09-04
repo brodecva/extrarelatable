@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,7 @@ import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 
 @Component
 public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
@@ -45,20 +48,24 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 	
 	private final SubcontextCompiler subcontextCompiler;
 	private final SubcontextMatcher subcontextMatcher;
+	private final UuidGenerator uuidGenerator;
 
 	private final double minimumPartitionRelativeSize;
 	private final double maximumPartitionRelativeSize;
 	
-	public DefaultPropertyTreeBuilder(final SubcontextCompiler subcontextCompiler, final SubcontextMatcher subcontextMatcher, @Value("${eu.odalic.extrarelatable.minimumPartitionRelativeSize:0.01}") final double minimumPartitionRelativeSize,
+	@Autowired
+	public DefaultPropertyTreeBuilder(final SubcontextCompiler subcontextCompiler, final SubcontextMatcher subcontextMatcher, @Qualifier("UuidGenerator") final UuidGenerator uuidGenerator, @Value("${eu.odalic.extrarelatable.minimumPartitionRelativeSize:0.01}") final double minimumPartitionRelativeSize,
 			@Value("${eu.odalic.extrarelatable.maximumPartitionRelativeSize:0.99}") final double maximumPartitionRelativeSize) {
 		checkNotNull(subcontextCompiler);
 		checkNotNull(subcontextMatcher);
+		checkNotNull(uuidGenerator);
 		checkArgument(minimumPartitionRelativeSize > 0);
 		checkArgument(maximumPartitionRelativeSize < 1);
 		checkArgument(minimumPartitionRelativeSize <= maximumPartitionRelativeSize);
 		
 		this.subcontextCompiler = subcontextCompiler;
 		this.subcontextMatcher = subcontextMatcher;		
+		this.uuidGenerator = uuidGenerator;
 		this.minimumPartitionRelativeSize = minimumPartitionRelativeSize;
 		this.maximumPartitionRelativeSize = maximumPartitionRelativeSize;
 	}
@@ -105,7 +112,7 @@ public class DefaultPropertyTreeBuilder implements PropertyTreeBuilder {
 					Sets.difference(availableContextColumnIndices, ImmutableSet.of(usedContextColumnIndex)), table);
 
 			final eu.odalic.extrarelatable.model.bag.Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue),
+			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(uuidGenerator.generate(), subattribute, subvalue),
 					ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 

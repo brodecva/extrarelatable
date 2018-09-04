@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
@@ -30,6 +31,7 @@ import eu.odalic.extrarelatable.model.bag.UnitValue;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.model.table.TypedTable;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 import eu.odalic.extrarelatable.model.table.NestedListsTypedTable;
 
 @Immutable
@@ -42,22 +44,26 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	private final InstantValueParser instantValueParser;
 	private final UnitValueParser unitValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
-
+	private final UuidGenerator uuidGenerator;
+	
 	private final boolean datesParsed;
 
 	public DefaultTableAnalyzer(final NumericValueParser numericValueParser,
 			final InstantValueParser instantValueParser, final UnitValueParser unitValueParser,
 			final ValueTypeAnalyzer valueTypeAnalyzer,
+			@Qualifier("UuidGenerator") final UuidGenerator uuidGenerator,
 			final @org.springframework.beans.factory.annotation.Value("${eu.odalic.extrarelatable.datesParsed:false}") boolean datesParsed) {
 		checkNotNull(numericValueParser);
 		checkNotNull(unitValueParser);
 		checkNotNull(instantValueParser);
 		checkNotNull(valueTypeAnalyzer);
+		checkNotNull(uuidGenerator);
 
 		this.numericValueParser = numericValueParser;
 		this.unitValueParser = unitValueParser;
 		this.instantValueParser = instantValueParser;
 		this.valueTypeAnalyzer = valueTypeAnalyzer;
+		this.uuidGenerator = uuidGenerator;
 		this.datesParsed = datesParsed;
 	}
 
@@ -82,9 +88,9 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 			final List<List<String>> rows = table.getRows();
 
 			if (valueTypeAnalyzer.isEmpty(header)) {
-				labelsBuilder.add(Label.synthetic(headerIndex, tableTitle, preview(column), headers, preview(rows)));
+				labelsBuilder.add(Label.synthetic(this.uuidGenerator.generate(), headerIndex, tableTitle, preview(column), headers, preview(rows)));
 			} else {
-				labelsBuilder.add(Label.of(header, null, false, headerIndex, tableTitle, preview(column), headers,
+				labelsBuilder.add(Label.of(this.uuidGenerator.generate(), header, null, false, headerIndex, tableTitle, preview(column), headers,
 						preview(rows)));
 			}
 		}

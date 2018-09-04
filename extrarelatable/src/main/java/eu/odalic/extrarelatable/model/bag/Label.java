@@ -1,5 +1,7 @@
 package eu.odalic.extrarelatable.model.bag;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +20,7 @@ public final class Label implements Comparable<Label>, Serializable {
 	
 	private static final long serialVersionUID = -4083750297108671549L;
 
-	private final UUID uuid = UUID.randomUUID();
+	private final UUID uuid;
 	
 	private final String text;
 	private final String description;
@@ -31,21 +33,22 @@ public final class Label implements Comparable<Label>, Serializable {
 	private final List<List<String>> firstRows; 
 		
 	@XmlTransient
-	public static Label synthetic(final String description, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
-		return new Label(UUID.randomUUID().toString(), description, true, index, file, firstValues, headers, firstRows);
+	public static Label synthetic(final UUID uuid, final String description, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
+		return new Label(uuid, uuid.toString(), description, true, index, file, firstValues, headers, firstRows);
 	}
 	
 	@XmlTransient
-	public static Label synthetic(final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
-		return synthetic(null, index, file, firstValues, headers, firstRows);
+	public static Label synthetic(final UUID uuid, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
+		return synthetic(uuid, null, index, file, firstValues, headers, firstRows);
 	}
 	
 	@XmlTransient
-	public static Label of(final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
-		return new Label(text, description, false, index, file, firstValues, headers, firstRows);
+	public static Label of(final UUID uuid, final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
+		return new Label(uuid, text, description, false, index, file, firstValues, headers, firstRows);
 	}
 	
 	private Label() {
+		this.uuid = null;
 		this.text = null;
 		this.description = null;
 		this.synthetic = true;
@@ -56,7 +59,10 @@ public final class Label implements Comparable<Label>, Serializable {
 		this.firstRows = ImmutableList.of();
 	}
 	
-	private Label(final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
+	private Label(final UUID uuid, final String text, final String description, final boolean synthetic, final int index, final String file, final List<? extends String> firstValues, final List<? extends String> headers, final List<? extends List<? extends String>> firstRows) {
+		checkNotNull(uuid);
+		
+		this.uuid = uuid;
 		this.text = text;
 		this.description = description;
 		this.synthetic = synthetic;

@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -103,6 +104,7 @@ import eu.odalic.extrarelatable.services.odalic.values.EntityCandidateValue;
 import eu.odalic.extrarelatable.services.odalic.values.EntityValue;
 import eu.odalic.extrarelatable.services.odalic.values.HeaderAnnotationValue;
 import eu.odalic.extrarelatable.services.odalic.values.ResultValue;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
@@ -114,13 +116,6 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring/testApplicationContext.xml" })
 public class DataGvAt {
-
-	private static final String CSV_TABLE_PARSER_QUALIFIER = System
-			.getProperty("eu.odalic.extrarelatable.csvTableParser", "automatic");
-	private static final String PROPERTIES_RESULT_AGGREGATOR_QUALIFIER = System
-			.getProperty("eu.odalic.extrarelatable.propertiesResultAggregator", "averageDistance");
-	private static final String PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER = System
-			.getProperty("eu.odalic.extrarelatable.propertyTreesMergingStrategy", "propertyUri");
 
 	private static final double RELATIVE_COLUMN_TYPE_VALUES_OCCURENCE_THRESHOLD = Double.parseDouble(
 			System.getProperty("eu.odalic.extrarelatable.relativeColumnTypeValuesOccurenceThreshold", "0.6"));
@@ -196,8 +191,16 @@ public class DataGvAt {
 	@Autowired
 	BeanFactory beanFactory;
 
+	@Autowired
+	@Lazy
+	@Qualifier("CsvTableParser")
 	private CsvTableParser csvTableParser;
 
+	@Autowired
+	@Lazy
+	@Qualifier("UuidGenerator")
+	private UuidGenerator uuidGenerator;
+	
 	@Autowired
 	@Lazy
 	private TableAnalyzer tableAnalyzer;
@@ -218,8 +221,14 @@ public class DataGvAt {
 	@Lazy
 	private TopKNodesMatcher topKNodesMatcher;
 
+	@Autowired
+	@Lazy
+	@Qualifier("PropertiesResultAggregator")
 	private ResultAggregator<MeasuredNode> propertiesResultAggregator;
 
+	@Autowired
+	@Lazy
+	@Qualifier("PropertyTreesMergingStrategy")
 	private PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 
 	@Autowired
@@ -233,18 +242,11 @@ public class DataGvAt {
 	@Autowired
 	@Lazy
 	private ContextCollectionService contextCollectionService;
-
+	
 	private TestStatistics.Builder testStatisticsBuilder;
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
-		this.csvTableParser = beanFactory.getBean(CSV_TABLE_PARSER_QUALIFIER, CsvTableParser.class);
-		this.propertiesResultAggregator = beanFactory.getBean(PROPERTIES_RESULT_AGGREGATOR_QUALIFIER,
-				ResultAggregator.class);
-		this.propertyTreesMergingStrategy = beanFactory.getBean(PROPERTIES_TREE_MERGING_STRATEGY_QUALIFIER,
-				PropertyTreesMergingStrategy.class);
-
 		this.testStatisticsBuilder = TestStatistics.builder();
 	}
 
@@ -660,7 +662,7 @@ public class DataGvAt {
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) throws IOException {
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(), propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
@@ -1215,7 +1217,7 @@ public class DataGvAt {
 					minimumPartitionRelativeSize, maximumPartitionRelativeSize, minimumPartitionSize);
 
 			final Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(subattribute, subvalue),
+			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
 					ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 

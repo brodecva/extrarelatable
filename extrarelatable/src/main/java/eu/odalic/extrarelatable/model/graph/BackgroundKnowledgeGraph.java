@@ -34,8 +34,8 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 		this(name, propertyTreesMergingStrategy, new HashSet<>());
 	}
 	
-	public BackgroundKnowledgeGraph(final PropertyTreesMergingStrategy propertyTreesMergingStrategy) {
-		this(UUID.randomUUID().toString(), propertyTreesMergingStrategy);
+	public BackgroundKnowledgeGraph(final UUID uuid, PropertyTreesMergingStrategy propertyTreesMergingStrategy) {
+		this(uuid.toString(), propertyTreesMergingStrategy);
 	}
 	
 	public BackgroundKnowledgeGraph(final BackgroundKnowledgeGraph original) {

@@ -33,8 +33,10 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	
 	private final Set<PropertyTree> instances;
 	
-	public Property() {
-		this.uuid = UUID.randomUUID();
+	public Property(final UUID uuid) {
+		checkNotNull(uuid);
+		
+		this.uuid = uuid;
 		this.uri = null;
 		this.declaredLabels = ImmutableSortedSet.of();
 		this.instances = new HashSet<>();

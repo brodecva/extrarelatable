@@ -22,6 +22,7 @@ import com.google.common.collect.Sets.SetView;
 
 import eu.odalic.extrarelatable.algorithms.distance.Distance;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
+import eu.odalic.extrarelatable.model.annotation.MeasuredNodeFactory;
 import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 import eu.odalic.extrarelatable.model.graph.Property;
@@ -39,32 +40,35 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	public static final double INITIAL_DEFAULT_CLASSES_WEIGHT = 0.25d;
 
 	private final Distance distance;
+	private final MeasuredNodeFactory measuredNodeFactory;
 	private final double defaultValuesWeight;
 	private final double defaultPropertiesWeight;
 	private final double defaultClassesWeight;
 	private final int defaultK;
 
 	@Autowired
-	ContextAwareDistanceTopKNodesMatcher(final Distance distance,
+	ContextAwareDistanceTopKNodesMatcher(final Distance distance, final MeasuredNodeFactory measuredNodeFactory,
 			@Value("${eu.odalic.extrarelatable.valuesWeight:0.5}") final double defaultValuesWeight,
 			@Value("${eu.odalic.extrarelatable.propertiesWeight:0.25}") final double defaultPropertiesWeight,
 			@Value("${eu.odalic.extrarelatable.classesWeight:0.25}") final double defaultClassesWeight,
 			@Value("${eu.odalic.extrarelatable.topKNeighbours?:50}") final int defaultK) {
 		checkNotNull(distance);
+		checkNotNull(measuredNodeFactory);
 		checkArgument(defaultValuesWeight >= 0, "The default values weight must be at least zero!");
 		checkArgument(defaultPropertiesWeight >= 0, "The default properties weight must be at least zero!");
 		checkArgument(defaultClassesWeight >= 0, "The default classes weight must be at least zero!");
 		checkArgument(defaultK >= 1, "The k must be at least one!");
 
 		this.distance = distance;
+		this.measuredNodeFactory = measuredNodeFactory;
 		this.defaultValuesWeight = defaultValuesWeight;
 		this.defaultPropertiesWeight = defaultPropertiesWeight;
 		this.defaultClassesWeight = defaultClassesWeight;
 		this.defaultK = defaultK;
 	}
 
-	public ContextAwareDistanceTopKNodesMatcher(final Distance distance) {
-		this(distance, INITIAL_DEFAULT_VALUES_WEIGHT, INITIAL_DEFAULT_PROPERTIES_WEIGHT, INITIAL_DEFAULT_CLASSES_WEIGHT, INITIAL_DEFAULT_K);
+	public ContextAwareDistanceTopKNodesMatcher(final Distance distance, final MeasuredNodeFactory measuredNodeFactory) {
+		this(distance, measuredNodeFactory, INITIAL_DEFAULT_VALUES_WEIGHT, INITIAL_DEFAULT_PROPERTIES_WEIGHT, INITIAL_DEFAULT_CLASSES_WEIGHT, INITIAL_DEFAULT_K);
 	}
 
 	@Override
@@ -138,7 +142,7 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 							+ normalizedPropertiesWeight * propertiesNormalizedjaccardDissimilarity
 							+ normalizedClassesWeight * classesNormalizedjaccardDissimilarity;
 
-					final MeasuredNode candidateNode = new MeasuredNode(node, measuredDistance);
+					final MeasuredNode candidateNode = this.measuredNodeFactory.create(node, measuredDistance);
 
 					if (winners.size() < k) {
 						winners.add(candidateNode);

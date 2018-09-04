@@ -10,6 +10,7 @@ import eu.odalic.extrarelatable.algorithms.graph.aggregation.ResultAggregator;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
 import eu.odalic.extrarelatable.model.graph.PropertyTreesMergingStrategy;
+import eu.odalic.extrarelatable.util.UuidGenerator;
 
 @Configuration
 public class PropertyBeanConfiguration {
@@ -28,7 +29,6 @@ public class PropertyBeanConfiguration {
 			@Value("${eu.odalic.extrarelatable.csvTableParser:automatic}") String qualifier) {
 		return (CsvTableParser) context.getBean(qualifier);
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	@Bean
@@ -49,5 +49,11 @@ public class PropertyBeanConfiguration {
 	public ResultAggregator<MeasuredNode> PairsResultAggregator(
 			@Value("${eu.odalic.extrarelatable.pairsResultAggregator:averageDistance}") String qualifier) {
 		return (ResultAggregator<MeasuredNode>) context.getBean(qualifier);
+	}
+	
+	@Bean
+	public UuidGenerator UuidGenerator(
+			@Value("${eu.odalic.extrarelatable.uuidGenerator:default}") String qualifier) {
+		return (UuidGenerator) context.getBean(qualifier);
 	}
 }
