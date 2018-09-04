@@ -286,6 +286,56 @@ public class DataGvAt {
 		}
 
 		for (final TestStatistics testStatistics : results) {
+			csvWriter.writeRow("Weighted average precision iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedPrecision().toArray());
+			
+			csvWriter.writeRow("Weighted average recall iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedRecall().toArray());
+			
+			csvWriter.writeRow("Weighted average F-measure iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedFMeasure().toArray());
+			
+			csvWriter.writeRow("Average accuracy iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageAccuracy().toArray());
+			
+			csvWriter.writeRow("Average error rate iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageErrorRate().toArray());
+			
+			csvWriter.writeRow("Overall accuracy iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallAccuracy().toArray());
+			
+			csvWriter.writeRow("Overall error rate iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallErrorRate().toArray());
+			
+			csvWriter.writeRow("uPrecision iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedPrecision().toArray());
+			
+			csvWriter.writeRow("MPrecision iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedPrecision().toArray());
+			
+			csvWriter.writeRow("uRecall iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedRecall().toArray());
+			
+			csvWriter.writeRow("MRecall iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedRecall().toArray());
+			
+			csvWriter.writeRow("uF-measure iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedFMeasure().toArray());
+			
+			csvWriter.writeRow("MF-measure iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedFMeasure().toArray());
+			
+			csvWriter.writeRow("Kappa iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsKappa().toArray());
+			
+			csvWriter.writeRow("Learning time iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsLearningTime().toArray());
+			
+			csvWriter.writeRow("Testing time iterations");
+			csvWriter.writeRow(testStatistics.getAllRepetitionsTestingTime().toArray());
+			
+			csvWriter.writeEmptyRow();
+			
 			csvWriter.writeRow("Files", "To learn", "To test", "Learnt", "Tested", "Irregular header", "Few rows",
 					"Few typed rows");
 			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
@@ -479,8 +529,8 @@ public class DataGvAt {
 
 		final long testStop = System.nanoTime();
 		
-		testStatisticsBuilder.addLearningTime(learningStop - learningStart);
-		testStatisticsBuilder.addTestingTime(testStop - testStart);
+		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
+		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
 		
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
@@ -537,8 +587,8 @@ public class DataGvAt {
 
 		final long testStop = System.nanoTime();
 		
-		testStatisticsBuilder.addLearningTime(learningStop - learningStart);
-		testStatisticsBuilder.addTestingTime(testStop - testStart);
+		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
+		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
 		
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
