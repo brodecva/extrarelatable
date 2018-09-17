@@ -618,15 +618,17 @@ public final class TestStatistics {
 		final Map<? extends URI, ? extends Number> repetitionNumerator = numerator.get(repetition);
 		final Map<? extends URI, ? extends Number> repetitionDenominator = denominator.get(repetition);
 		
-		final Set<? extends URI> repetitionClasses = repetitionNumerator.keySet();
+		final Set<? extends URI> repetitionNumeratorClasses = repetitionNumerator.keySet();
 					
 		double repetitionNumeratorSum = 0;
-		for (final URI repetitionClass : repetitionClasses) {
+		for (final URI repetitionClass : repetitionNumeratorClasses) {
 			repetitionNumeratorSum += repetitionNumerator.get(repetitionClass).doubleValue();
 		}
 		
+		final Set<? extends URI> repetitionDenominatorClasses = repetitionDenominator.keySet();
+		
 		double repetitionDenominatorSum = 0;
-		for (final URI repetitionClass : repetitionClasses) {
+		for (final URI repetitionClass : repetitionDenominatorClasses) {
 			repetitionDenominatorSum += repetitionDenominator.get(repetitionClass).doubleValue();
 		}
 		
@@ -694,7 +696,7 @@ public final class TestStatistics {
 				
 				final int propertyAllSum = propertyTruePositives + propertyFalseNegatives;
 				if (propertyAllSum == 0) {
-					return 0d;
+					return 1d;
 				}
 				
 				return ((double) propertyTruePositives) / ((double) propertyAllSum);
@@ -717,7 +719,7 @@ public final class TestStatistics {
 				
 				final int propertyAllSum = propertyTruePositives + propertyFalsePositives;
 				if (propertyAllSum == 0) {
-					return 1d;
+					return 0d;
 				}
 				
 				return ((double) propertyTruePositives) / ((double) propertyAllSum);
