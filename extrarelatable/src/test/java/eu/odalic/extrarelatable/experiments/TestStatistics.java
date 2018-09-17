@@ -271,8 +271,10 @@ public final class TestStatistics {
 		}
 		
 		public Builder addFalse(int repetition, URI assigned, URI correct) {
-			final Map<URI, Integer> repetitionFalsePositives = testStatistics.falsePositives.get(repetition);
-			repetitionFalsePositives.compute(assigned, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			if (assigned != null) {
+				final Map<URI, Integer> repetitionFalsePositives = testStatistics.falsePositives.get(repetition);
+				repetitionFalsePositives.compute(assigned, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
+			}
 			
 			final Map<URI, Integer> repetitionFalseNegatives = testStatistics.falseNegatives.get(repetition);
 			repetitionFalseNegatives.compute(correct, (oldKey, oldValue) -> (oldValue == null ?  1 : oldValue + 1));
@@ -281,7 +283,9 @@ public final class TestStatistics {
 		}
 		
 		public Builder addPropertyOccurence(int repetition, URI propertyUri) {
-			testStatistics.presentClasses.get(repetition).add(propertyUri);
+			if (propertyUri != null) {
+				testStatistics.presentClasses.get(repetition).add(propertyUri);
+			}
 			
 			return this;
 		}
