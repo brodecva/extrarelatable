@@ -110,6 +110,8 @@ public class T2Dv2GoldStandardOdalic {
 							.stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
 	private static final int TEST_REPETITIONS = Integer
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
+	private static final boolean GROUP_DEPENDENT = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.groupDependent", "true"));
 	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.of(
 			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/releaseDate"),
 			URI.create("http://dbpedia.org/ontology/year"), URI.create("http://dbpedia.org/ontology/foundingYear"));
@@ -674,7 +676,7 @@ public class T2Dv2GoldStandardOdalic {
 		}
 
 		return first.equals(second)
-				|| (IS_ACCEPTABLE_FOR_PAIRS.get(first) != null && IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
+				|| (GROUP_DEPENDENT && IS_ACCEPTABLE_FOR_PAIRS.get(first) != null && IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
 	}
 
 	private static Map<Integer, DeclaredEntity> getSolution(final Path input, final Path declaredPropertiesPath) {
