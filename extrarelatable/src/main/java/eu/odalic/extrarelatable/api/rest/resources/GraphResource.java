@@ -33,6 +33,10 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.webcohesion.enunciate.metadata.rs.ResponseCode;
+import com.webcohesion.enunciate.metadata.rs.StatusCodes;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
+
 import eu.odalic.extrarelatable.api.rest.responses.Message;
 import eu.odalic.extrarelatable.api.rest.responses.Reply;
 import eu.odalic.extrarelatable.api.rest.values.FormatValue;
@@ -81,6 +85,9 @@ public final class GraphResource {
 	@Path("{name}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "The name field value does not match the path name."),
+			@ResponseCode(code = 200, condition = "A new graph has been created.") })
+	@TypeHint(Message.class)
 	public Response put(final @PathParam("name") String name, final GraphValue graphValue)
 			throws MalformedURLException, IllegalStateException, IllegalArgumentException {
 		if (graphValue.getName() != null || graphValue.getName() != name) {
@@ -100,6 +107,9 @@ public final class GraphResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "The name is missing or invalid."),
+			@ResponseCode(code = 200, condition = "A new graph has been created.") })
+	@TypeHint(Message.class)
 	public Response post(final GraphValue graphValue)
 			throws MalformedURLException, IllegalStateException, IllegalArgumentException {
 		if (graphValue.getName() == null) {
@@ -127,6 +137,9 @@ public final class GraphResource {
 	@DELETE
 	@Path("{name}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "The graph does not exist."),
+			@ResponseCode(code = 200, condition = "Graph deleted.") })
+	@TypeHint(Message.class)
 	public Response delete(final @PathParam("name") String name) {
 		try {
 			this.graphService.delete(name);
@@ -141,6 +154,9 @@ public final class GraphResource {
 	@Path("{name}/learnt")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "No input provided or missing metadata."),
+			@ResponseCode(code = 200, condition = "The input has been learnt for the graph.") })
+	@TypeHint(Message.class)
 	public Response learn(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
 			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
@@ -171,12 +187,15 @@ public final class GraphResource {
 
 		try {
 			this.graphService.learn(name, input, format, metadata,
-					onlyWithProperties == null ? true : onlyWithProperties, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
+					onlyWithProperties == null ? true : onlyWithProperties,
+					contextCollected == null ? false : contextCollected,
+					onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext,
+					usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
 
-		return Message.of("An input has been learnt for graph " + name + ".").toResponse(Response.Status.OK,
+		return Message.of("The input has been learnt for graph " + name + ".").toResponse(Response.Status.OK,
 				this.uriInfo);
 	}
 
@@ -184,6 +203,9 @@ public final class GraphResource {
 	@Path("{name}/learnt")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "No table provided or missing metadata."),
+			@ResponseCode(code = 200, condition = "The input has been learnt for the graph.") })
+	@TypeHint(Message.class)
 	public Response learn(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
 			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
 			final @QueryParam("collectContext") Boolean contextCollected,
@@ -206,7 +228,10 @@ public final class GraphResource {
 		}
 
 		try {
-			this.graphService.learn(name, parsedTable, onlyWithProperties == null ? true : onlyWithProperties, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
+			this.graphService.learn(name, parsedTable, onlyWithProperties == null ? true : onlyWithProperties,
+					contextCollected == null ? false : contextCollected,
+					onlyDeclaredAsContext == null ? true : onlyDeclaredAsContext,
+					usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -219,6 +244,9 @@ public final class GraphResource {
 	@Path("{name}/annotated")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "No input provided or missing metadata."),
+			@ResponseCode(code = 200, condition = "The input has been annotated.") })
+	@TypeHint(Message.class)
 	public Response annotate(final @PathParam("name") String name, final @FormDataParam("input") InputStream input,
 			final @FormDataParam("format") FormatValue formatValue, final @FormDataParam("metadata") Metadata metadata,
 			final @QueryParam("learn") Boolean learn,
@@ -245,12 +273,16 @@ public final class GraphResource {
 		}
 
 		if (learn != null && learn) {
-			learn(name, input, formatValue, metadata, onlyWithProperties, contextCollected, onlyDeclaredAsContext, usedBases, primaryBase);
+			learn(name, input, formatValue, metadata, onlyWithProperties, contextCollected, onlyDeclaredAsContext,
+					usedBases, primaryBase);
 		}
 
 		final AnnotationResult result;
 		try {
-			result = this.graphService.annotate(name, input, format, metadata, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
+			result = this.graphService.annotate(name, input, format, metadata,
+					contextCollected == null ? false : contextCollected,
+					onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext,
+					usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -262,6 +294,9 @@ public final class GraphResource {
 	@Path("{name}/annotated")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "No table provided or missing metadata."),
+			@ResponseCode(code = 200, condition = "The table has been annotated.") })
+	@TypeHint(Reply.class)
 	public Response annotate(final @PathParam("name") String name, final ParsedTableValue parsedTableValue,
 			final @QueryParam("learn") Boolean learn,
 			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
@@ -281,12 +316,15 @@ public final class GraphResource {
 				parsedTableValue.getRows(), parsedTableValue.getMetadata());
 
 		if (learn != null && learn) {
-			learn(name, parsedTableValue, onlyWithProperties, contextCollected, onlyDeclaredAsContext, usedBases, primaryBase);
+			learn(name, parsedTableValue, onlyWithProperties, contextCollected, onlyDeclaredAsContext, usedBases,
+					primaryBase);
 		}
-		
+
 		final AnnotationResult result;
 		try {
-			result = this.graphService.annotate(name, parsedTable, contextCollected == null ? false : contextCollected, onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext, usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
+			result = this.graphService.annotate(name, parsedTable, contextCollected == null ? false : contextCollected,
+					onlyDeclaredAsContext == null ? false : onlyDeclaredAsContext,
+					usedBases == null ? ImmutableSet.of() : usedBases, primaryBase);
 		} catch (final IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage(), e);
 		}
@@ -297,6 +335,9 @@ public final class GraphResource {
 	@GET
 	@Path("{name}/search")
 	@Produces(MediaType.APPLICATION_JSON)
+	@StatusCodes({ @ResponseCode(code = 400, condition = "No pattern provided."),
+			@ResponseCode(code = 200, condition = "The search was executed.") })
+	@TypeHint(Reply.class)
 	public Response search(final @PathParam("name") String name, final @QueryParam("pattern") String pattern,
 			final @QueryParam("flags") Integer flags, final @QueryParam("limit") Integer limit) throws IOException {
 		if (pattern == null) {

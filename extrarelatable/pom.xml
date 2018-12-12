@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.odalic.extrarelatable</groupId>
@@ -12,7 +13,7 @@
 		<java.version>1.8</java.version>
 		<jcloverslf4j.version>1.7.21</jcloverslf4j.version>
 		<jersey.version>2.23.1</jersey.version>
-<!-- 		<jackson.version>2.5.4</jackson.version> -->
+		<!-- <jackson.version>2.5.4</jackson.version> -->
 		<logback.version>1.1.7</logback.version>
 		<spring.version>4.3.0.RELEASE</spring.version>
 		<guava.version>21.0</guava.version>
@@ -31,10 +32,10 @@
 			<name>Java.net Repository for Maven</name>
 			<url>http://download.java.net/maven/2/</url>
 		</repository>
-		
+
 		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 
@@ -150,14 +151,14 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.4</version>
 		</dependency>
-		
+
 		<!-- Apache Commons Math -->
 		<dependency>
-    		<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-math3</artifactId>
-    		<version>3.6.1</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
 		</dependency>
-		
+
 		<!-- UniVocity -->
 		<dependency>
 			<groupId>com.univocity</groupId>
@@ -165,18 +166,18 @@
 			<version>2.5.5</version>
 			<type>jar</type>
 		</dependency>
-		
+
 		<!-- Apache Tika parsers -->
 		<dependency>
-		    <groupId>org.apache.tika</groupId>
-		    <artifactId>tika-parsers</artifactId>
-		    <version>1.16</version>
-		    <exclusions>
-	            <exclusion>
-	                <groupId>org.apache.cxf</groupId>
-	                <artifactId>cxf-rt-rs-client</artifactId>
-	            </exclusion>
-        	</exclusions>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-parsers</artifactId>
+			<version>1.16</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.cxf</groupId>
+					<artifactId>cxf-rt-rs-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
@@ -189,10 +190,10 @@
 
 		<!-- Jersey client -->
 		<dependency>
-		    <groupId>org.glassfish.jersey.core</groupId>
-		    <artifactId>jersey-client</artifactId>
-		    <version>${jersey.version}</version>
-		</dependency>	
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
 
 		<!-- Jackson -->
 		<dependency>
@@ -212,41 +213,18 @@
 		</dependency>
 
 		<!-- Jackson -->
-		<!-- <dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-jaxrs-base</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>com.fasterxml.jackson.module</groupId>
-		    <artifactId>jackson-module-jaxb-annotations</artifactId>
-		    <version>${jackson.version}</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>com.fasterxml.jackson.core</groupId> <artifactId>jackson-core</artifactId> 
+			<version>${jackson.version}</version> </dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
+			<artifactId>jackson-jaxrs-json-provider</artifactId> <version>${jackson.version}</version> 
+			</dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
+			<artifactId>jackson-databind</artifactId> <version>${jackson.version}</version> 
+			</dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
+			<artifactId>jackson-annotations</artifactId> <version>${jackson.version}</version> 
+			</dependency> <dependency> <groupId>com.fasterxml.jackson.core</groupId> 
+			<artifactId>jackson-jaxrs-base</artifactId> <version>${jackson.version}</version> 
+			</dependency> <dependency> <groupId>com.fasterxml.jackson.module</groupId> 
+			<artifactId>jackson-module-jaxb-annotations</artifactId> <version>${jackson.version}</version> 
+			</dependency> -->
 		<!-- JUnit -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -254,27 +232,27 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- JSR 305 Annotations -->
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.pojava/pojava -->
 		<dependency>
-		    <groupId>org.pojava</groupId>
-		    <artifactId>pojava</artifactId>
-		    <version>3.0.3</version>
+			<groupId>org.pojava</groupId>
+			<artifactId>pojava</artifactId>
+			<version>3.0.3</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.github.brodecva</groupId>
-		    <artifactId>dwtc-tools</artifactId>
-		    <version>603db61</version>
+			<groupId>com.github.brodecva</groupId>
+			<artifactId>dwtc-tools</artifactId>
+			<version>603db61</version>
 		</dependency>
-		
+
 		<!-- MapDB -->
 		<dependency>
 			<groupId>org.mapdb</groupId>
@@ -287,9 +265,44 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
+		<!-- Enunciate annotations -->
+		<dependency>
+			<groupId>com.webcohesion.enunciate</groupId>
+			<artifactId>enunciate-core-annotations</artifactId>
+			<version>2.11.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
+		<!-- <pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.webcohesion.enunciate</groupId>
+										<artifactId>enunciate-maven-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>docs</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement> -->
 		<plugins>
 			<plugin>
 				<inherited>true</inherited>
@@ -310,6 +323,22 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.webcohesion.enunciate</groupId>
+				<artifactId>enunciate-slim-maven-plugin</artifactId>
+				<version>2.11.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>docs</goal>
+						</goals>
+						<!-- <configuration>
+							<docsDir>${project.build.directory}/docs</docsDir>
+						</configuration> -->
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
