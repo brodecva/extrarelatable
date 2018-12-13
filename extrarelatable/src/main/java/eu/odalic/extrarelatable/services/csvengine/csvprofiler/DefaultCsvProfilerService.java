@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 public final class DefaultCsvProfilerService implements CsvProfilerService {
 
 	private static final String BODY_PART_NAME = "csv_file";
-	private static final String TARGET_PATH = "http://data.wu.ac.at/csvengine/api/v1/profiler/";
+	private static final String TARGET_PATH = "https://data.wu.ac.at/csvengine/api/v1/profiler/";
 	private static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv");
 	private static final long MINIMUM_QUERY_INTERVAL_MILIS = 2000;
 	

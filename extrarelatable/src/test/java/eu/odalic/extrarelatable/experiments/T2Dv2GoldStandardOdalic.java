@@ -110,6 +110,8 @@ public class T2Dv2GoldStandardOdalic {
 							.stream().map(e -> Integer.parseInt(e)).collect(ImmutableList.toImmutableList());
 	private static final int TEST_REPETITIONS = Integer
 			.parseInt(System.getProperty("eu.odalic.extrarelatable.testRepetitions", "1"));
+	private static final boolean DRY_RUN = Boolean
+			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.dryRun", "false"));
 	private static final boolean GROUP_DEPENDENT = Boolean
 			.parseBoolean(System.getProperty("eu.odalic.extrarelatable.groupDependent", "true"));
 	private static final Multimap<URI, URI> IS_ACCEPTABLE_FOR_PAIRS = ImmutableMultimap.of(
@@ -497,6 +499,10 @@ public class T2Dv2GoldStandardOdalic {
 
 	private static List<Path> getTestFiles(final Random random, final double sampleSizeStepRatio,
 			final int sampleSizeIndex, final List<Path> files) {
+		if (DRY_RUN) {
+			return ImmutableList.of();
+		}
+		
 		final List<Path> filesCopy = new ArrayList<>(files);
 
 		final int allFilesSize = files.size();
