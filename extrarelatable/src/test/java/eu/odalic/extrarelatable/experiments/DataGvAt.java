@@ -838,7 +838,7 @@ public class DataGvAt {
 			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) {
 		csvWriter.writeRow("Processing file:", input);
 
-		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+		final Path cleanedInput = clean(csvWriter, input, cleanedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
@@ -1110,20 +1110,20 @@ public class DataGvAt {
 		return csvProfile;
 	}
 
-	private Path clean(final Path input, final Path cleanedInputFilesDirectory) {
+	private Path clean(final CsvWriter csvWriter, final Path input, final Path cleanedInputFilesDirectory) {
 		Path cleanedInput = cleanedInputFilesDirectory.resolve(input.getFileName());
 		final Path failedCleanNotice = cleanedInputFilesDirectory.resolve(input.getFileName() + ".fail");
 		if (cleanedInput.toFile().exists()) {
-			System.out.println("File " + input + " already cleaned.");
+			csvWriter.writeRow("File " + input + " already cleaned.");
 		} else if (failedCleanNotice.toFile().exists()) {
-			System.out.println("Previously failed cleaning attempt for " + input + ". Using original instead.");
+			csvWriter.writeRow("Previously failed cleaning attempt for " + input + ". Using original instead.");
 
 			cleanedInput = input;
 		} else {
 			try (final InputStream cleanedInputStream = csvCleanService.clean(input.toFile())) {
 				Files.copy(cleanedInputStream, cleanedInput);
 			} catch (final IllegalStateException e) {
-				System.out.println("Failed clean attempt for " + input + "!");
+				csvWriter.writeRow("Failed clean attempt for " + input + "!");
 
 				cleanedInput = input;
 				try {
@@ -1239,7 +1239,7 @@ public class DataGvAt {
 			final BackgroundKnowledgeGraph graph, final Path cleanedInputFilesDirectory, final Path profilesDirectory,
 			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random, int maxColumnSampleSize) {
-		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+		final Path cleanedInput = clean(csvWriter, input, cleanedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
@@ -1294,7 +1294,7 @@ public class DataGvAt {
 	private List<URI> getTestProperties(final CsvWriter csvWriter, final Path input,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final boolean onlyWithProperties) {
-		final Path cleanedInput = clean(input, cleanedInputFilesDirectory);
+		final Path cleanedInput = clean(csvWriter, input, cleanedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
 
