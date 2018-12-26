@@ -407,10 +407,6 @@ public class DataGvAt {
 			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
 			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(), Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
 
-			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
-			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(),
-					Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
-
 			csvWriter.writeEmptyRow();
 		}
 
