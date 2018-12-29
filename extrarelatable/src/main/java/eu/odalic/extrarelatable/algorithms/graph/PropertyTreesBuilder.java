@@ -8,7 +8,7 @@ import eu.odalic.extrarelatable.model.table.SlicedTable;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 /**
- * Builder of a set of {@link PropertyTree}s from a {@SlicedTable}.
+ * Builder of a set of {@link PropertyTree}s from a {@link SlicedTable}.
  * 
  * @author Václav Brodec
  *

@@ -60,7 +60,7 @@ public final class Matrix {
 	/**
 	 * Array-of-arrays equivalent of {@link #isMatrix(List)}.
 	 * 
-	 * @param arrayOfarrays
+	 * @param arrayOfarrays array of arrays
 	 * @return true, if the array of arrays is a matrix (up to second dimension)
 	 * 
 	 * @param <E> type of elements

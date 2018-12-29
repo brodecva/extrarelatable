@@ -14,10 +14,10 @@ import eu.odalic.extrarelatable.api.rest.adapters.MetadataAdapter;
 
 /**
  * Table meta-data. Next to optional values such as title, author and language
- * tag according to BCP 47 norm, it contains both the declared and collected context for
- * that table. The declared context is considered to be of high quality, as it
- * is a result of manual curation, whereas the collected one may originate from
- * unsupervised automatic processing.
+ * tag according to BCP 47 norm, it contains both the declared and collected
+ * context for that table. The declared context is considered to be of high
+ * quality, as it is a result of manual curation, whereas the collected one may
+ * originate from unsupervised automatic processing.
  * 
  * @author Václav Brodec
  *
@@ -39,13 +39,24 @@ public final class Metadata implements Serializable {
 	/**
 	 * Creates the meta-data object.
 	 * 
-	 * @param title title of the table
-	 * @param author author of the table
-	 * @param languageTag language tag according to BCP 47 norm
+	 * @param title
+	 *            title of the table
+	 * @param author
+	 *            author of the table
+	 * @param languageTag
+	 *            language tag according to BCP 47 norm
 	 * @param declaredProperties
+	 *            manually curated properties assigned to the select columns (by
+	 *            their indices)
 	 * @param declaredClasses
+	 *            manually curated classes assigned to the select columns (by their
+	 *            indices)
 	 * @param collectedProperties
+	 *            automatically recognized properties assigned to the select columns
+	 *            (by their indices)
 	 * @param collectedClasses
+	 *            automatically recognized classes assigned to the select columns
+	 *            (by their indices)
 	 */
 	public Metadata(final String title, final String author, final String languageTag,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
@@ -70,8 +81,12 @@ public final class Metadata implements Serializable {
 	 * Creates the meta-data object without any context data.
 	 * 
 	 * @param title
+	 *            title of the table
 	 * @param author
+	 *            author of the table
 	 * @param languageTag
+	 *            language tag according to BCP 47 norm of the content language of
+	 *            the table
 	 */
 	public Metadata(final String title, final String author, final String languageTag) {
 		this(title, author, languageTag, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of());
@@ -106,7 +121,8 @@ public final class Metadata implements Serializable {
 	}
 
 	/**
-	 * @return map of column indices to the properties they are manually annotated by 
+	 * @return map of column indices to the properties they are manually annotated
+	 *         by
 	 */
 	public Map<Integer, DeclaredEntity> getDeclaredProperties() {
 		return declaredProperties;
@@ -120,14 +136,16 @@ public final class Metadata implements Serializable {
 	}
 
 	/**
-	 * @return map of column indices to the properties they are automatically annotated by
+	 * @return map of column indices to the properties they are automatically
+	 *         annotated by
 	 */
 	public Map<Integer, DeclaredEntity> getCollectedProperties() {
 		return collectedProperties;
 	}
 
 	/**
-	 * @return map of column indices to the classes they are automatically annotated by
+	 * @return map of column indices to the classes they are automatically annotated
+	 *         by
 	 */
 	public Map<Integer, DeclaredEntity> getCollectedClasses() {
 		return collectedClasses;

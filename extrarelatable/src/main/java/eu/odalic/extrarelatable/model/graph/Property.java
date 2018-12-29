@@ -60,7 +60,7 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	/**
 	 * Copies the property.
 	 * 
-	 * @param original
+	 * @param original copied instance
 	 */
 	public Property(final Property original) {
 		this.uuid = original.uuid;

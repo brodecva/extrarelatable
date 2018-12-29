@@ -9,7 +9,7 @@ import eu.odalic.extrarelatable.services.odalic.values.ColumnRelationPositionVal
 import jersey.repackaged.com.google.common.base.Preconditions;
 
 /**
- * Map key JSON deserializer for {@link ColumnPosition} instances.
+ * Map key JSON deserializer for {@link ColumnRelationPositionValue} instances.
  *
  * @author Václav Brodec
  *

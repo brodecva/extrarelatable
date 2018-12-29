@@ -19,7 +19,7 @@ public final class Sets {
 	 * comparators cuts short in case the sizes of the sets are not the same.
 	 * 
 	 * @param comparator
-	 *            comparator of element of type <T>
+	 *            comparator of elements
 	 * @return comparator of two sets based on the comparator of the elements
 	 * 
 	 * @param <T> type of elements

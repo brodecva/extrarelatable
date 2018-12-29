@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import eu.odalic.extrarelatable.services.odalic.values.ColumnRelationPositionValue;
 
 /**
- * Map key JSON serializer for {@link ColumnRelationPosition} instances.
+ * Map key JSON serializer for {@link ColumnRelationPositionValue} instances.
  *
  * @author Václav Brodec
  *

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
- * </p>Serializer of {@link StatusType} to integer status code.</p>
+ * <p>Serializer of {@link StatusType} to integer status code.</p>
  * 
  * <p>Adapted from Odalic with permission.</p>
  *

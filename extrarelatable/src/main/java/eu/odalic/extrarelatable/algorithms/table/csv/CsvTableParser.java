@@ -29,7 +29,7 @@ public interface CsvTableParser {
 	/**
 	 * Reads into a {@link ParsedTable}.
 	 * 
-	 * @param content CSV string
+	 * @param reader character reader of CSV input
 	 * @param format CSV format
 	 * @param metadata CSV meta-data
 	 * @return the parsed table
@@ -40,7 +40,7 @@ public interface CsvTableParser {
 	/**
 	 * Parses the input stream into a {@link ParsedTable}.
 	 * 
-	 * @param content CSV string
+	 * @param stream CSV input stream
 	 * @param format CSV format
 	 * @param metadata CSV meta-data
 	 * @return the parsed table

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.KeyDeserializer;
 import eu.odalic.extrarelatable.services.odalic.values.ColumnPositionValue;
 
 /**
- * Map key JSON deserializer for {@link ColumnPosition} instances.
+ * Map key JSON deserializer for {@link ColumnPositionValue} instances.
  *
  * @author Václav Brodec
  *

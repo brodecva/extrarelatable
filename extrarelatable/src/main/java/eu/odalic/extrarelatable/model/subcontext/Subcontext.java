@@ -58,8 +58,10 @@ public final class Subcontext {
 		}
 		
 		/**
-		 * @param value 
-		 * @param cell
+		 * Puts the numeric cell in row context of the value into the sub-context.
+		 * 
+		 * @param value context value
+		 * @param cell the numeric cell
 		 * @return the builder
 		 */
 		public Builder put(final Value value, final NumericCell cell) {

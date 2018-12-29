@@ -30,9 +30,9 @@ import eu.odalic.extrarelatable.model.table.csv.Format;
 /**
  * <p>
  * An implementation of the {@link CsvTableParser} using
- * <a href="https://github.com/uniVocity/univocity-parsers"> UniVocity
- * parsers</a> and <a href="http://tika.apache.org/"> to automate format
- * detection.
+ * <a href="https://github.com/uniVocity/univocity-parsers">UniVocity
+ * parsers</a> and <a href="http://tika.apache.org/">Apache Tika</a> to automate
+ * format detection.
  * </p>
  * 
  * <p>
@@ -56,14 +56,14 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 			final CharsetDetector charsetDetector = new CharsetDetector();
 			charsetDetector.setText(stream);
 			final CharsetMatch[] charsetMatches = charsetDetector.detectAll();
-			
+
 			for (final CharsetMatch match : charsetMatches) {
 				try (final Reader reader = new InputStreamReader(stream, match.getName())) {
 					return parse(reader, format, metadata);
 				} catch (final UnsupportedEncodingException e) {
 				}
 			}
-			
+
 			try (final Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
 				return parse(reader, format, metadata);
 			}
@@ -79,14 +79,14 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 		final CsvParserSettings parserSettings = new CsvParserSettings();
 
 		parserSettings.setLineSeparatorDetectionEnabled(true);
-		
+
 		if (format == null) {
 			parserSettings.setDelimiterDetectionEnabled(true);
 		} else {
 			final CsvFormat csvFormat = new CsvFormat();
 			csvFormat.setDelimiter(format.getDelimiter());
 			csvFormat.setQuote(format.getQuoteCharacter());
-			
+
 			parserSettings.setFormat(csvFormat);
 			parserSettings.setDelimiterDetectionEnabled(false);
 			parserSettings.setQuoteDetectionEnabled(false);
@@ -105,20 +105,17 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 		if (rows.isEmpty()) {
 			throw new IllegalArgumentException("Empty table!");
 		}
-		
+
 		final int width = rows.stream().reduce(0, (u, r) -> Math.max(u, r.length), (u, v) -> Math.max(u, v));
-		
+
 		int headerIndex = findHeaderIndex(rows);
-		
+
 		final String[] headersArray = rows.get(headerIndex);
-		
+
 		final List<String> headersList = toRowList(headersArray, width);
-		
-		return NestedListsParsedTable.fromRows(
-			headersList,
-			rows.stream().skip(headerIndex + 1).map(row -> toRowList(row, width)).collect(ImmutableList.toImmutableList()),
-			metadata
-		);
+
+		return NestedListsParsedTable.fromRows(headersList, rows.stream().skip(headerIndex + 1)
+				.map(row -> toRowList(row, width)).collect(ImmutableList.toImmutableList()), metadata);
 	}
 
 	private static int findHeaderIndex(final List<? extends String[]> rows) {
@@ -128,10 +125,10 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 			if (cellsFilled) {
 				return index;
 			}
-			
+
 			index++;
 		}
-		
+
 		return 0;
 	}
 

@@ -19,7 +19,7 @@ public interface Annotator {
 	 * Annotates numeric columns from the input {@link SlicedTable}, using the
 	 * provided context.
 	 * 
-	 * @param backgroundKnowledgeGraph
+	 * @param graph
 	 *            background knowledge graph serving as the basis for the
 	 *            annotations
 	 * @param slicedTable
@@ -37,7 +37,7 @@ public interface Annotator {
 	 *            context
 	 * @return the map of indices of numeric columns to annotations
 	 */
-	Map<Integer, Annotation> annotate(BackgroundKnowledgeGraph backgroundKnowledgeGraph, SlicedTable slicedTable,
+	Map<Integer, Annotation> annotate(BackgroundKnowledgeGraph graph, SlicedTable slicedTable,
 			Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
 			Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
@@ -47,7 +47,7 @@ public interface Annotator {
 	 * Annotates numeric columns from the input {@link SlicedTable}, using the
 	 * provided context.
 	 * 
-	 * @param backgroundKnowledgeGraph
+	 * @param graph
 	 *            background knowledge graph serving as the basis for the
 	 *            annotations
 	 * @param slicedTable

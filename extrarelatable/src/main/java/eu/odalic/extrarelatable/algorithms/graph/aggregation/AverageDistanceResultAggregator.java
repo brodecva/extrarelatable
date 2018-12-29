@@ -21,9 +21,7 @@ import eu.odalic.extrarelatable.model.annotation.MeasuredNode;
  * the natural ordering of products is used.
  * 
  * @author Václav Brodec
- *
- * @param <U>
- *            the type of aggregated items
+ * 
  */
 @Immutable
 @Component("averageDistance")

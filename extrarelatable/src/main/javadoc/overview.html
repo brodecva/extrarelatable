@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ExtraRelaTable overview</title>
+</head>
+<body>
+	<p>ExtraRelaTable is a thesis project developed by Václav Brodec at
+		Faculty of Mathematics and Physics of Charles University in Prague,
+		which applies bottom-up approach to assignment of RDF properties to
+		numeric table columns; these properties identify the relations formed
+		between the columns and the subject of the table. The project follows
+		and complements preceding work of Neumaier et al., which uses more
+		general top-down approach to labeling of numeric columns.</p>
+
+	<p>
+		The algorithm is exposed through public REST API at <a
+			href="http://localhost:8080/extrarelatable/">http://localhost:8080/extrarelatable/</a>,
+		supposed that the packaged WAR is deployed in a local servlet
+		container on default port. ERT may optionally use available running
+		instance of Odalic STI tool (<a href="https://github.com/odalic">https://github.com/odalic</a>)
+		to provide additional context, which increases the effectiveness of
+		the algorithm.
+	</p>
+
+	<p>Alongside the main application, a small experimental framework
+		is included, implemented as a set of JUnit tests, which allow to
+		thoroughly evaluate the algorithm on various supported data sets.</p>
+
+	<p>
+		The project is documented in the accompanying thesis Discovering and
+		Creating Relations among CSV Columns using Linked Data Knowledge
+		Bases. The sources are hosted at <a
+			href="https://github.com/brodecva/extrarelatable">https://github.com/brodecva/extrarelatable</a>.
+	</p>
+</body>
+</html>

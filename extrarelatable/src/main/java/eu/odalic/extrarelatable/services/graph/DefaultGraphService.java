@@ -242,9 +242,9 @@ public class DefaultGraphService implements GraphService {
 	 * @param csvProfilerService profiles the CSV files (mainly for deduction of used data types)
 	 * @param csvCleanerService cleans provided CSV files and converts them to uniform format
 	 * @param csvTableParser parses CSV tables
-	 * @param tableAnalyzer
-	 * @param propertyTreesBuilder
-	 * @param tableSlicer 
+	 * @param tableAnalyzer analyzes the present data types
+	 * @param propertyTreesBuilder builder of the set of trees from the input tables
+	 * @param tableSlicer slicer of the typed tables into typed tables with distinct sets of numeric columns and columns providing row context
 	 * @param annotator the actual annotating service of the numeric columns
 	 * @param csvTableWriter CSV writer used to cache the tables obtained in other formats (such as DWTC)
 	 * @param dwtcToCsvService converts tables from the DWTC format to CSV

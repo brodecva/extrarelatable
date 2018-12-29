@@ -82,7 +82,7 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		}
 
 		/**
-		 * Executes {@link #addChild(CommonNode)} in bulk.
+		 * Executes {@link PropertyTree.Node#addChild(PropertyTree.CommonNode)} in bulk.
 		 * 
 		 * @param children added children nodes
 		 */

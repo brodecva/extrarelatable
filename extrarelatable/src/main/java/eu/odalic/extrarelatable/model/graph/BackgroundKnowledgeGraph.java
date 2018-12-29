@@ -132,7 +132,7 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	/**
 	 * Executes {@link #add(Property)} in bulk.
 	 * 
-	 * @param properties
+	 * @param properties collection of {@link Property} instances
 	 */
 	public synchronized void addAll(final Collection<? extends Property> properties) {
 		checkNotNull(properties);

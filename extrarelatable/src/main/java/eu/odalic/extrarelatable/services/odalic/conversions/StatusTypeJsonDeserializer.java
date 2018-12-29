@@ -10,11 +10,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 /**
- * Deserializer from integer status code to.
+ * Deserializer from integer status code to {@link StatusType} instance.
  *
  * @author Václav Brodec
  *
- * @see CustomDateJsonSerializer
  */
 public final class StatusTypeJsonDeserializer extends JsonDeserializer<StatusType> {
 
