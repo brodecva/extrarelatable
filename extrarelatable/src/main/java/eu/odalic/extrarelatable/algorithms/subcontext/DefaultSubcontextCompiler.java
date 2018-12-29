@@ -22,6 +22,12 @@ import eu.odalic.extrarelatable.model.subcontext.Partition;
 import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
+/**
+ * Default implementation of the {@link SubcontextCompiler}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @Component
 public class DefaultSubcontextCompiler implements SubcontextCompiler {

@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import eu.odalic.extrarelatable.api.rest.values.SearchResultValue;
 import eu.odalic.extrarelatable.model.graph.SearchResult;
 
-
+/**
+ * Adapter of {@link SearchResult} to {@link SearchResultValue}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class SearchResultAdapter extends XmlAdapter<SearchResultValue, SearchResult> {
 
   @Override

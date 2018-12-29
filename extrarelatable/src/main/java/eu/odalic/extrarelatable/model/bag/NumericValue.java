@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Numeric-typed value.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class NumericValue extends NumberLikeValue implements Serializable {
 	
@@ -19,6 +25,7 @@ public final class NumericValue extends NumberLikeValue implements Serializable 
 		this.figure = figure;
 	}	
 	
+	@Override
 	public double getFigure() {
 		return figure;
 	}

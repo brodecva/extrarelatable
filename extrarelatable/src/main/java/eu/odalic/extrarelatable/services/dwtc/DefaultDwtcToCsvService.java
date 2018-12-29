@@ -17,6 +17,13 @@ import com.univocity.parsers.csv.CsvWriterSettings;
 import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
 
+/**
+ * Default implementation of {@link DwtcToCsvService}, which uses the
+ * referential DWTC parsing library and uniVocity parsers to write the CSVs.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Service
 public class DefaultDwtcToCsvService implements DwtcToCsvService {
 
@@ -28,13 +35,15 @@ public class DefaultDwtcToCsvService implements DwtcToCsvService {
 		} catch (final IOException e) {
 			throw new RuntimeException("Failed to read " + input + "!", e);
 		}
-		
-		final List<List<String>> listBackedRelation = Arrays.stream(dataset.getRelation()).map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
-		final List<List<String>> transposedRelation = Matrix.transpose(listBackedRelation);
-		
+
+		final List<List<String>> listBackedRelation = Arrays.stream(dataset.getRelation())
+				.map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
+		final List<List<String>> transposedRelation = Matrix.transpose(listBackedRelation); // DWTC keeps the tables transposed.
+
 		final CsvWriter writer = new CsvWriter(output.toFile(), new CsvWriterSettings());
-		
-		writer.writeRowsAndClose(transposedRelation.stream().map(row -> row.toArray(new String[row.size()])).collect(ImmutableList.toImmutableList()));
+
+		writer.writeRowsAndClose(transposedRelation.stream().map(row -> row.toArray(new String[row.size()]))
+				.collect(ImmutableList.toImmutableList()));
 	}
 
 }

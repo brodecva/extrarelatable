@@ -8,6 +8,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 
+/**
+ * {@link AttributeValuePair} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlRootElement(name = "attributeValuePair")
 public final class AttributeValuePairValue implements Serializable {
 	

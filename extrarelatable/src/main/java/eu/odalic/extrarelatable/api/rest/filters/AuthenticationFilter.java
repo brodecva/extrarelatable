@@ -27,7 +27,9 @@ import eu.odalic.extrarelatable.api.rest.Secured;
 import eu.odalic.extrarelatable.api.rest.responses.Message;
 
 /**
- * Authentication filter.
+ * <p>Authentication filter.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *
@@ -39,7 +41,7 @@ import eu.odalic.extrarelatable.api.rest.responses.Message;
 public final class AuthenticationFilter implements ContainerRequestFilter {
 
   private static final String INVALID_REQUEST_CHALLENGE_FORMAT =
-      "Bearer realm=\"Odalic\", error=\"invalid_request\", error_description=\"%s\"";
+      "Bearer realm=\"ExtraRelaTable\", error=\"invalid_request\", error_description=\"%s\"";
   /*private static final String INVALID_TOKEN_CHALLENGE_FORMAT =
       "Bearer realm=\"Odalic\", error=\"invalid_token\", error_description=\"%s\"";*/
   private static final String AUTHENTICATION_SCHEME = "Bearer";
@@ -77,20 +79,6 @@ public final class AuthenticationFilter implements ContainerRequestFilter {
       return;
     }
 
-    //final String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-
-    /*final User user;
-    try {
-      user = this.userService.validateToken(new Token(token));
-    } catch (final Exception e) {
-      requestContext.abortWith(Message.of("Authentication failed!", e.getMessage())
-          .toResponseBuilder(Response.Status.UNAUTHORIZED, this.uriInfo)
-          .header(HttpHeaders.WWW_AUTHENTICATE,
-              String.format(INVALID_TOKEN_CHALLENGE_FORMAT, e.getMessage()))
-          .build());
-      return;
-    }*/
-
     requestContext.setSecurityContext(new SecurityContext() {
 
       @Override
@@ -100,7 +88,6 @@ public final class AuthenticationFilter implements ContainerRequestFilter {
 
       @Override
       public Principal getUserPrincipal() {
-    	  //return () -> user.getEmail();
     	  return () -> "user";
       }
 
@@ -116,8 +103,7 @@ public final class AuthenticationFilter implements ContainerRequestFilter {
 
       @Override
       public boolean isUserInRole(final String role) {
-        //return user.getRole().toString().equals(role);
-    	return true;
+        return true;
       }
     });
   }

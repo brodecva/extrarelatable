@@ -12,12 +12,22 @@ import com.google.common.collect.ImmutableMap;
 
 import eu.odalic.extrarelatable.api.rest.adapters.MetadataAdapter;
 
+/**
+ * Table meta-data. Next to optional values such as title, author and language
+ * tag according to BCP 47 norm, it contains both the declared and collected context for
+ * that table. The declared context is considered to be of high quality, as it
+ * is a result of manual curation, whereas the collected one may originate from
+ * unsupervised automatic processing.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @XmlJavaTypeAdapter(MetadataAdapter.class)
 public final class Metadata implements Serializable {
-	
+
 	private static final long serialVersionUID = -8245805148358617046L;
-	
+
 	private final String title;
 	private final String author;
 	private final String languageTag;
@@ -25,7 +35,18 @@ public final class Metadata implements Serializable {
 	private final Map<Integer, DeclaredEntity> declaredClasses;
 	private final Map<Integer, DeclaredEntity> collectedProperties;
 	private final Map<Integer, DeclaredEntity> collectedClasses;
-	
+
+	/**
+	 * Creates the meta-data object.
+	 * 
+	 * @param title title of the table
+	 * @param author author of the table
+	 * @param languageTag language tag according to BCP 47 norm
+	 * @param declaredProperties
+	 * @param declaredClasses
+	 * @param collectedProperties
+	 * @param collectedClasses
+	 */
 	public Metadata(final String title, final String author, final String languageTag,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
@@ -35,7 +56,7 @@ public final class Metadata implements Serializable {
 		checkNotNull(declaredClasses);
 		checkNotNull(collectedClasses);
 		checkNotNull(collectedProperties);
-		
+
 		this.title = title;
 		this.author = author;
 		this.languageTag = languageTag;
@@ -44,39 +65,70 @@ public final class Metadata implements Serializable {
 		this.collectedClasses = ImmutableMap.copyOf(collectedClasses);
 		this.collectedProperties = ImmutableMap.copyOf(collectedProperties);
 	}
-	
+
+	/**
+	 * Creates the meta-data object without any context data.
+	 * 
+	 * @param title
+	 * @param author
+	 * @param languageTag
+	 */
 	public Metadata(final String title, final String author, final String languageTag) {
 		this(title, author, languageTag, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of());
 	}
 
+	/**
+	 * Creates an empty meta-data object.
+	 */
 	public Metadata() {
 		this(null, null, null);
 	}
-	
+
+	/**
+	 * @return the table title
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * @return the author of the table
+	 */
 	public String getAuthor() {
 		return author;
 	}
 
+	/**
+	 * @return language tag of the table
+	 */
 	public String getLanguageTag() {
 		return languageTag;
 	}
 
+	/**
+	 * @return map of column indices to the properties they are manually annotated by 
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredProperties() {
 		return declaredProperties;
 	}
 
+	/**
+	 * @return map of column indices to the classes they are manually annotated by
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredClasses() {
 		return declaredClasses;
 	}
-	
+
+	/**
+	 * @return map of column indices to the properties they are automatically annotated by
+	 */
 	public Map<Integer, DeclaredEntity> getCollectedProperties() {
 		return collectedProperties;
 	}
 
+	/**
+	 * @return map of column indices to the classes they are automatically annotated by
+	 */
 	public Map<Integer, DeclaredEntity> getCollectedClasses() {
 		return collectedClasses;
 	}
@@ -163,7 +215,6 @@ public final class Metadata implements Serializable {
 	public String toString() {
 		return "Metadata [title=" + title + ", author=" + author + ", languageTag=" + languageTag
 				+ ", declaredProperties=" + declaredProperties + ", declaredClasses=" + declaredClasses
-				+ ", collectedProperties=" + collectedProperties + ", collectedClasses=" + collectedClasses
-				+ "]";
+				+ ", collectedProperties=" + collectedProperties + ", collectedClasses=" + collectedClasses + "]";
 	}
 }

@@ -4,6 +4,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Deterministic generator of unique strings.
+ * 
+ * @author Václav Brodec
+ *
+ * @see NamesGenerator
+ */
 @Service
 public class OrderedNamesGenerator implements NamesGenerator {
 

@@ -31,6 +31,13 @@ import eu.odalic.extrarelatable.services.odalic.values.ComputationInputValue;
 import eu.odalic.extrarelatable.services.odalic.values.ComputationValue;
 import eu.odalic.extrarelatable.services.odalic.values.ResultValue;
 
+/**
+ * Service that connects to the configured Odalic instance and retrieves the
+ * context provided by its annotation run.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Service
 public final class OdalicContextCollectionService implements ContextCollectionService {
 
@@ -45,13 +52,22 @@ public final class OdalicContextCollectionService implements ContextCollectionSe
 	private final URI targetPath;
 	private final int rowsLimit;
 	private final ComputationInputConverter computationInputConverter;
-	
+
 	private Client client;
 	private Instant lastQueried = null;
 
-	
+	/**
+	 * Initializes the context-collecting service.
+	 * 
+	 * @param computationInputConverter converter of the ERT format to the one recognized by Odalic
+	 * @param basePath URI string of the Odalic instance (e.g. "http://localhost:8080/odalic/")
+	 * @param userId user ID used to query the Odalic instance
+	 * @param rowsLimit limit on number of rows sent to Odalic
+	 */
 	@Autowired
-	public OdalicContextCollectionService(final ComputationInputConverter computationInputConverter, final @Value("${eu.odalic.extrarelatable.odalic.basePath:http://localhost:8080/odalic/}") String basePath, final @Value("${eu.odalic.extrarelatable.odalic.userId:odalic@email.cz}") String userId,
+	public OdalicContextCollectionService(final ComputationInputConverter computationInputConverter,
+			final @Value("${eu.odalic.extrarelatable.odalic.basePath:http://localhost:8080/odalic/}") String basePath,
+			final @Value("${eu.odalic.extrarelatable.odalic.userId:odalic@email.cz}") String userId,
 			final @Value("${eu.odalic.extrarelatable.odalic.rowsLimit:200}") int rowsLimit) {
 		checkNotNull(computationInputConverter);
 		checkNotNull(basePath);
@@ -59,26 +75,55 @@ public final class OdalicContextCollectionService implements ContextCollectionSe
 		checkArgument(rowsLimit >= 2, "The limit of input rows has to be at least two!");
 
 		this.computationInputConverter = computationInputConverter;
-		this.targetPath = URI.create(basePath).resolve(USERS_SUBPATH + userId + PATH_SEGMENT_DELIMITER).resolve(COMPUTATIONS_SUBPATH);
+		this.targetPath = URI.create(basePath).resolve(USERS_SUBPATH + userId + PATH_SEGMENT_DELIMITER)
+				.resolve(COMPUTATIONS_SUBPATH);
 		this.rowsLimit = rowsLimit;
-		this.client = ClientBuilder.newBuilder().register(JacksonFeature.class)
-				.build();
+		this.client = ClientBuilder.newBuilder().register(JacksonFeature.class).build();
 	}
 
 	@Override
-	public ResultValue process(final ParsedTable table, final Set<? extends String> usedBases, final String primaryBase, final Random random) {
+	public ResultValue process(final ParsedTable table, final Set<? extends String> usedBases, final String primaryBase,
+			final Random random) {
 		checkNotNull(table);
 		checkNotNull(usedBases);
 		checkNotNull(primaryBase);
 		checkArgument(!usedBases.isEmpty(), "At least one base has to be provided!");
 		checkArgument(usedBases.contains(primaryBase), "The used bases must contain the primary base!");
-		
-		final ComputationInputValue computationInput = this.computationInputConverter.convert(table, this.rowsLimit, random);
-		final ComputationValue computation = new ComputationValue(computationInput, usedBases, primaryBase,
-				false);
 
+		final ComputationValue computation = prepareInput(table, usedBases, primaryBase, random);
+
+		throttleRemoteQueries();
+
+		final Response response = query(computation);
+
+		if (!isSuccessful(response)) {
+			throw new IllegalStateException("The request to process the file failed: " + response.getStatus() + "["
+					+ response.readEntity(String.class) + "]");
+		}
+
+		return read(response);
+	}
+
+	private ResultValue read(final Response response) {
+		return response.readEntity(ResultReply.class).getPayload();
+	}
+
+	private Response query(final ComputationValue computation) {
 		final WebTarget target = client.target(this.targetPath);
+		final Response response = target.request().accept(MediaType.APPLICATION_JSON_TYPE)
+				.post(Entity.entity(computation, MediaType.APPLICATION_JSON_TYPE));
+		return response;
+	}
 
+	private ComputationValue prepareInput(final ParsedTable table, final Set<? extends String> usedBases,
+			final String primaryBase, final Random random) {
+		final ComputationInputValue computationInput = this.computationInputConverter.convert(table, this.rowsLimit,
+				random);
+		final ComputationValue computation = new ComputationValue(computationInput, usedBases, primaryBase, false);
+		return computation;
+	}
+
+	private void throttleRemoteQueries() {
 		if (lastQueried == null) {
 			lastQueried = Instant.now();
 		} else {
@@ -93,16 +138,6 @@ public final class OdalicContextCollectionService implements ContextCollectionSe
 
 			lastQueried = Instant.now();
 		}
-
-		final Response response = target.request().accept(MediaType.APPLICATION_JSON_TYPE)
-				.post(Entity.entity(computation, MediaType.APPLICATION_JSON_TYPE));
-
-		if (!isSuccessful(response)) {
-			throw new IllegalStateException("The request to process the file failed: " + response.getStatus() + "["
-					+ response.readEntity(String.class) + "]");
-		}
-
-		return response.readEntity(ResultReply.class).getPayload();
 	}
 
 	private static boolean isSuccessful(final Response response) {

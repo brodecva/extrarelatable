@@ -112,6 +112,15 @@ import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
+ * <p>
+ * Part of the test framework for the modiied DWTC format (as found in the provided T2Dv2 Gold Standard dataset).
+ * </p>
+ * 
+ * <p>
+ * Parameters, recommended means of execution and description of the output is
+ * described in the accompanying thesis.
+ * </p>
+ * 
  * @author Václav Brodec
  *
  */
@@ -726,7 +735,7 @@ public class T2Dv2GoldStandard {
 					final Statistics statistics = propertiesStatistics.get(property);
 
 					return new Object[] { statistics.getAverage(), statistics.getMedian(), statistics.getOccurence(),
-							statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property) };
+							statistics.getRelativeOccurrence(), property.getUri(), getContextProperties(property) };
 				}).collect(ImmutableList.toImmutableList()));
 
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());

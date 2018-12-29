@@ -2,11 +2,20 @@ package eu.odalic.extrarelatable.model.bag;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * AN empty cell value.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public enum EmptyValue implements Value {
 	
-	INSTANCE;
+	INSTANCE; // Empty value singleton.
 	
+	/**
+	 * @return an empty value
+	 */
 	public static EmptyValue instance() {
 		return INSTANCE;
 	}

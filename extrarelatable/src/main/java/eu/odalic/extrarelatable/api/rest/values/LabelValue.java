@@ -13,6 +13,12 @@ import com.google.common.collect.ImmutableList;
 
 import eu.odalic.extrarelatable.model.bag.Label;
 
+/**
+ * {@link Label} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlRootElement(name = "label")
 public final class LabelValue implements Serializable {
 	

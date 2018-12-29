@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import eu.odalic.extrarelatable.api.rest.values.AnnotationResultValue;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 
-
+/**
+ * Adapter of {@link AnnotationResult} to {@link AnnotationResultValue}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class AnnotationResultAdapter extends XmlAdapter<AnnotationResultValue, AnnotationResult> {
 
   @Override

@@ -5,12 +5,24 @@ import java.time.Instant;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Value representing an instant in time.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class InstantValue extends AbstractValue implements Serializable {
 	private static final long serialVersionUID = -8198368132975821586L;
 	
 	private final Instant instant;
 
+	/**
+	 * Creates the value.
+	 * 
+	 * @param instant instant in time
+	 * @return the value
+	 */
 	public static final InstantValue of(Instant instant) {
 		return new InstantValue(instant);
 	}
@@ -19,6 +31,9 @@ public final class InstantValue extends AbstractValue implements Serializable {
 		this.instant = figure;
 	}	
 	
+	/**
+	 * @return the encapsualted instant in time
+	 */
 	public Instant getInstant() {
 		return instant;
 	}

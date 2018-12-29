@@ -11,6 +11,12 @@ import com.google.common.collect.ImmutableList;
 
 import eu.odalic.extrarelatable.api.rest.adapters.SearchResultAdapter;
 
+/**
+ * Properties matching a search query done on {@link BackgroundKnowledgeGraph}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlJavaTypeAdapter(SearchResultAdapter.class)
 public final class SearchResult implements Serializable {
 
@@ -18,16 +24,27 @@ public final class SearchResult implements Serializable {
 
 	private List<Property> properties;
 
+	/**
+	 * Creates an empty search result.
+	 */
 	public SearchResult() {
 		this.properties = ImmutableList.of();
 	}
 
+	/**
+	 * Creates a search result.
+	 * 
+	 * @param properties matching properties
+	 */
 	public SearchResult(final List<? extends Property> properties) {
 		checkNotNull(properties);
 		
 		this.properties = ImmutableList.copyOf(properties);
 	}
 
+	/**
+	 * @return matching properties
+	 */
 	@XmlElement
 	public List<Property> getProperties() {
 		return properties;

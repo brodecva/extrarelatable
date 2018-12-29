@@ -36,5 +36,9 @@ public final class Characters {
     return (value == LINE_FEED) || (value == CARRIAGE_RETURN);
   }
 
+  /**
+	 * We want to keep this class uninstantiable, so no visible constructor is
+	 * available.
+	 */
   private Characters() {}
 }

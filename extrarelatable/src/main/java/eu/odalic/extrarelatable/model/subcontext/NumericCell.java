@@ -7,11 +7,23 @@ import javax.annotation.concurrent.Immutable;
 
 import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 
+/**
+ * A cell containing number-like value accompanied by index of the row where it is located.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class NumericCell {
 	private final int rowIndex;
 	private final NumberLikeValue value;
 	
+	/**
+	 * Creates a cell.
+	 * 
+	 * @param rowIndex index of the row where the cell is located
+	 * @param value number-like content of the cell
+	 */
 	public NumericCell(final int rowIndex, final NumberLikeValue value) {
 		checkArgument(rowIndex >= 0);
 		checkNotNull(value);
@@ -20,10 +32,16 @@ public final class NumericCell {
 		this.value = value;
 	}
 
+	/**
+	 * @return index of the row where the cell is placed
+	 */
 	public int getRowIndex() {
 		return rowIndex;
 	}
 
+	/**
+	 * @return content of the cell
+	 */
 	public NumberLikeValue getValue() {
 		return value;
 	}

@@ -20,9 +20,10 @@ import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
- * An adapted for REST API.
- *
+ * {@link ParsedTable} adapted for REST API.
+ * 
  * @author Václav Brodec
+ *
  */
 @XmlRootElement(name = "parsedTable")
 @XmlAccessorType(XmlAccessType.NONE)

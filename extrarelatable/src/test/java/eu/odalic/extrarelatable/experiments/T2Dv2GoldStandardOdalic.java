@@ -78,6 +78,17 @@ import eu.odalic.extrarelatable.model.table.NestedListsParsedTable;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
+ * <p>
+ * Part of the test framework for the modiied DWTC format (as found in the provided T2Dv2
+ * Gold Standard dataset) which allows to employ Odalic instead of ERT to
+ * annotate the inputs.
+ * </p>
+ * 
+ * <p>
+ * Parameters, recommended means of execution and description of the output is
+ * described in the accompanying thesis.
+ * </p>
+ * 
  * @author Václav Brodec
  *
  */
@@ -149,7 +160,7 @@ public class T2Dv2GoldStandardOdalic {
 	@Autowired
 	@Lazy
 	private ContextCollectionService contextCollectionService;
-	
+
 	private TestStatistics.Builder testStatisticsBuilder;
 
 	@Before
@@ -168,7 +179,7 @@ public class T2Dv2GoldStandardOdalic {
 			final TestStatistics testStatistics = testFolding(csvWriter, SAMPLE_SIZE_STEP_RATIO, TEST_REPETITIONS);
 			csvWriter.flush();
 			results.add(testStatistics);
-		} else {		
+		} else {
 			if (CHOSEN_SAMPLES_INDICES != null) {
 				for (final int sampleSizeIndex : CHOSEN_SAMPLES_INDICES) {
 					final TestStatistics testStatistics = testSample(csvWriter, SAMPLE_SIZE_STEP_RATIO, sampleSizeIndex,
@@ -187,7 +198,7 @@ public class T2Dv2GoldStandardOdalic {
 					if (testStatistics == null) {
 						break;
 					}
-	
+
 					results.add(testStatistics);
 					sampleSizeIndex++;
 				}
@@ -197,54 +208,54 @@ public class T2Dv2GoldStandardOdalic {
 		for (final TestStatistics testStatistics : results) {
 			csvWriter.writeRow("Weighted average precision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedPrecision().toArray());
-			
+
 			csvWriter.writeRow("Weighted average recall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedRecall().toArray());
-			
+
 			csvWriter.writeRow("Weighted average F-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("Average accuracy iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageAccuracy().toArray());
-			
+
 			csvWriter.writeRow("Average error rate iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageErrorRate().toArray());
-			
+
 			csvWriter.writeRow("Overall accuracy iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallAccuracy().toArray());
-			
+
 			csvWriter.writeRow("Overall error rate iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallErrorRate().toArray());
-			
+
 			csvWriter.writeRow("uPrecision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedPrecision().toArray());
-			
+
 			csvWriter.writeRow("MPrecision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedPrecision().toArray());
-			
+
 			csvWriter.writeRow("uRecall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedRecall().toArray());
-			
+
 			csvWriter.writeRow("MRecall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedRecall().toArray());
-			
+
 			csvWriter.writeRow("uF-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("MF-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("Kappa iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsKappa().toArray());
-			
+
 			csvWriter.writeRow("Learning time iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsLearningTime().toArray());
-			
+
 			csvWriter.writeRow("Testing time iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsTestingTime().toArray());
-			
+
 			csvWriter.writeEmptyRow();
-			
+
 			csvWriter.writeRow("Files", "To learn", "To test", "Learnt", "Tested", "Irregular header", "Few rows",
 					"Few typed rows");
 			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
@@ -271,7 +282,7 @@ public class T2Dv2GoldStandardOdalic {
 			csvWriter.writeRow("Not enough numeric learning columns", "Not enough numeric testing columns");
 			csvWriter.writeRow(testStatistics.getTooSmallLearningNumericColumns(),
 					testStatistics.getTooSmallTestingNumericColumns());
-			
+
 			csvWriter.writeRow("Unique numeric column properties", "Unique numeric column properties learnt",
 					"Unique numeric column properties tested");
 			csvWriter.writeRow(testStatistics.getUniqueProperties(), testStatistics.getUniquePropertiesLearnt(),
@@ -286,22 +297,24 @@ public class T2Dv2GoldStandardOdalic {
 			csvWriter.writeRow("Weighted average precision", "Weighted average recall", "Weighted average F-measure");
 			csvWriter.writeRow(testStatistics.getAverageWeightedPrecision(), testStatistics.getAverageWeightedRecall(),
 					testStatistics.getAverageWeightedFMeasure());
-			
+
 			csvWriter.writeRow("Average accuracy", "Average error rate", "Overall accuracy", "Overall error rate");
 			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate(),
 					testStatistics.getAverageOverallAccuracy(), testStatistics.getAverageOverallErrorRate());
-			
+
 			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "MRecall");
 			csvWriter.writeRow(testStatistics.getAverageMicroAveragedPrecision(),
-					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(), testStatistics.getAverageMacroAveragedRecall());
-			
+					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(),
+					testStatistics.getAverageMacroAveragedRecall());
+
 			csvWriter.writeRow("uF-measure", "MF-measure", "Kappa");
-			csvWriter.writeRow(testStatistics.getAverageMicroAveragedFMeasure(), testStatistics.getAverageMacroAveragedFMeasure(), testStatistics.getAverageKappa());
-			
-			
+			csvWriter.writeRow(testStatistics.getAverageMicroAveragedFMeasure(),
+					testStatistics.getAverageMacroAveragedFMeasure(), testStatistics.getAverageKappa());
+
 			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
-			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(), Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
-			
+			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(),
+					Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
+
 			csvWriter.writeEmptyRow();
 		}
 
@@ -309,10 +322,11 @@ public class T2Dv2GoldStandardOdalic {
 		csvWriter.close();
 	}
 
-	private TestStatistics testFolding(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int repetitions) throws IOException {
+	private TestStatistics testFolding(final CsvWriter csvWriter, final double sampleSizeStepRatio,
+			final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
 		testStatisticsBuilder.setSeed(SEED);
-		
+
 		if (INSTANCE_SUBPATH == null) {
 			throw new IllegalArgumentException("No instance path provided!");
 		}
@@ -323,20 +337,20 @@ public class T2Dv2GoldStandardOdalic {
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
 		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
-		
+
 		final int foldsCount = (int) Math.round(1d / sampleSizeStepRatio);
 		final int foldSize = (int) Math.round(files.size() * sampleSizeStepRatio);
-		
+
 		final int foldedRepetitions = foldsCount * repetitions;
 		testStatisticsBuilder.setRepetitions(foldedRepetitions);
-		
+
 		int foldedRepetition = 0;
 		for (int repetition = 0; repetition < repetitions; repetition++) {
 			final List<List<Path>> folds = getFolds(random, foldsCount, foldSize, files);
-			
+
 			for (int fold = 0; fold < foldsCount; fold++) {
 				testStatisticsBuilder.addFilesCount(files.size());
-				
+
 				testSample(csvWriter, fold, files, folds, random, foldedRepetition);
 				foldedRepetition++;
 			}
@@ -347,7 +361,7 @@ public class T2Dv2GoldStandardOdalic {
 
 		return testStatisticsBuilder.build();
 	}
-	
+
 	private TestStatistics testSample(final CsvWriter csvWriter, final double sampleSizeStepRatio,
 			final int sampleSizeIndex, final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
@@ -406,29 +420,28 @@ public class T2Dv2GoldStandardOdalic {
 		}
 
 		final long learningStart = System.nanoTime();
-		
-		learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
-				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
-				repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
+
+		learn(csvWriter, learningPaths, inputFilesPath, profilesPath, declaredPropertiesPath,
+				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition, random,
+				MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
 
 		final long learningStop = System.nanoTime();
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 
 		final long testStart = System.nanoTime();
-		
-		test(csvWriter, testPaths, inputFilesPath, profilesPath, declaredPropertiesPath,
-				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition,
-				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+
+		test(csvWriter, testPaths, inputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory,
+				NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		final long testStop = System.nanoTime();
-		
+
 		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
 		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
 
@@ -436,9 +449,9 @@ public class T2Dv2GoldStandardOdalic {
 
 		return true;
 	}
-	
-	private void testSample(final CsvWriter csvWriter, final int fold, final List<Path> files, final List<List<Path>> folds,
-			final Random random, final int repetition) throws IOException {
+
+	private void testSample(final CsvWriter csvWriter, final int fold, final List<Path> files,
+			final List<List<Path>> folds, final Random random, final int repetition) throws IOException {
 		final Path instancePath = Paths.get(INSTANCE_SUBPATH);
 
 		final Path setPath = instancePath.resolve(SET_SUBPATH);
@@ -464,29 +477,28 @@ public class T2Dv2GoldStandardOdalic {
 		}
 
 		final long learningStart = System.nanoTime();
-		
-		learn(csvWriter, learningPaths, inputFilesPath, profilesPath,
-				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
-				repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
+
+		learn(csvWriter, learningPaths, inputFilesPath, profilesPath, declaredPropertiesPath,
+				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition, random,
+				MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
 
 		final long learningStop = System.nanoTime();
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 
 		final long testStart = System.nanoTime();
-		
-		test(csvWriter, testPaths, inputFilesPath, profilesPath, declaredPropertiesPath,
-				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition,
-				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
+
+		test(csvWriter, testPaths, inputFilesPath, profilesPath, declaredPropertiesPath, collectionResultsDirectory,
+				NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		final long testStop = System.nanoTime();
-		
+
 		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
 		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
 
@@ -502,7 +514,7 @@ public class T2Dv2GoldStandardOdalic {
 		if (DRY_RUN) {
 			return ImmutableList.of();
 		}
-		
+
 		final List<Path> filesCopy = new ArrayList<>(files);
 
 		final int allFilesSize = files.size();
@@ -522,10 +534,11 @@ public class T2Dv2GoldStandardOdalic {
 		final List<Path> testPaths = testPathsBuilder.build();
 		return testPaths;
 	}
-	
-	private static List<List<Path>> getFolds(final Random random, final int foldsCount, final int foldSize, final List<Path> files) {
+
+	private static List<List<Path>> getFolds(final Random random, final int foldsCount, final int foldSize,
+			final List<Path> files) {
 		final List<Path> filesCopy = new ArrayList<>(files);
-		
+
 		final List<List<Path>> folds = new ArrayList<>(foldsCount);
 		for (int fold = 0; fold < foldsCount - 1; fold++) {
 			final ImmutableList.Builder<Path> foldPathsBuilder = ImmutableList.builder();
@@ -535,11 +548,11 @@ public class T2Dv2GoldStandardOdalic {
 				foldPathsBuilder.add(filesCopy.remove(removedIndex));
 			}
 			final List<Path> foldPaths = foldPathsBuilder.build();
-			
+
 			folds.add(foldPaths);
 		}
 		folds.add(ImmutableList.copyOf(filesCopy));
-		
+
 		return folds;
 	}
 
@@ -556,21 +569,20 @@ public class T2Dv2GoldStandardOdalic {
 
 	private void learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final int repetition, final Random random,
-			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) throws IOException {
+			final Path collectionResultsDirectory, final boolean onlyWithProperties, final int repetition,
+			final Random random, final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties)
+			throws IOException {
 		paths.forEach(file -> {
-			learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
-					declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties,
-					repetition, random, maxColumnSampleSize, whitelistedProperties);
+			learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory, declaredPropertiesPath,
+					collectionResultsDirectory, onlyWithProperties, repetition, random, maxColumnSampleSize,
+					whitelistedProperties);
 		});
 	}
 
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory,
-			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final int repetition, final Random random, int maxColumnSampleSize)
-			throws IOException {
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final Path collectionResultsDirectory, final boolean onlyWithProperties, final int repetition,
+			final Random random, int maxColumnSampleSize) throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
 
@@ -579,8 +591,8 @@ public class T2Dv2GoldStandardOdalic {
 			final Map<Integer, URI> result;
 			try {
 				result = annotateTable(csvWriter, file, convertedInputFilesDirectory, profilesDirectory,
-						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties,
-						repetition, random, maxColumnSampleSize);
+						declaredPropertiesPath, collectionResultsDirectory, onlyWithProperties, repetition, random,
+						maxColumnSampleSize);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
@@ -632,15 +644,17 @@ public class T2Dv2GoldStandardOdalic {
 						if (match) {
 							testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
 						} else {
-							/*if (annotation == null) {
-								testStatisticsBuilder.addPropertyOccurence(repetition, URI.create("http://odalic.eu/reserved/null"));
-								testStatisticsBuilder.addFalse(repetition, URI.create("http://odalic.eu/reserved/null"),
-										columnSolution.getUri());
-							} else {*/
-								testStatisticsBuilder.addPropertyOccurence(repetition, annotation);
-								testStatisticsBuilder.addFalse(repetition, annotation,
-										columnSolution.getUri());
-							/*}*/
+							/*
+							 * if (annotation == null) {
+							 * testStatisticsBuilder.addPropertyOccurence(repetition,
+							 * URI.create("http://odalic.eu/reserved/null"));
+							 * testStatisticsBuilder.addFalse(repetition,
+							 * URI.create("http://odalic.eu/reserved/null"), columnSolution.getUri()); }
+							 * else {
+							 */
+							testStatisticsBuilder.addPropertyOccurence(repetition, annotation);
+							testStatisticsBuilder.addFalse(repetition, annotation, columnSolution.getUri());
+							/* } */
 						}
 					} else {
 						testStatisticsBuilder.addInLearningMissingColumn();
@@ -681,19 +695,18 @@ public class T2Dv2GoldStandardOdalic {
 			return false;
 		}
 
-		return first.equals(second)
-				|| (GROUP_DEPENDENT && IS_ACCEPTABLE_FOR_PAIRS.get(first) != null && IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
+		return first.equals(second) || (GROUP_DEPENDENT && IS_ACCEPTABLE_FOR_PAIRS.get(first) != null
+				&& IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
 	}
 
 	private static Map<Integer, DeclaredEntity> getSolution(final Path input, final Path declaredPropertiesPath) {
 		return getDeclaredPropertyUris(declaredPropertiesPath, input.getFileName().toString());
 	}
 
-	private void learnFile(final CsvWriter csvWriter, final Path input,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
-			final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final int repetition, final Random random,
-			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) {
+	private void learnFile(final CsvWriter csvWriter, final Path input, final Path convertedInputFilesDirectory,
+			final Path profilesDirectory, final Path declaredPropertiesPath, final Path collectionResultsDirectory,
+			final boolean onlyWithProperties, final int repetition, final Random random, final int maxColumnSampleSize,
+			final Set<? extends URI> whitelistedProperties) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
@@ -741,8 +754,8 @@ public class T2Dv2GoldStandardOdalic {
 
 		final Map<Integer, DeclaredEntity> contextProperties;
 		final Map<Integer, DeclaredEntity> contextClasses;
-		final ResultValue collectedContext = getCollectedContext(csvWriter, table, input,
-				collectionResultsDirectory, random);
+		final ResultValue collectedContext = getCollectedContext(csvWriter, table, input, collectionResultsDirectory,
+				random);
 		if (collectedContext == null) {
 			contextProperties = ImmutableMap.of();
 			contextClasses = ImmutableMap.of();
@@ -751,9 +764,8 @@ public class T2Dv2GoldStandardOdalic {
 			contextClasses = getContextClasses(collectedContext);
 		}
 
-		buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses,
-				onlyWithProperties, repetition, random, maxColumnSampleSize,
-				whitelistedProperties);
+		buildTrees(slicedTable, declaredProperties, contextProperties, contextClasses, onlyWithProperties, repetition,
+				random, maxColumnSampleSize, whitelistedProperties);
 
 		testStatisticsBuilder.addLearntFile();
 	}
@@ -811,8 +823,8 @@ public class T2Dv2GoldStandardOdalic {
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final int repetition, final Random random,
-			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) {
+			final int repetition, final Random random, final int maxColumnSampleSize,
+			final Set<? extends URI> whitelistedProperties) {
 		testStatisticsBuilder.addLearningColumnsCount(slicedTable.getWidth());
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -823,7 +835,7 @@ public class T2Dv2GoldStandardOdalic {
 			testStatisticsBuilder.addAttemptedLearntNumericColumn();
 
 			final int columnIndex = numericColumn.getKey();
-			
+
 			final List<Value> values = createColumnSample(random, numericColumn, maxColumnSampleSize);
 
 			final Partition partition = new Partition(values.stream().filter(v -> v.isNumberLike())
@@ -1001,9 +1013,9 @@ public class T2Dv2GoldStandardOdalic {
 	}
 
 	private Map<Integer, URI> annotateTable(final CsvWriter csvWriter, final Path input,
-			final Path convertedInputFilesDirectory, final Path profilesDirectory,
-			final Path declaredPropertiesPath, final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final int repetition, final Random random, int maxColumnSampleSize) {
+			final Path convertedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
+			final Path collectionResultsDirectory, final boolean onlyWithProperties, final int repetition,
+			final Random random, int maxColumnSampleSize) {
 		final Path convertedInput = convert(csvWriter, input, convertedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, convertedInput);
@@ -1053,8 +1065,8 @@ public class T2Dv2GoldStandardOdalic {
 			contextClasses = getContextClasses(collectedContext);
 		}
 
-		return annotate(slicedTable, declaredPropertyUris, contextProperties,
-				contextClasses, onlyWithProperties, repetition, random, maxColumnSampleSize);
+		return annotate(slicedTable, declaredPropertyUris, contextProperties, contextClasses, onlyWithProperties,
+				repetition, random, maxColumnSampleSize);
 	}
 
 	private List<URI> getTestProperties(final CsvWriter csvWriter, final Path input,
@@ -1206,8 +1218,7 @@ public class T2Dv2GoldStandardOdalic {
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final int repetition, final Random random,
-			final int maxColumnSampleSize) {
+			final int repetition, final Random random, final int maxColumnSampleSize) {
 		testStatisticsBuilder.addTestingColumnsCount(slicedTable.getWidth());
 
 		final Set<Integer> availableContextColumnIndices = slicedTable.getContextColumns().keySet();
@@ -1215,7 +1226,7 @@ public class T2Dv2GoldStandardOdalic {
 		testStatisticsBuilder.addTestedContextColumnsCount(availableContextColumnIndices.size());
 
 		final Map<Integer, URI> resultProperties = new HashMap<>();
-		
+
 		for (final Entry<Integer, List<Value>> numericColumn : slicedTable.getDataColumns().entrySet()) {
 			testStatisticsBuilder.addAttemptedTestedNumericColumn();
 
@@ -1242,9 +1253,9 @@ public class T2Dv2GoldStandardOdalic {
 				testStatisticsBuilder.addUniqueProperty(repetition, declaredProperty.getUri());
 				testStatisticsBuilder.addUniquePropertyTested(repetition, declaredProperty.getUri());
 			}
-			
+
 			final DeclaredEntity resultProperty = contextProperties.get(columnIndex);
-			
+
 			resultProperties.put(columnIndex, resultProperty == null ? null : resultProperty.getUri());
 		}
 

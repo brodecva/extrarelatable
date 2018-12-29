@@ -9,6 +9,12 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Deserializes the list of outliers from the JSON output of the CSV Profiler.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class OutliersValueListDeserializer
     extends JsonDeserializer<List<Double>> {
 

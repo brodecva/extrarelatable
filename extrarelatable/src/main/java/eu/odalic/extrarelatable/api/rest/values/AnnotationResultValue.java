@@ -12,6 +12,12 @@ import com.google.common.collect.ImmutableMap;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
 
+/**
+ * {@link AnnotationResult} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlRootElement(name = "annotationResult")
 public class AnnotationResultValue implements Serializable {
 	

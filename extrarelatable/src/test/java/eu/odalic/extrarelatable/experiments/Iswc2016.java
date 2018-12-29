@@ -106,6 +106,23 @@ import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
+ * <p>
+ * Part of the test framework which uses a provided learning in raw tables
+ * format to annotate the test dataset. No automatic verification of the results
+ * is done, as they are not provided, in contrast to the other suites in the
+ * framework.
+ * </p>
+ * 
+ * <p>
+ * This part of the test framework allows to apply ERT to files published by
+ * Neumaier et al, which were used to demonstrate the top-down approach.
+ * </p>
+ * 
+ * <p>
+ * Parameters, recommended means of execution and description of the output is
+ * described in the accompanying thesis.
+ * </p>
+ * 
  * @author Václav Brodec
  *
  */
@@ -171,7 +188,7 @@ public class Iswc2016 {
 	@Lazy
 	@Qualifier("UuidGenerator")
 	private UuidGenerator uuidGenerator;
-	
+
 	@Autowired
 	@Lazy
 	private TableAnalyzer tableAnalyzer;
@@ -228,10 +245,10 @@ public class Iswc2016 {
 		csvWriter.flush();
 		csvWriter.close();
 	}
-	
+
 	private void testSample(final CsvWriter csvWriter) throws IOException {
 		final Random random = new Random(SEED);
-		
+
 		testSample(csvWriter, random);
 	}
 
@@ -252,7 +269,7 @@ public class Iswc2016 {
 
 		final Path testSetPath = testInstancePath;
 		final Path testCollectionResultsDirectory = testInstancePath.resolve(CONTEXT_COLLECTION_RESULTS_SUBPATH);
-		
+
 		final List<Path> testPaths;
 		if (DRY_RUN) {
 			testPaths = ImmutableList.of();
@@ -274,9 +291,8 @@ public class Iswc2016 {
 
 		final Path testCleanedInputFilesPath = testSetPath.resolve(CLEANED_INPUT_FILES_DIRECTORY);
 		final Path testProfilesPath = testSetPath.resolve(PROFILES_DIRECTORY);
-		
-		test(csvWriter, testPaths, graph, testCleanedInputFilesPath, testProfilesPath, 
-				testCollectionResultsDirectory,
+
+		test(csvWriter, testPaths, graph, testCleanedInputFilesPath, testProfilesPath, testCollectionResultsDirectory,
 				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		csvWriter.writeEmptyRow();
@@ -297,11 +313,10 @@ public class Iswc2016 {
 		Collections.sort(paths);
 		return ImmutableList.copyOf(paths);
 	}
-	
+
 	private static List<Path> getTestFiles(final Path setPath) throws IOException {
 		final List<Path> paths = Streams.stream(Files.newDirectoryStream(setPath))
-				.filter(path -> path.toFile().isFile())
-				.collect(Collectors.toCollection(ArrayList::new));
+				.filter(path -> path.toFile().isFile()).collect(Collectors.toCollection(ArrayList::new));
 
 		Collections.sort(paths);
 		return ImmutableList.copyOf(paths);
@@ -310,9 +325,10 @@ public class Iswc2016 {
 	private BackgroundKnowledgeGraph learn(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final Random random,
-			final int maxColumnSampleSize) throws IOException {
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(), propertyTreesMergingStrategy);
+			final boolean onlyDeclaredAsContext, final Random random, final int maxColumnSampleSize)
+			throws IOException {
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(),
+				propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
@@ -327,17 +343,14 @@ public class Iswc2016 {
 
 	private void test(final CsvWriter csvWriter, final Collection<? extends Path> paths,
 			final BackgroundKnowledgeGraph graph, final Path cleanedInputFilesDirectory, final Path profilesDirectory,
-			final Path collectionResultsDirectory,
-			final Random random, int maxColumnSampleSize)
-			throws IOException {
+			final Path collectionResultsDirectory, final Random random, int maxColumnSampleSize) throws IOException {
 		paths.forEach(file -> {
 			csvWriter.writeRow("File:", file);
 
 			final AnnotationResult result;
 			try {
 				result = annotateTable(csvWriter, file, graph, cleanedInputFilesDirectory, profilesDirectory,
-						collectionResultsDirectory,
-						random, maxColumnSampleSize);
+						collectionResultsDirectory, random, maxColumnSampleSize);
 			} catch (final IllegalArgumentException e) {
 				csvWriter.writeRow("Error:", e.getMessage());
 
@@ -379,7 +392,7 @@ public class Iswc2016 {
 					final Statistics statistics = propertiesStatistics.get(property);
 
 					return new Object[] { statistics.getAverage(), statistics.getMedian(), statistics.getOccurence(),
-							statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property) };
+							statistics.getRelativeOccurrence(), property.getUri(), getContextProperties(property) };
 				}).collect(ImmutableList.toImmutableList()));
 			});
 
@@ -397,8 +410,7 @@ public class Iswc2016 {
 	private Set<PropertyTree> learnFile(final CsvWriter csvWriter, final Path input,
 			final Path cleanedInputFilesDirectory, final Path profilesDirectory, final Path declaredPropertiesPath,
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final Random random,
-			final int maxColumnSampleSize) {
+			final boolean onlyDeclaredAsContext, final Random random, final int maxColumnSampleSize) {
 		csvWriter.writeRow("Processing file:", input);
 
 		final Path cleanedInput = clean(csvWriter, input, cleanedInputFilesDirectory);
@@ -503,8 +515,7 @@ public class Iswc2016 {
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
-			final boolean onlyDeclaredAsContext, final Random random,
-			final int maxColumnSampleSize) {
+			final boolean onlyDeclaredAsContext, final Random random, final int maxColumnSampleSize) {
 		/*
 		 * For each numeric column and its set of numeric values compute the possible
 		 * sub-contexts and order them by distance in descending order from the set.
@@ -758,7 +769,8 @@ public class Iswc2016 {
 					minimumPartitionRelativeSize, maximumPartitionRelativeSize, minimumPartitionSize);
 
 			final Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
+			final SharedPairNode subtree = new SharedPairNode(
+					new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
 					ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 
@@ -770,8 +782,7 @@ public class Iswc2016 {
 
 	private AnnotationResult annotateTable(final CsvWriter csvWriter, final Path input,
 			final BackgroundKnowledgeGraph graph, final Path cleanedInputFilesDirectory, final Path profilesDirectory,
-			final Path collectionResultsDirectory,
-			final Random random, int maxColumnSampleSize) {
+			final Path collectionResultsDirectory, final Random random, int maxColumnSampleSize) {
 		final Path cleanedInput = clean(csvWriter, input, cleanedInputFilesDirectory);
 
 		final CsvProfile csvProfile = profile(csvWriter, input, profilesDirectory, cleanedInput);
@@ -808,8 +819,8 @@ public class Iswc2016 {
 			contextClasses = getContextClasses(collectedContext);
 		}
 
-		return new AnnotationResult(parsedTable, annotate(graph, slicedTable, contextProperties,
-				contextClasses, random, maxColumnSampleSize));
+		return new AnnotationResult(parsedTable,
+				annotate(graph, slicedTable, contextProperties, contextClasses, random, maxColumnSampleSize));
 	}
 
 	private Map<Integer, DeclaredEntity> getContextClasses(final ResultValue collectedContext) {
@@ -910,8 +921,7 @@ public class Iswc2016 {
 
 	private Map<Integer, Annotation> annotate(final BackgroundKnowledgeGraph graph, final SlicedTable slicedTable,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
-			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses,
-			final Random random,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final Random random,
 			final int maxColumnSampleSize) {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
@@ -936,10 +946,8 @@ public class Iswc2016 {
 			rootNode.addChildren(children);
 
 			final Context context = new Context(slicedTable.getHeaders(), slicedTable.getMetadata().getAuthor(),
-					slicedTable.getMetadata().getTitle(), null,
-					getMeaningfulEntities(contextProperties),
-					contextClasses, columnIndex,
-					availableContextColumnIndices);
+					slicedTable.getMetadata().getTitle(), null, getMeaningfulEntities(contextProperties),
+					contextClasses, columnIndex, availableContextColumnIndices);
 
 			final PropertyTree tree = new PropertyTree(rootNode, context);
 			rootNode.setPropertyTree(tree);

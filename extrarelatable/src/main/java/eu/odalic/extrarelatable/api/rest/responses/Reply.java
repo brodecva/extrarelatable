@@ -30,6 +30,7 @@ import eu.odalic.extrarelatable.util.URL;
  * payload in the type attribute.
  * </p>
  *
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

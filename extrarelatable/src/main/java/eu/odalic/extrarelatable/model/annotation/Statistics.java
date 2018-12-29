@@ -6,50 +6,77 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import eu.odalic.extrarelatable.api.rest.adapters.StatisticsAdapter;
 
+/**
+ * Statistics taken from the algorithm run. Usually meant to be associated each
+ * computed annotation.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlJavaTypeAdapter(StatisticsAdapter.class)
 public final class Statistics implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3810017751616551396L;
-	
+
 	private final Double average;
 	private final Double median;
-	private final Integer occurence;
-	private final Double relativeOccurence;
-	
-	public static Statistics of(final Double average, final Double median, final Integer occurence, final Double relativeOccurence) {
-		return new Statistics(average, median, occurence, relativeOccurence);
+	private final Integer occurrence;
+	private final Double relativeOccurrence;
+
+	/**
+	 * Creates the statistics object.
+	 * 
+	 * @param average average distance of the associated annotation
+	 * @param median median distance of the associated annotation
+	 * @param occurrence absolute occurrence of the annotation within the top N nodes
+	 * @param relativeOccurence relative occurrence (ratio of the absolute occurrence and N of the top N closest nodes)
+	 * @return the statistics object
+	 */
+	public static Statistics of(final Double average, final Double median, final Integer occurrence,
+			final Double relativeOccurence) {
+		return new Statistics(average, median, occurrence, relativeOccurence);
 	}
-	
+
 	private Statistics() {
 		this.average = null;
 		this.median = null;
-		this.occurence = null;
-		this.relativeOccurence = null;
-	}
-	
-	private Statistics(final Double average, final Double median, final Integer occurence, final Double relativeOccurence) {
-		this.average = average;
-		this.median = median;
-		this.occurence = occurence;
-		this.relativeOccurence = relativeOccurence;
+		this.occurrence = null;
+		this.relativeOccurrence = null;
 	}
 
+	private Statistics(final Double average, final Double median, final Integer occurence,
+			final Double relativeOccurence) {
+		this.average = average;
+		this.median = median;
+		this.occurrence = occurence;
+		this.relativeOccurrence = relativeOccurence;
+	}
+
+	/**
+	 * @return average distance of the associated annotation
+	 */
 	public Double getAverage() {
 		return average;
 	}
 
+	/**
+	 * @return median distance of the associated annotation
+	 */
 	public Double getMedian() {
 		return median;
 	}
 
+	/**
+	 * @return absolute occurrence of the annotation within the top N closest nodes
+	 */
 	public Integer getOccurence() {
-		return occurence;
+		return occurrence;
 	}
 
-	public Double getRelativeOccurence() {
-		return relativeOccurence;
+	/**
+	 * @return relative occurrence (ratio of the absolute occurrence and number N of the top N closest nodes)
+	 */
+	public Double getRelativeOccurrence() {
+		return relativeOccurrence;
 	}
 
 	@Override
@@ -58,8 +85,8 @@ public final class Statistics implements Serializable {
 		int result = 1;
 		result = prime * result + ((average == null) ? 0 : average.hashCode());
 		result = prime * result + ((median == null) ? 0 : median.hashCode());
-		result = prime * result + ((occurence == null) ? 0 : occurence.hashCode());
-		result = prime * result + ((relativeOccurence == null) ? 0 : relativeOccurence.hashCode());
+		result = prime * result + ((occurrence == null) ? 0 : occurrence.hashCode());
+		result = prime * result + ((relativeOccurrence == null) ? 0 : relativeOccurrence.hashCode());
 		return result;
 	}
 
@@ -89,18 +116,18 @@ public final class Statistics implements Serializable {
 		} else if (!median.equals(other.median)) {
 			return false;
 		}
-		if (occurence == null) {
-			if (other.occurence != null) {
+		if (occurrence == null) {
+			if (other.occurrence != null) {
 				return false;
 			}
-		} else if (!occurence.equals(other.occurence)) {
+		} else if (!occurrence.equals(other.occurrence)) {
 			return false;
 		}
-		if (relativeOccurence == null) {
-			if (other.relativeOccurence != null) {
+		if (relativeOccurrence == null) {
+			if (other.relativeOccurrence != null) {
 				return false;
 			}
-		} else if (!relativeOccurence.equals(other.relativeOccurence)) {
+		} else if (!relativeOccurrence.equals(other.relativeOccurrence)) {
 			return false;
 		}
 		return true;
@@ -108,7 +135,7 @@ public final class Statistics implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Statistics [average=" + average + ", median=" + median + ", occurence=" + occurence
-				+ ", relativeOccurence=" + relativeOccurence + "]";
+		return "Statistics [average=" + average + ", median=" + median + ", occurrence=" + occurrence
+				+ ", relativeOccurrence=" + relativeOccurrence + "]";
 	}
 }

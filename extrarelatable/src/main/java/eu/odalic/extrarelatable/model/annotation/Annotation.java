@@ -19,6 +19,13 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.graph.Property;
 
+/**
+ * Annotation of a numeric column and in turn descriptor of the relation it
+ * forms with the subject column.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @XmlJavaTypeAdapter(AnnotationAdapter.class)
 public final class Annotation {
@@ -30,21 +37,53 @@ public final class Annotation {
 	private final Map<Label, Statistics> labelsStatistics;
 	private final Map<Set<AttributeValuePair>, Statistics> pairsStatistics;
 
+	/**
+	 * Creates an annotation.
+	 * 
+	 * @param properties
+	 *            list of assigned properties in descending order of priority
+	 * @param labels
+	 *            list of assigned label in descending order of priority
+	 * @param attributeValuePairs
+	 *            list of assigned attribute-value pairs in descending order of
+	 *            priority
+	 * @param propertiesStatistics
+	 *            statistics for each assigned property
+	 * @param labelsStatistics
+	 *            statistic for each assigned label
+	 * @param pairsStatistics
+	 *            statistic for each assigned attribute-value pair
+	 * @return the annotation
+	 */
 	@XmlTransient
 	public static Annotation of(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs,
 			final Map<? extends Property, ? extends Statistics> propertiesStatistics,
 			final Map<? extends Label, ? extends Statistics> labelsStatistics,
 			final Map<? extends Set<? extends AttributeValuePair>, ? extends Statistics> pairsStatistics) {
-		return new Annotation(properties, labels, attributeValuePairs, propertiesStatistics, labelsStatistics, pairsStatistics);
+		return new Annotation(properties, labels, attributeValuePairs, propertiesStatistics, labelsStatistics,
+				pairsStatistics);
 	}
-	
+
+	/**
+	 * Creates an annotation without any statistics.
+	 * 
+	 * @param properties
+	 *            list of assigned properties in descending order of priority
+	 * @param labels
+	 *            list of assigned label in descending order of priority
+	 * @param attributeValuePairs
+	 *            list of assigned attribute-value pairs in descending order of
+	 *            priority
+	 * @return the annotation
+	 */
 	@XmlTransient
 	public static Annotation of(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs) {
-		return new Annotation(properties, labels, attributeValuePairs, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of());
+		return new Annotation(properties, labels, attributeValuePairs, ImmutableMap.of(), ImmutableMap.of(),
+				ImmutableMap.of());
 	}
-	
+
 	private Annotation() {
 		this.properties = ImmutableList.of();
 		this.labels = ImmutableList.of();
@@ -53,7 +92,7 @@ public final class Annotation {
 		this.labelsStatistics = ImmutableMap.of();
 		this.pairsStatistics = ImmutableMap.of();
 	}
-	
+
 	private Annotation(final List<? extends Property> properties, final List<? extends Label> labels,
 			List<? extends Set<? extends AttributeValuePair>> attributeValuePairs,
 			final Map<? extends Property, ? extends Statistics> propertiesStatistics,
@@ -65,35 +104,53 @@ public final class Annotation {
 
 		this.properties = ImmutableList.copyOf(properties);
 		this.labels = ImmutableList.copyOf(labels);
-		this.attributeValuePairs = attributeValuePairs.stream().map(e -> ImmutableSet.<AttributeValuePair> copyOf(e))
+		this.attributeValuePairs = attributeValuePairs.stream().map(e -> ImmutableSet.<AttributeValuePair>copyOf(e))
 				.collect(ImmutableList.toImmutableList());
 		this.propertiesStatistics = ImmutableMap.copyOf(propertiesStatistics);
 		this.labelsStatistics = ImmutableMap.copyOf(labelsStatistics);
-		this.pairsStatistics = pairsStatistics.entrySet().stream().collect(
-			ImmutableMap.toImmutableMap(e -> ImmutableSet.copyOf(e.getKey()), e -> e.getValue())
-		);
+		this.pairsStatistics = pairsStatistics.entrySet().stream()
+				.collect(ImmutableMap.toImmutableMap(e -> ImmutableSet.copyOf(e.getKey()), e -> e.getValue()));
 	}
 
+	/**
+	 * @return the properties
+	 */
 	public List<Property> getProperties() {
 		return properties;
 	}
 
+	/**
+	 * @return the labels
+	 */
 	public List<Label> getLabels() {
 		return labels;
 	}
 
+	/**
+	 * @return the attribute-value pairs
+	 */
 	public List<Set<AttributeValuePair>> getAttributeValuePairs() {
 		return attributeValuePairs;
 	}
 
+	/**
+	 * @return the map of assigned properties to the accompanying statistics
+	 */
 	public Map<Property, Statistics> getPropertiesStatistics() {
 		return propertiesStatistics;
 	}
 
+	/**
+	 * @return the map of assigned properties to the accompanying statistics
+	 */
 	public Map<Label, Statistics> getLabelsStatistics() {
 		return labelsStatistics;
 	}
 
+	/**
+	 * @return the map of assigned attribute-value pairs to the accompanying
+	 *         statistics
+	 */
 	public Map<Set<AttributeValuePair>, Statistics> getPairsStatistics() {
 		return pairsStatistics;
 	}

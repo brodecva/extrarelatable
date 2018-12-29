@@ -12,6 +12,12 @@ import org.springframework.stereotype.Component;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.model.table.TypedTable;
 
+/**
+ * Default implementation of {@link ColumnTypeAnalyzer}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @Component
 public class DefaultColumnTypeAnalyzer implements ColumnTypeAnalyzer {

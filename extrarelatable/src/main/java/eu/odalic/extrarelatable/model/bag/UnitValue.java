@@ -4,6 +4,12 @@ import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Unit value (centimeters, kilograms, ...).
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class UnitValue extends NumberLikeValue implements Serializable {
 	
@@ -21,6 +27,7 @@ private static final long serialVersionUID = -25440715468458309L;
 		this.text = text;
 	}	
 	
+	@Override
 	public double getFigure() {
 		return figure;
 	}

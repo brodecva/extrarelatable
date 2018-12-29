@@ -5,6 +5,12 @@ import java.util.Map;
 
 import eu.odalic.extrarelatable.model.bag.Type;
 
+/**
+ * POJ to which the JSON output of the CSV Profiler is mapped.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public class CsvProfile {
 	private int columns;
 	private Completeness completeness;

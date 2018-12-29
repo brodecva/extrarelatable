@@ -16,12 +16,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Default implementation of {@link InstantValueParser}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @Component
 public final class DefaultInstantValueParser implements InstantValueParser {
 
 	private final int limit;
 	
+	/**
+	 * Instantiates the parser.
+	 * 
+	 * @param limit maximum number of characters that are parsed
+	 */
 	@Autowired
 	public DefaultInstantValueParser(final @Value("${eu.odalic.extrarelatable.parseLimit:50}") int limit) {
 		checkArgument(limit > 0, "The limit must be a positive integer!");

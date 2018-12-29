@@ -12,15 +12,31 @@ import com.google.common.collect.ImmutableSetMultimap;
 import eu.odalic.extrarelatable.model.bag.Attribute;
 import eu.odalic.extrarelatable.model.bag.Value;
 
+/**
+ * Candidate set of {@link Partition}s for a column.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class Subcontext {
 
+	/**
+	 * Subcontext builder.
+	 * 
+	 * @author Václav Brodec
+	 *
+	 */
 	public static final class Builder {
 
 		private Attribute attribute;
 		private Integer columnIndex;
 		private ImmutableSetMultimap.Builder<Value, NumericCell> partitionsBuilder = ImmutableSetMultimap.builder();
 
+		/**
+		 * @param attribute of the context column associated with the subcontext
+		 * @return the builder
+		 */
 		public Builder setAttribute(final Attribute attribute) {
 			checkNotNull(attribute);
 			
@@ -29,6 +45,10 @@ public final class Subcontext {
 			return this;
 		}
 		
+		/**
+		 * @param columnIndex index of the context column associated with the subcontext
+		 * @return the builder
+		 */
 		public Builder setColumnIndex(final int columnIndex) {
 			checkArgument(columnIndex >= 0);
 			
@@ -37,6 +57,11 @@ public final class Subcontext {
 			return this;
 		}
 		
+		/**
+		 * @param value 
+		 * @param cell
+		 * @return the builder
+		 */
 		public Builder put(final Value value, final NumericCell cell) {
 			checkNotNull(value);
 			checkNotNull(cell);
@@ -46,6 +71,11 @@ public final class Subcontext {
 			return this;
 		}
 
+		/**
+		 * Builds the subcontext.
+		 * 
+		 * @return the built subcontext
+		 */
 		public Subcontext build() {
 			final ImmutableSetMultimap<Value, NumericCell> partitionsEntryMap = partitionsBuilder.build();
 
@@ -60,10 +90,20 @@ public final class Subcontext {
 	private final Attribute attribute;
 	private final int columnIndex;
 
+	/**
+	 * @return the subcontext builder
+	 */
 	public static Builder builder() {
 		return new Builder();
 	}
 
+	/**
+	 * Creates a candidate subcontext.
+	 * 
+	 * @param attribute attribute of the column that is associated with this candidate subcontext
+	 * @param columnIndex index of the column associated with this candidate subcontext
+	 * @param partitions map of values from the context column to partitions from the partitioned column
+	 */
 	public Subcontext(final Attribute attribute, final int columnIndex, final Map<? extends Value, ? extends Partition> partitions) {
 		checkNotNull(attribute);
 		checkArgument(columnIndex >= 0);
@@ -75,18 +115,30 @@ public final class Subcontext {
 		this.partitions = ImmutableMap.copyOf(partitions);
 	}
 
+	/**
+	 * @return attribute belonging to the column that is associated with this candidate subcontext
+	 */
 	public Attribute getAttribute() {
 		return attribute;
 	}
 
+	/**
+	 * @return the index of the context column that is associated with this candidate subcontext
+	 */
 	public int getColumnIndex() {
 		return columnIndex;
 	}
 	
+	/**
+	 * @return map of context values to the formed partitions
+	 */
 	public Map<Value, Partition> getPartitions() {
 		return partitions;
 	}
 
+	/**
+	 * @return the size of the smallest partition in the candidate subcontext
+	 */
 	public int getSmallestPartitionSize() {
 		return partitions.values().stream().reduce((p, q) -> {
 			if (p.size() <= q.size()) {
@@ -97,6 +149,9 @@ public final class Subcontext {
 		}).get().size();
 	}
 	
+	/**
+	 * @return the size of the largest partition in the candidate subcontext
+	 */
 	public int getLargestPartitionSize() {
 		return partitions.values().stream().reduce((p, q) -> {
 			if (p.size() >= q.size()) {

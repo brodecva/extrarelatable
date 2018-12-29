@@ -12,6 +12,12 @@ import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Value;
 import eu.odalic.extrarelatable.util.Matrix;
 
+/**
+ * Implementation of {@link TypedTable} based on immutable list of immutable lists.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class NestedListsTypedTable implements TypedTable {
 	private final List<Label> header;
@@ -22,6 +28,14 @@ public final class NestedListsTypedTable implements TypedTable {
 	
 	private final Metadata metadata;
 	
+	/**
+	 * Builds table from header row and other typed rows.
+	 * 
+	 * @param header header row
+	 * @param rows other rows
+	 * @param metadata the table meta-data
+	 * @return the typed table
+	 */
 	public static TypedTable fromRows(final List<? extends Label> header, final List<? extends List<? extends Value>> rows, final Metadata metadata) {
 		checkNotNull(header);
 		checkNotNull(rows);
@@ -41,65 +55,41 @@ public final class NestedListsTypedTable implements TypedTable {
 		this.metadata = metadata;
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getHeaders()
-	 */
 	@Override
 	public List<Label> getHeaders() {
 		return header;
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getRows()
-	 */
 	@Override
 	public List<List<Value>> getRows() {
 		return rows;
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getColumns()
-	 */
 	@Override
 	public List<List<Value>> getColumns() {
 		return columns;
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getMetadata()
-	 */
 	@Override
 	public Metadata getMetadata() {
 		return metadata;
 	}
 
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getWidth()
-	 */
 	@Override
 	public int getWidth() {
 		return columns.size();
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getHeight()
-	 */
 	@Override
 	public int getHeight() {
 		return rows.size();
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getRow(int)
-	 */
 	@Override
 	public List<Value> getRow(final int index) {
 		return rows.get(index);
 	}
 	
-	/* (non-Javadoc)
-	 * @see eu.odalic.extrarelatable.model.table.TypedTable#getColumn(int)
-	 */
 	@Override
 	public List<Value> getColumn(final int index) {
 		return columns.get(index);

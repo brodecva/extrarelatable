@@ -4,14 +4,24 @@ import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Value representing artificially made identifier.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class IdValue extends AbstractValue implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2331954295033377038L;
+	
 	private final String id;
 
+	/**
+	 * Creates the value.
+	 * 
+	 * @param id the ID text
+	 * @return the value
+	 */
 	public static IdValue of(final String id) {
 		return new IdValue(id);
 	}

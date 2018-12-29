@@ -6,10 +6,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Domain class adapted for REST API.
+ * Graph representation for REST API.
  *
  * @author Václav Brodec
- *
  */
 @XmlRootElement(name = "graph")
 public final class GraphValue implements Serializable {

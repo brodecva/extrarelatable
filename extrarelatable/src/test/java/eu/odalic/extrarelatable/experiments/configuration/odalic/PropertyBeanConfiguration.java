@@ -9,6 +9,14 @@ import org.springframework.context.annotation.Configuration;
 import eu.odalic.extrarelatable.algorithms.table.csv.CsvTableParser;
 import eu.odalic.extrarelatable.util.UuidGenerator;
 
+/**
+ * Test-specific Spring configuration allowing to use the funcionality of bean
+ * qualifier to inject instances according to configuration obtained from system
+ * properties.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Configuration
 public class PropertyBeanConfiguration {
 
@@ -22,8 +30,7 @@ public class PropertyBeanConfiguration {
 	}
 
 	@Bean
-	public UuidGenerator UuidGenerator(
-			@Value("${eu.odalic.extrarelatable.uuidGenerator:default}") String qualifier) {
+	public UuidGenerator UuidGenerator(@Value("${eu.odalic.extrarelatable.uuidGenerator:default}") String qualifier) {
 		return (UuidGenerator) context.getBean(qualifier);
 	}
 }

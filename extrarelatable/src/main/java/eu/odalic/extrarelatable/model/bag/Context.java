@@ -7,14 +7,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
+/**
+ * COntext in which a {@link PropertyTree} appears in the original file.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class Context implements Serializable {
 
@@ -29,11 +37,30 @@ public final class Context implements Serializable {
 	private final Integer columnIndex;
 	private final Set<Integer> contextColumnIndices;
 
+	/**
+	 * Creates context object without any context entitites.
+	 * 
+	 * @param columnHeaders column labels collected from the original file
+	 * @param tableAuthor author of the table
+	 * @param tableTitle title of the table
+	 */
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle) {
 		this(columnHeaders, tableAuthor, tableTitle, null, ImmutableMap.of(), ImmutableMap.of(), null,
 				ImmutableSet.of());
 	}
 
+	/**
+	 * Creates context object.
+	 * 
+	 * @param columnHeaders column labels collected from the original file
+	 * @param tableAuthor author of the table
+	 * @param tableTitle title of the table
+	 * @param declaredProperty property assigned manually to the column which the property tree models
+	 * @param declaredColumnProperties all declared properties for the columns in the original file
+	 * @param declaredColumnClasses all declared classes for the columns in the original file
+	 * @param columnIndex index of the original column
+	 * @param contextColumnIndices indices of columns which do not contain number-like data, but are only meant to provide row context
+	 */
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle,
 			final DeclaredEntity declaredProperty, final Map<? extends Integer, ? extends DeclaredEntity> declaredColumnProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredColumnClasses, final Integer columnIndex,
@@ -53,43 +80,76 @@ public final class Context implements Serializable {
 		this.contextColumnIndices = ImmutableSet.copyOf(contextColumnIndices);
 	}
 
+	/**
+	 * @return column labels collected from the original file
+	 */
 	public List<Label> getColumnHeaders() {
 		return columnHeaders;
 	}
 
+	/**
+	 * @return the author of the table
+	 */
+	@Nullable
 	public String getTableAauthor() {
 		return tableAauthor;
 	}
 
+	/**
+	 * @return the title of the table
+	 */
+	@Nullable
 	public String getTableTitle() {
 		return tableTitle;
 	}
 
+	/**
+	 * @return property assigned manually to the column which the property tree models
+	 */
+	@Nullable
 	public DeclaredEntity getDeclaredProperty() {
 		return declaredProperty;
 	}
 
+	/**
+	 * @return all declared properties for the columns in the original file
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredColumnProperties() {
 		return declaredColumnProperties;
 	}
 
+	/**
+	 * @return all declared classes for the columns in the original file
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredColumnClasses() {
 		return declaredColumnClasses;
 	}
 
+	/**
+	 * @return index of the original column
+	 */
 	public Integer getColumnIndex() {
 		return columnIndex;
 	}
 
+	/**
+	 * @return indices of columns which do not contain number-like data, but are only meant to provide row context
+	 */
 	public Set<Integer> getContextColumnIndices() {
 		return contextColumnIndices;
 	}
 
+	/**
+	 * @return declared properties belonging to the columns providing row context
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredContextColumnProperties() {
 		return declaredColumnProperties.entrySet().stream().filter(e -> contextColumnIndices.contains(e.getKey()))
 				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
+	/**
+	 * @return declared classes belonging to the columns providing row context
+	 */
 	public Map<Integer, DeclaredEntity> getDeclaredContextColumnClasses() {
 		return declaredColumnClasses.entrySet().stream().filter(e -> contextColumnIndices.contains(e.getKey()))
 				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> e.getValue()));

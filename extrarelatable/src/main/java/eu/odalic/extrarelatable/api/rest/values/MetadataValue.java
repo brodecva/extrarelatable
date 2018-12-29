@@ -15,9 +15,10 @@ import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 
 /**
- * Domain class adapted for REST API.
- *
+ * {@link Metadata} adapted for REST API.
+ * 
  * @author Václav Brodec
+ *
  */
 @XmlRootElement(name = "metadata")
 public final class MetadataValue implements Serializable {

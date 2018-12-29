@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 
 /**
- * File based {@link GraphsPersitingService}.
+ * File based {@link GraphsPersitingService}. Uses {@link DB} under the hood.
  *
  * @author Václav Brodec
  *
@@ -30,9 +30,13 @@ import eu.odalic.extrarelatable.model.graph.BackgroundKnowledgeGraph;
 public final class DbGraphsPersistingService implements GraphsPersitingService {
 
 	private final DB db;
-	
+
 	private final Map<String, BackgroundKnowledgeGraph> persistedGraphs;
 
+	/**
+	 * @param db DB-managing instance
+	 * @param persistedGraphs DB-persisted map of names and graphs
+	 */
 	DbGraphsPersistingService(final DB db, final HTreeMap<String, BackgroundKnowledgeGraph> persistedGraphs) {
 		checkNotNull(db);
 		checkNotNull(persistedGraphs);
@@ -41,6 +45,11 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 		this.persistedGraphs = persistedGraphs;
 	}
 
+	/**
+	 * Initializes the DB from the provided path.
+	 * 
+	 * @param filePath path to the DB file
+	 */
 	@SuppressWarnings("unchecked")
 	public DbGraphsPersistingService(final Path filePath) {
 		checkNotNull(filePath, "The DB file path cannot be null!");
@@ -49,6 +58,11 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 		this.persistedGraphs = this.db.hashMap("persistedGraphs", Serializer.STRING, Serializer.JAVA).createOrOpen();
 	}
 
+	/**
+	 * Initializes the DB from the provided path string.
+	 * 
+	 * @param filePath path string to the DB file
+	 */
 	@Autowired
 	public DbGraphsPersistingService(@Value("${eu.odalic.extrarelatable.db.filePath}") final String filePath) {
 		this(Paths.get(filePath));
@@ -69,14 +83,16 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	@Override
 	public void persist(Map<? extends String, ? extends BackgroundKnowledgeGraph> graphs) {
 		this.persistedGraphs.clear();
-		this.persistedGraphs.putAll(graphs.entrySet().stream().collect(ImmutableMap.toImmutableMap(entry -> entry.getKey(), entry -> new BackgroundKnowledgeGraph(entry.getValue()))));
+		this.persistedGraphs.putAll(graphs.entrySet().stream().collect(ImmutableMap
+				.toImmutableMap(entry -> entry.getKey(), entry -> new BackgroundKnowledgeGraph(entry.getValue()))));
 		this.db.commit();
 		this.db.getStore().compact();
 	}
 
 	@Override
 	public Map<String, BackgroundKnowledgeGraph> load() {
-		return this.persistedGraphs.entrySet().stream().collect(ImmutableMap.toImmutableMap(entry -> entry.getKey(), entry -> new BackgroundKnowledgeGraph(entry.getValue())));
+		return this.persistedGraphs.entrySet().stream().collect(ImmutableMap.toImmutableMap(entry -> entry.getKey(),
+				entry -> new BackgroundKnowledgeGraph(entry.getValue())));
 	}
 
 	@Override

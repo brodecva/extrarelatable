@@ -2,6 +2,12 @@ package eu.odalic.extrarelatable.services.csvengine.csvprofiler;
 
 import java.util.List;
 
+/**
+ * POJ to which the completeness part of the JSON output of the CSV Profiler is mapped.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public class Completeness {
 	private List<Double> columns;
 	private Double data;

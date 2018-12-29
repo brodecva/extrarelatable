@@ -13,11 +13,22 @@ import eu.odalic.extrarelatable.model.graph.PropertyTree;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 
+/**
+ * Default implementation of {@link PropertyTreesBuilder}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Component
 public class DefaultPropertyTreesBuilder implements PropertyTreesBuilder {
 
 	private final PropertyTreeBuilder propertyTreeBuilder;
 	
+	/**
+	 * Constructs a set builder from a builder for a single tree.
+	 * 
+	 * @param propertyTreeBuilder the builder used to build the individual trees
+	 */
 	public DefaultPropertyTreesBuilder(final PropertyTreeBuilder propertyTreeBuilder) {
 		checkNotNull(propertyTreeBuilder);
 		

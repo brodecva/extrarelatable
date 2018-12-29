@@ -85,30 +85,87 @@ import eu.odalic.extrarelatable.util.Matrix;
 import webreduce.data.Dataset;
 import webreduce.data.HeaderPosition;
 
+/**
+ * Default implementation of {@link GraphService}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Service
 public class DefaultGraphService implements GraphService {
 
+	/**
+	 * Suffix that is assigned to cached failed attempts to either profile or clean the input CSV file. 
+	 */
 	private static final String DOT_LEADING_FAILED_RESULT_FILE_SUFFIX = ".fail";
+	/**
+	 * JSON suffix
+	 */
 	private static final String DOT_LEADING_JSON_SUFFIX = ".json";
+	/**
+	 * CSV file suffix
+	 */
 	private static final String DOT_LEADING_CSV_SUFFIX = ".csv";
-	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";
+	/**
+	 * Characters that have to be sanitized in order to obtain valid file name (e.g. for declared properties of the DWTC format tables).
+	 */
+	private static final String CHARACTERS_TO_SANITIZE_REGEX = "[.]";	
+	/**
+	 * Sanitizing string used to replace the sanitized characters.
+	 */
 	private static final String SANITIZE_WITH = "_";
 
+	/**
+	 * Pattern to cut out locale language to from the graph name.
+	 */
 	private static final Pattern LOCALE_LANGUAGE_TAG_IN_GRAPH_NAME_PATTERN = Pattern.compile("^.*__([^_]+)$");
+	/**
+	 * Default locale.
+	 */
 	private static final Locale DEFAULT_LOCALE = Locale.getDefault();
 
+	/**
+	 * JSON-encoded tables sub-path in DWTC format.
+	 */
 	private static final Path TABLES_SUBPATH = Paths.get("tables");
+	/**
+	 * Declared properties sub-path in DWTC format.
+	 */
 	private static final Path DECLARED_PROPERTIES_SUBPATH = Paths.get("property");
+	/**
+	 * Parsed tables sub-path of tables in modified DWTC format.
+	 */
 	private static final Path PARSED_TABLES_CSVS_SUBPATH = Paths.get("csvs");
+	/**
+	 * Profiles sub-path in both modified DWTC (tables sub-paths) and raw tables format (root sub-path).
+	 */
 	private static final Path PROFILES_SUBPATH = Paths.get("profiles");
+	/**
+	 * Cleaned files sub-path in both modified DWTC (tables sub-path) and raw tables format (root sub-path). 
+	 */
 	private static final Path CLEANED_CSVS_SUBPATH = Paths.get("cleaned");
+	/**
+	 * Collected context sub-path in both modified DWTC (tables sub-path) and raw tables format (root sub-path).
+	 */
 	private static final Path CONTEXT_COLLECTION_RESULTS_SUBPATH = Paths.get("context");
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGraphService.class);
+	
+	/**
+	 * Name of the file within context directory which holds the configuration of context-collecting bases (used ones separated by {@link #USED_BASES_CONTEXT_BASES_CONFIGURATION_DELIMITER}} and the primary one in the second row)
+	 */
 	private static final String CONTEXT_BASES_CONFIGURATION_FILE_NAME = "odalic.conf";
+	/**
+	 * Separator of used bases on the first rows in the {@value #CONTEXT_BASES_CONFIGURATION_FILE_NAME} configuration file. 
+	 */
 	private static final char USED_BASES_CONTEXT_BASES_CONFIGURATION_DELIMITER = ';';
+	/**
+	 * First row index, holding the used bases in the {@value #CONTEXT_BASES_CONFIGURATION_FILE_NAME} file.
+	 */
 	private static final int USED_BASES_CONTEXT_BASES_CONFIGURATION_INDEX = 0;
-	private static final int PRIMARY_BASE_CONTEXT_BASES_CONFIGURATION_INDEX = 1;
+	/**
+	 * Second row index, holding the primary base in the {@value #CONTEXT_BASES_CONFIGURATION_FILE_NAME} file.
+	 */private static final int PRIMARY_BASE_CONTEXT_BASES_CONFIGURATION_INDEX = 1;
 
 	private final PropertyTreesMergingStrategy propertyTreesMergingStrategy;
 	private final FileCachingService fileCachingService;
@@ -124,7 +181,14 @@ public class DefaultGraphService implements GraphService {
 	private final GraphsPersitingService graphsPersistingService;
 	private final ContextCollectionService contextCollectionService;
 
+	/**
+	 * Background knowledge graphs mapped to their names.
+	 */
 	private final Map<String, BackgroundKnowledgeGraph> graphs;
+	
+	/**
+	 * Random generator used to sample the input tables.
+	 */
 	private Random random;
 
 	DefaultGraphService(PropertyTreesMergingStrategy propertyTreesMergingStrategy,
@@ -170,6 +234,26 @@ public class DefaultGraphService implements GraphService {
 		this.graphs = graphs;
 	}
 
+	/**
+	 * Initializes the graph service.
+	 * 
+	 * @param propertyTreesMergingStrategy merges the property trees of the background knowledge graph
+	 * @param fileCachingService caches immediate results and result from remote services
+	 * @param csvProfilerService profiles the CSV files (mainly for deduction of used data types)
+	 * @param csvCleanerService cleans provided CSV files and converts them to uniform format
+	 * @param csvTableParser parses CSV tables
+	 * @param tableAnalyzer
+	 * @param propertyTreesBuilder
+	 * @param tableSlicer 
+	 * @param annotator the actual annotating service of the numeric columns
+	 * @param csvTableWriter CSV writer used to cache the tables obtained in other formats (such as DWTC)
+	 * @param dwtcToCsvService converts tables from the DWTC format to CSV
+	 * @param graphsPersitingService stores the graphs in persistent storage between application runs
+	 * @param contextCollectionService collects additional class and property context for the ERT algorithm
+	 * @param graphsPath path to directory containing the graphs to learn (one graph per sub-directory) 
+	 * @param onlyWithProperties determines whether only the numeric columns with existing declared property are learned from referential files
+	 * @throws IOException whenever I/O exception occurs
+	 */
 	@Autowired
 	public DefaultGraphService(
 			@Qualifier("PropertyTreesMergingStrategy") PropertyTreesMergingStrategy propertyTreesMergingStrategy,
@@ -186,10 +270,14 @@ public class DefaultGraphService implements GraphService {
 				tableAnalyzer, propertyTreesBuilder, tableSlicer, annotator, csvTableWriter, dwtcToCsvService,
 				graphsPersitingService, contextCollectionService, new HashMap<>(graphsPersitingService.load()));
 
+		initializeGraphs(graphsPath, onlyWithProperties);
+	}
+
+	private void initializeGraphs(final String graphsPath, final boolean onlyWithProperties) throws IOException {
 		final Set<BackgroundKnowledgeGraph> loadedGraphs = loadGraphs(Paths.get(graphsPath), onlyWithProperties);
-
+		
 		loadedGraphs.forEach(graph -> this.graphsPersistingService.persist(graph.getName(), graph));
-
+		
 		if (graphsPath != null) {
 			this.graphs.putAll(loadedGraphs.stream()
 					.collect(ImmutableMap.toImmutableMap(graph -> graph.getName(), graph -> graph)));
@@ -229,6 +317,7 @@ public class DefaultGraphService implements GraphService {
 
 		final Path tablesPath = graphPath.resolve(TABLES_SUBPATH);
 
+		// Supported referential files format detection
 		if (tablesPath.toFile().exists() && tablesPath.toFile().isDirectory()) {
 			return loadDwtcGraph(graphName, tablesPath, tablesPath.resolve(PROFILES_SUBPATH),
 					tablesPath.resolve(PARSED_TABLES_CSVS_SUBPATH), graphPath.resolve(DECLARED_PROPERTIES_SUBPATH),

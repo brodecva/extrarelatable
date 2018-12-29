@@ -17,7 +17,7 @@ import eu.odalic.extrarelatable.util.Characters;
  * </p>
  * 
  * <p>
- * Adapted from Odalic.
+ * Adapted from Odalic with permission.
  * </p>
  *
  * @author Jan Váňa

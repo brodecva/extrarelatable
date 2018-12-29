@@ -9,9 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.google.common.base.Preconditions;
 
 /**
- * <p>
  * Odalic domain class adapted for REST API.
- * </p>
  *
  * @author Václav Brodec
  *

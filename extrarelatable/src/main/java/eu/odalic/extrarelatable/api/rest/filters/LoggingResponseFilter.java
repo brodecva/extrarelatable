@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Filter that logs the API responses.
+ * <p>Filter that logs the API responses.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

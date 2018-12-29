@@ -15,6 +15,12 @@ import com.google.common.collect.ImmutableMap;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Value;
 
+/**
+ * Implementation of {@link SlicedTable} based on immutable list of immutable lists.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class NestedListsSlicedTable implements SlicedTable {
 	
@@ -22,6 +28,14 @@ public final class NestedListsSlicedTable implements SlicedTable {
 	private final Map<Integer, List<Value>> numericColumns;
 	private final Map<Integer, List<Value>> textualColumns;
 	
+	/**
+	 * Converts a typed table and disjoint sets of indices to a sliced table.
+	 * 
+	 * @param typedTable typed table
+	 * @param numericColumnsIndices set of indices of numeric columns
+	 * @param textualColumnsIndices set of indices of context columns
+	 * @return the sliced table
+	 */
 	public static SlicedTable of(final TypedTable typedTable, Set<? extends Integer> numericColumnsIndices,
 			Set<? extends Integer> textualColumnsIndices) {
 		checkNotNull(typedTable);
@@ -45,34 +59,42 @@ public final class NestedListsSlicedTable implements SlicedTable {
 		this.textualColumns = textualColumns;
 	}
 	
+	@Override
 	public List<Label> getHeaders() {
 		return typedTable.getHeaders();
 	}
 	
+	@Override
 	public List<List<Value>> getRows() {
 		return typedTable.getRows();
 	}
 	
+	@Override
 	public List<List<Value>> getColumns() {
 		return typedTable.getColumns();
 	}
 	
+	@Override
 	public Metadata getMetadata() {
 		return typedTable.getMetadata();
 	}
 
+	@Override
 	public int getWidth() {
 		return typedTable.getWidth();
 	}
 	
+	@Override
 	public int getHeight() {
 		return typedTable.getHeight();
 	}
 	
+	@Override
 	public List<Value> getRow(final int index) {
 		return typedTable.getRow(index);
 	}
 	
+	@Override
 	public List<Value> getColumn(final int index) {
 		return typedTable.getColumn(index);
 	}

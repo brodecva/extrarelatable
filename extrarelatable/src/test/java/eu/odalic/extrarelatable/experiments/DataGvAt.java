@@ -110,6 +110,10 @@ import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
+ * <p>Part of the test framework for the raw tables format (as found in the data.gv.at and www.opendataportal.at datasets).</p>
+ * 
+ * <p>Parameters, recommended means of execution and description of the output is described in the accompanying thesis.</p>
+ * 
  * @author Václav Brodec
  *
  */
@@ -742,7 +746,7 @@ public class DataGvAt {
 					final Statistics statistics = propertiesStatistics.get(property);
 
 					return new Object[] { statistics.getAverage(), statistics.getMedian(), statistics.getOccurence(),
-							statistics.getRelativeOccurence(), property.getUri(), getContextProperties(property) };
+							statistics.getRelativeOccurrence(), property.getUri(), getContextProperties(property) };
 				}).collect(ImmutableList.toImmutableList()));
 
 				csvWriter.writeRow("Solution:", columnSolution == null ? null : columnSolution.getUri());

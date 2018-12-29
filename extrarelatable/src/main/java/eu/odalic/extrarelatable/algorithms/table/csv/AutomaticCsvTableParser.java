@@ -91,7 +91,6 @@ public final class AutomaticCsvTableParser implements CsvTableParser {
 			parserSettings.setDelimiterDetectionEnabled(false);
 			parserSettings.setQuoteDetectionEnabled(false);
 		}
-		//parserSettings.setHeaderExtractionEnabled(true);
 		parserSettings.setEmptyValue("");
 		parserSettings.setNullValue("");
 		parserSettings.setMaxCharsPerColumn(-1);

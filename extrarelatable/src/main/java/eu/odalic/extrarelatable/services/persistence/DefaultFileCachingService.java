@@ -7,9 +7,18 @@ import java.nio.file.Path;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Default implementation of {@link FileCachingService}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Service
 public class DefaultFileCachingService implements FileCachingService {
 
+	/**
+	 * Prefix of the temporary files.
+	 */
 	private static final String PREFIX = "extrarelatable";
 
 	@Override

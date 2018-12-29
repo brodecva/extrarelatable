@@ -8,7 +8,9 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 
 /**
- * Same origin problem workaround filter.
+ * <p>Same origin problem workaround filter.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

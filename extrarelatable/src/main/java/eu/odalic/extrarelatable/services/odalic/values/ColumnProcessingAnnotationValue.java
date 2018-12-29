@@ -10,9 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * <p>
  * Odalic domain class adapted for REST API.
- * </p>
  *
  * @author Josef Janoušek
  *

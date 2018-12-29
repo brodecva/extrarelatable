@@ -21,7 +21,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
- * Catch-all throwable mapper.
+ * <p>Catch-all throwable mapper.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

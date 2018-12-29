@@ -10,7 +10,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.SecurityContext;
 
 /**
- * REST API security utility methods.
+ * <p>REST API security utility methods.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

@@ -36,6 +36,12 @@ import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.SlicedTable;
 
+/**
+ * Default implementation of {@link Annotator}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Component
 public final class DefaultAnnotator implements Annotator {
 
@@ -46,6 +52,16 @@ public final class DefaultAnnotator implements Annotator {
 	private final ResultAggregator<MeasuredNode> pairsResultAggregator;
 	private final int defaultK;
 
+	/**
+	 * Constructs the annotator.
+	 * 
+	 * @param propertyTreeBuilder builder used to build temporary property trees (which are not to become part of the graph) which are measured against the trees from the graph
+	 * @param topKNodesMatcher retrieves the top K nodes from the graph closest to input node
+	 * @param propertiesResultAggregator aggregates the top K nodes by their shared properties
+	 * @param labelsResultAggregator aggregates the top K nodes by their shared labels
+	 * @param pairsResultAggregator aggregates the top K nodes by their shared attribute-value pairs
+	 * @param defaultK default maximum number of the top properties, labels or other parts of each annotation returned in the result
+	 */
 	public DefaultAnnotator(final PropertyTreeBuilder propertyTreeBuilder, final TopKNodesMatcher topKNodesMatcher,
 			@Qualifier("PropertiesResultAggregator") final ResultAggregator<MeasuredNode> propertiesResultAggregator,
 			@Qualifier("LabelsResultAggregator") final ResultAggregator<MeasuredNode> labelsResultAggregator,

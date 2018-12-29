@@ -11,6 +11,12 @@ import org.springframework.stereotype.Component;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 import eu.odalic.extrarelatable.services.odalic.values.ComputationInputValue;
 
+/**
+ * Default implementation of {@link ComputationInputConverter}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Component
 public class DefaultComputationInputConverter implements ComputationInputConverter {
 

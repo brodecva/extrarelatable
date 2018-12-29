@@ -25,7 +25,7 @@ public final class StatisticsValue implements Serializable {
 		this.average = adaptee.getAverage();
 		this.median = adaptee.getMedian();
 		this.occurence = adaptee.getOccurence();
-		this.relativeOccurence = adaptee.getRelativeOccurence();
+		this.relativeOccurence = adaptee.getRelativeOccurrence();
 	}
 
 	@XmlElement

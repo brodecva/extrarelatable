@@ -17,6 +17,12 @@ import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.graph.Property;
 
+/**
+ * {@link Annotation} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @XmlRootElement(name = "annotation")
 public final class AnnotationValue implements Serializable {

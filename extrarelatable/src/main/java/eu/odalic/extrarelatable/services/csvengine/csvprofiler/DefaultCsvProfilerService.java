@@ -23,6 +23,15 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.springframework.stereotype.Service;
 
+/**
+ * Default implementation of {@link CsvProfilerService}. Uses Jersey client to
+ * connect to the remote CSV Clean service and request the cleaning. To avoid
+ * overwhelming the service with too many requests, the service is limited to
+ * one request per two seconds.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Service
 public final class DefaultCsvProfilerService implements CsvProfilerService {
 

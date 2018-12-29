@@ -12,7 +12,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Stand-alone computation request for REST API.
+ * Stand-alone computation request for REST API. Aparts from the encoded table
+ * as {@link ComputationInputValue}, it keeps the names of the used knowledge
+ * bases, the primary one and the (unused by ERT) statistical processing flag.
  *
  * @author Václav Brodec
  *

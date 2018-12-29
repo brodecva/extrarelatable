@@ -12,6 +12,14 @@ import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.api.rest.adapters.DeclaredEntityAdapter;
 
+/**
+ * This class encapsulates either the RDFS property or class that is a part of
+ * either the declared or collected context associated with a table. The URI of
+ * the property (or class) is accompanied by a list of associated text labels.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlJavaTypeAdapter(DeclaredEntityAdapter.class)
 public final class DeclaredEntity implements Serializable {
 
@@ -29,10 +37,16 @@ public final class DeclaredEntity implements Serializable {
 		this.labels = ImmutableSortedSet.copyOf(labels);
 	}
 
+	/**
+	 * @return entity URI
+	 */
 	public URI getUri() {
 		return uri;
 	}
 
+	/**
+	 * @return labels associated with the entity
+	 */
 	public NavigableSet<String> getLabels() {
 		return labels;
 	}

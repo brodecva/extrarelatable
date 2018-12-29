@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import eu.odalic.extrarelatable.api.rest.values.DeclaredEntityValue;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
-
+/**
+ * Adapter of {@link DeclaredEntity} to {@link DeclaredEntityValue} and back.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class DeclaredEntityAdapter extends XmlAdapter<DeclaredEntityValue, DeclaredEntity> {
 
   @Override

@@ -14,13 +14,20 @@ import com.google.common.collect.ImmutableMap;
 import eu.odalic.extrarelatable.api.rest.adapters.AnnotationResultAdapter;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
+/**
+ * {@link Annotation}s for each recognized numeric column and the parsed table
+ * from which they were computed.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlJavaTypeAdapter(AnnotationResultAdapter.class)
 public final class AnnotationResult implements Serializable {
-	
+
 	private static final long serialVersionUID = 8678871094793797335L;
 
 	private final ParsedTable parsedTable;
-	
+
 	private final Map<Integer, Annotation> annotations;
 
 	@SuppressWarnings("unused")
@@ -28,21 +35,37 @@ public final class AnnotationResult implements Serializable {
 		parsedTable = null;
 		annotations = ImmutableMap.of();
 	}
-	
-	public AnnotationResult(final ParsedTable parsedTable, final Map<? extends Integer, ? extends Annotation> annotations) {
+
+	/**
+	 * Creates the complete result of the annotating process.
+	 * 
+	 * @param parsedTable
+	 *            the original parsed table
+	 * @param annotations
+	 *            annotations for each recognized numeric column
+	 */
+	public AnnotationResult(final ParsedTable parsedTable,
+			final Map<? extends Integer, ? extends Annotation> annotations) {
 		checkNotNull(parsedTable);
 		checkNotNull(annotations);
-		
+
 		this.parsedTable = parsedTable;
 		this.annotations = ImmutableMap.copyOf(annotations);
 	}
-	
+
+	/**
+	 * @return the original parsed table, which served as the input
+	 */
 	@XmlTransient
 	@JsonIgnore
 	public ParsedTable getParsedTable() {
 		return parsedTable;
 	}
 
+	/**
+	 * @return the map of indices of recognized numeric columns to the assigned
+	 *         annotations
+	 */
 	public Map<Integer, Annotation> getAnnotations() {
 		return annotations;
 	}

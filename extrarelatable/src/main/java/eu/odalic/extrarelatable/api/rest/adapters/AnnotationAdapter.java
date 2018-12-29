@@ -6,6 +6,12 @@ import eu.odalic.extrarelatable.api.rest.values.AnnotationValue;
 import eu.odalic.extrarelatable.model.annotation.Annotation;
 
 
+/**
+ * Adapter of {@link Annotation} to {@link AnnotationValue}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class AnnotationAdapter extends XmlAdapter<AnnotationValue, Annotation> {
 
   @Override

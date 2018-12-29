@@ -4,14 +4,24 @@ import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Value representing a real-world entity.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class EntityValue extends AbstractValue implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1092664987967658783L;
+	
 	private final String entity;
 
+	/**
+	 * Creates the value.
+	 * 
+	 * @param entity name of the entity
+	 * @return the value
+	 */
 	public static EntityValue of(final String entity) {
 		return new EntityValue(entity);
 	}

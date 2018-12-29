@@ -14,6 +14,13 @@ import com.google.common.collect.ImmutableSet;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.util.UuidGenerator;
 
+/**
+ * A merge strategy that does not attempt to merge the {@link PropertyTree} into an existing
+ * {@link Property}. Instead it immediately creates a new one for it.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Component("trivial")
 public final class TrivialPropertyTreesMergingStrategy implements PropertyTreesMergingStrategy, Serializable {
 

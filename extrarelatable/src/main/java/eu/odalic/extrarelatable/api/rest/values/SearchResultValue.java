@@ -10,6 +10,12 @@ import com.google.common.collect.ImmutableList;
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.SearchResult;
 
+/**
+ * {@link SearchResult} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlRootElement(name = "searchResult")
 public final class SearchResultValue implements Serializable {
 

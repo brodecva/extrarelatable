@@ -29,7 +29,9 @@ import eu.odalic.extrarelatable.api.rest.responses.Message;
 import eu.odalic.extrarelatable.api.rest.util.Role;
 
 /**
- * Role authorization filter.
+ * <p>Role authorization filter.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *
@@ -50,9 +52,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     return ImmutableSet.copyOf(secured.value());
   }
-
-  /*@Autowired
-  private UserService userService;*/
 
   @Context
   private UriInfo uriInfo;

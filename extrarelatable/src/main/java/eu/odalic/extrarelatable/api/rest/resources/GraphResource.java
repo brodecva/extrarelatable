@@ -52,7 +52,7 @@ import eu.odalic.extrarelatable.services.graph.GraphService;
 import jersey.repackaged.com.google.common.collect.ImmutableSet;
 
 /**
- * File resource definition.
+ * Background knowledge graphs resource definition.
  *
  * @author Václav Brodec
  */
@@ -62,14 +62,7 @@ public final class GraphResource {
 
 	public static final String TEXT_CSV_MEDIA_TYPE = "text/csv";
 
-	// private static final Logger LOGGER =
-	// LoggerFactory.getLogger(GraphResource.class);
-
 	private final GraphService graphService;
-
-	/*
-	 * @Context private SecurityContext securityContext;
-	 */
 
 	@Context
 	private UriInfo uriInfo;

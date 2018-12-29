@@ -6,9 +6,17 @@ import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * Attribute is in the context of bottom-up approach of ERT equal to header of
+ * the context column by which the numeric column in question was partitioned in
+ * the end.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 public final class Attribute implements Serializable {
-	
+
 	private static final long serialVersionUID = -6922739591510264619L;
 	private final String name;
 
@@ -16,13 +24,21 @@ public final class Attribute implements Serializable {
 	private Attribute() {
 		this.name = null;
 	}
-	
+
+	/**
+	 * Creates an attribute.
+	 * 
+	 * @param name attribute name
+	 */
 	public Attribute(String name) {
 		checkNotNull(name);
-		
+
 		this.name = name;
 	}
 
+	/**
+	 * @return attribute name
+	 */
 	public String getName() {
 		return name;
 	}

@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import eu.odalic.extrarelatable.api.rest.values.PropertyValue;
 import eu.odalic.extrarelatable.model.graph.Property;
 
-
+/**
+ * Adapter of {@link Property} to {@link PropertyValue}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class PropertyAdapter extends XmlAdapter<PropertyValue, Property> {
 
   @Override

@@ -6,6 +6,12 @@ import eu.odalic.extrarelatable.api.rest.values.AttributeValuePairValue;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 
 
+/**
+ * Adapter of {@link AttributeValuePair} to {@link AttributeValuePairValue}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class AttributeValuePairAdapter extends XmlAdapter<AttributeValuePairValue, AttributeValuePair> {
 
   @Override

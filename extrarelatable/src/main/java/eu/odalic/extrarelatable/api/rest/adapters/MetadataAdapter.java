@@ -5,7 +5,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import eu.odalic.extrarelatable.api.rest.values.MetadataValue;
 import eu.odalic.extrarelatable.model.table.Metadata;
 
-
+/**
+ * Adapter of {@link Metadata} to {@link MetadataValue} and back.
+ * 
+ * @author Václav Brodec
+ *
+ */
 public final class MetadataAdapter extends XmlAdapter<MetadataValue, Metadata> {
 
   @Override

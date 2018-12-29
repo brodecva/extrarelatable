@@ -10,14 +10,15 @@ import javax.ws.rs.NameBinding;
 import eu.odalic.extrarelatable.api.rest.util.Role;
 
 /**
- * Secured resource annotation.
+ * Secured resource annotation. Used to annotate resources where the access
+ * restriction has to be applied.
  *
  * @author Václav Brodec
  *
  */
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface Secured {
-  Role[] value() default {};
+	Role[] value() default {};
 }

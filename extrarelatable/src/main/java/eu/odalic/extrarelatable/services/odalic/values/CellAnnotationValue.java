@@ -20,9 +20,7 @@ import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValue
 import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValueSetSerializer;
 
 /**
- * <p>
  * Odalic domain class adapted for REST API.
- * </p>
  *
  * @author Václav Brodec
  *

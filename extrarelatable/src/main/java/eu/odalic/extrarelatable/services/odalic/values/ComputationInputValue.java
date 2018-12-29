@@ -13,6 +13,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 /**
+ * Odalic-compatible computation input definition. Encodes the rows and header of a table,
+ * accompanied by its identifier.
+ * 
  * @author Václav Brodec
  */
 @XmlRootElement(name = "computationInput")

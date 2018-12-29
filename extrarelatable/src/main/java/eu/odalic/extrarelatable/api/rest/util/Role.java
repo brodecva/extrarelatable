@@ -1,7 +1,9 @@
 package eu.odalic.extrarelatable.api.rest.util;
 
 /**
- * User role.
+ * <p>User role.</p>
+ * 
+ * <p>Adapted from Odalic with permission.</p>
  *
  * @author Václav Brodec
  *

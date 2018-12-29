@@ -34,6 +34,12 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 import eu.odalic.extrarelatable.util.UuidGenerator;
 import eu.odalic.extrarelatable.model.table.NestedListsTypedTable;
 
+/**
+ * Default implementation of {@link TableAnalyzer}.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @Immutable
 @Component
 public final class DefaultTableAnalyzer implements TableAnalyzer {
@@ -45,13 +51,31 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 	private final UnitValueParser unitValueParser;
 	private final ValueTypeAnalyzer valueTypeAnalyzer;
 	private final UuidGenerator uuidGenerator;
-	
+
 	private final boolean datesParsed;
 
+	/**
+	 * Instantiates the analyzer.
+	 * 
+	 * @param numericValueParser
+	 *            used data type parser
+	 * @param instantValueParser
+	 *            used data type parser
+	 * @param unitValueParser
+	 *            used data type parser
+	 * @param valueTypeAnalyzer
+	 *            analyzer of individual cell values
+	 * @param uuidGenerator
+	 *            generator of UUIDs for
+	 *            {@link eu.odalic.extrarelatable.model.bag.Label}s created
+	 *            throughout the process
+	 * @param datesParsed
+	 *            turns on and off parsing of dates (even for type analysis) for
+	 *            columns without existing type hint
+	 */
 	public DefaultTableAnalyzer(final NumericValueParser numericValueParser,
 			final InstantValueParser instantValueParser, final UnitValueParser unitValueParser,
-			final ValueTypeAnalyzer valueTypeAnalyzer,
-			@Qualifier("UuidGenerator") final UuidGenerator uuidGenerator,
+			final ValueTypeAnalyzer valueTypeAnalyzer, @Qualifier("UuidGenerator") final UuidGenerator uuidGenerator,
 			final @org.springframework.beans.factory.annotation.Value("${eu.odalic.extrarelatable.datesParsed:false}") boolean datesParsed) {
 		checkNotNull(numericValueParser);
 		checkNotNull(unitValueParser);
@@ -78,23 +102,14 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 		checkNotNull(table);
 		checkNotNull(columnTypeHints);
 
-		final List<String> headers = table.getHeaders();
-		final ImmutableList.Builder<Label> labelsBuilder = ImmutableList.builder();
-		final int headersSize = headers.size();
-		for (int headerIndex = 0; headerIndex < headersSize; headerIndex++) {
-			final String header = headers.get(headerIndex);
-			final String tableTitle = table.getMetadata().getTitle();
-			final List<String> column = table.getColumn(headerIndex);
-			final List<List<String>> rows = table.getRows();
+		final List<Label> labels = readColumnLabels(table);
+		final List<List<Value>> rows = inferRows(table, locale, columnTypeHints);
 
-			if (valueTypeAnalyzer.isEmpty(header)) {
-				labelsBuilder.add(Label.synthetic(this.uuidGenerator.generate(), headerIndex, tableTitle, preview(column), headers, preview(rows)));
-			} else {
-				labelsBuilder.add(Label.of(this.uuidGenerator.generate(), header, null, false, headerIndex, tableTitle, preview(column), headers,
-						preview(rows)));
-			}
-		}
+		return NestedListsTypedTable.fromRows(labels, rows, table.getMetadata());
+	}
 
+	private List<List<Value>> inferRows(final ParsedTable table, final Locale locale,
+			final Map<? extends Integer, ? extends Type> columnTypeHints) {
 		final List<List<String>> inputRows = table.getRows();
 		final List<List<Value>> rows = inputRows.stream().map(row -> {
 			final ImmutableList.Builder<Value> builder = ImmutableList.builder();
@@ -107,6 +122,7 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 					continue;
 				}
 
+				// Determine the type of the cell either from a hint or by parsing attempts
 				final Type hint = columnTypeHints.get(index);
 				if (hint != null) {
 					switch (hint) {
@@ -152,16 +168,31 @@ public final class DefaultTableAnalyzer implements TableAnalyzer {
 
 			return builder.build();
 		}).collect(ImmutableList.toImmutableList());
+		return rows;
+	}
 
-		return NestedListsTypedTable.fromRows(labelsBuilder.build(), rows, table.getMetadata());
+	private List<Label> readColumnLabels(final ParsedTable table) {
+		final List<String> headers = table.getHeaders();
+		final ImmutableList.Builder<Label> labelsBuilder = ImmutableList.builder();
+		final int headersSize = headers.size();
+		for (int headerIndex = 0; headerIndex < headersSize; headerIndex++) {
+			final String header = headers.get(headerIndex);
+			final String tableTitle = table.getMetadata().getTitle();
+			final List<String> column = table.getColumn(headerIndex);
+			final List<List<String>> rows = table.getRows();
+
+			if (valueTypeAnalyzer.isEmpty(header)) {
+				labelsBuilder.add(Label.synthetic(this.uuidGenerator.generate(), headerIndex, tableTitle,
+						preview(column), headers, preview(rows)));
+			} else {
+				labelsBuilder.add(Label.of(this.uuidGenerator.generate(), header, null, false, headerIndex, tableTitle,
+						preview(column), headers, preview(rows)));
+			}
+		}
+		return labelsBuilder.build();
 	}
 
 	private static <T> List<T> preview(final List<T> list) {
 		return list.subList(0, Math.min(list.size(), MAXIMUM_PREVIEW_SIZE));
-	}
-
-	@Override
-	public TypedTable infer(ParsedTable table) {
-		return infer(table, null);
 	}
 }

@@ -13,6 +13,12 @@ import com.google.common.collect.ImmutableSortedSet;
 
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
+/**
+ * {@link DeclaredEntity} adapted for REST API.
+ * 
+ * @author Václav Brodec
+ *
+ */
 @XmlRootElement(name = "declaredEntity")
 public final class DeclaredEntityValue implements Serializable {
 
