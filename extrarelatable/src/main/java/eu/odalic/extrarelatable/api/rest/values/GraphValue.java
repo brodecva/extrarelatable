@@ -5,8 +5,10 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+
 /**
- * Graph representation for REST API.
+ * Graph representation for the REST API.
  *
  * @author Václav Brodec
  */
@@ -20,10 +22,13 @@ public final class GraphValue implements Serializable {
   public GraphValue() {}
 
   /**
+   * the name of the graph
+   * 
    * @return the name
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("example_dataset__en-us")
   public String getName() {
     return this.name;
   }

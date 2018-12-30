@@ -10,11 +10,17 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.collect.ImmutableSortedSet;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 /**
- * {@link DeclaredEntity} adapted for REST API.
+ * <p>It encapsulates either the RDFS property or class that is a part of
+ * either the declared or collected context associated with a table. The URI of
+ * the property (or class) is accompanied by a list of associated text labels.</p>
+ * 
+ * <p>{@link DeclaredEntity} adapted for REST API.</p>
  * 
  * @author Václav Brodec
  *
@@ -39,7 +45,13 @@ public final class DeclaredEntityValue implements Serializable {
 		this.labels = ImmutableSortedSet.copyOf(bound.getLabels());
 	}
 
+	/**
+	 * the URI
+	 * 
+	 * @return the URI
+	 */
 	@XmlElement
+	@DocumentationExample("http://dbpedia.org/ontology/population")
 	public URI getUri() {
 		return uri;
 	}
@@ -50,7 +62,14 @@ public final class DeclaredEntityValue implements Serializable {
 		this.uri = uri;
 	}
 
+	/**
+	 * the associated labels
+	 * 
+	 * @return the associated labels
+	 */
 	@XmlElement
+	@DocumentationExample(value = "Population", value2 = "Population as of 2010")
+	@TypeHint(String[].class)
 	public NavigableSet<String> getLabels() {
 		return labels;
 	}

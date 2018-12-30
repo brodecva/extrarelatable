@@ -16,6 +16,8 @@ import eu.odalic.extrarelatable.api.rest.adapters.LabelAdapter;
 
 /**
  * Label of a property tree/a column in a table (originating from its header).
+ * Apart from the label text it contains various samples from the original file
+ * to better contextualize the label.
  * 
  * @author Václav Brodec
  *

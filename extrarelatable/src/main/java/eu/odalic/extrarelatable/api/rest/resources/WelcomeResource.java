@@ -5,12 +5,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.webcohesion.enunciate.metadata.Ignore;
+
 /**
  * Welcome page.
  *
  * @author Václav Brodec
  */
 @Path("/")
+@Ignore
 public final class WelcomeResource {
 
   private static final String WELCOME_PAGE_CONTENT =

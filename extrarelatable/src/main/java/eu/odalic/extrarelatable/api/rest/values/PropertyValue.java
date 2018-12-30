@@ -15,11 +15,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.eclipse.collections.impl.block.factory.Comparators;
 
 import com.google.common.collect.ImmutableSortedSet;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import eu.odalic.extrarelatable.model.graph.Property;
 
 /**
- * {@link Property} adapted for REST API.
+ * <p>RDFS property representation within the context of background knowledge base
+ * derived from learned files. It encapsulates its URI (which may be left-out), internal unique
+ * identifier and all the labels (collected from column headers) associated with it.</p>
+ * 
+ * <p>{@link Property} adapted for REST API.</p>
  * 
  * @author Václav Brodec
  *
@@ -53,13 +59,25 @@ public final class PropertyValue implements Serializable {
 		}
 	}
 
+	/**
+	 * UUID assigned by ERT instance to the property
+	 * 
+	 * @return UUID assigned by ERT instance to the property
+	 */
 	@XmlElement
+	@DocumentationExample("123e4567-e89b-12d3-a456-426655440000")
 	public UUID getUuid() {
 		return uuid;
 	}
 	
+	/**
+	 * the URI
+	 * 
+	 * @return the URI
+	 */
 	@XmlElement
 	@Nullable
+	@DocumentationExample("http://dbpedia.org/ontology/population")
 	public URI getUri() {
 		return uri;
 	}
@@ -74,7 +92,14 @@ public final class PropertyValue implements Serializable {
 		this.uri = uri;
 	}
 	
+	/**
+	 * associated labels
+	 * 
+	 * @return associated labels
+	 */
 	@XmlElement
+	@DocumentationExample(value = "Population", value2= "Population as of 2010")
+	@TypeHint(String[].class)
 	public NavigableSet<String> getLabels() {
 		return labels;
 	}

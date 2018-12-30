@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 import eu.odalic.extrarelatable.api.rest.adapters.AnnotationAdapter;
 import eu.odalic.extrarelatable.model.bag.AttributeValuePair;
 import eu.odalic.extrarelatable.model.bag.Label;

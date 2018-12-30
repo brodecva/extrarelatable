@@ -11,11 +11,19 @@ import javax.annotation.Nullable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 
 /**
- * {@link Metadata} adapted for REST API.
+ * <p>Table meta-data. Next to optional values such as title, author and language
+ * tag according to BCP 47 norm, it contains both the declared and collected
+ * context for that table. The declared context is considered to be of high
+ * quality, as it is a result of manual curation, whereas the collected one may
+ * originate from unsupervised automatic processing.</p>
+ * 
+ * <p>{@link Metadata} adapted for REST API.</p>
  * 
  * @author Václav Brodec
  *
@@ -47,8 +55,14 @@ public final class MetadataValue implements Serializable {
 		this.collectedProperties = adaptee.getCollectedProperties();
 	}
 
+	/**
+	 * the table tiitle
+	 * 
+	 * @return the table tiitle
+	 */
 	@XmlElement
 	@Nullable
+	@DocumentationExample("American cities")
 	public String getTitle() {
 		return title;
 	}
@@ -57,8 +71,14 @@ public final class MetadataValue implements Serializable {
 		this.title = title;
 	}
 
+	/**
+	 * the table author
+	 * 
+	 * @return the table author
+	 */
 	@XmlElement
 	@Nullable
+	@DocumentationExample("John Smith")
 	public String getAuthor() {
 		return author;
 	}
@@ -67,8 +87,14 @@ public final class MetadataValue implements Serializable {
 		this.author = author;
 	}
 
+	/**
+	 * BCP 47 norm language tag
+	 * 
+	 * @return BCP 47 norm language tag
+	 */
 	@XmlElement
 	@Nullable
+	@DocumentationExample("en-US")
 	public String getLanguageTag() {
 		return languageTag;
 	}
@@ -77,6 +103,11 @@ public final class MetadataValue implements Serializable {
 		this.languageTag = languageTag;
 	}
 	
+	/**
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated properties
+	 * 
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated properties
+	 */
 	@XmlElement
 	public Map<Integer, DeclaredEntity> getDeclaredProperties() {
 		return Collections.unmodifiableMap(declaredProperties);
@@ -88,6 +119,11 @@ public final class MetadataValue implements Serializable {
 		this.declaredProperties = new HashMap<>(declaredProperties);
 	}
 	
+	/**
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated classes
+	 * 
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated classes
+	 */
 	@XmlElement
 	public Map<Integer, DeclaredEntity> getDeclaredClasses() {
 		return Collections.unmodifiableMap(declaredClasses);
@@ -99,6 +135,11 @@ public final class MetadataValue implements Serializable {
 		this.declaredClasses = new HashMap<>(declaredClasses);
 	}
 	
+	/**
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected properties
+	 * 
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected properties
+	 */
 	@XmlElement
     public Map<Integer, DeclaredEntity> getCollectedProperties() {
         return Collections.unmodifiableMap(collectedProperties);
@@ -110,7 +151,12 @@ public final class MetadataValue implements Serializable {
         this.collectedProperties = new HashMap<>(collectedProperties);
     }
     
-    @XmlElement
+    /**
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected classes
+	 * 
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected classes
+	 */
+	@XmlElement
     public Map<Integer, DeclaredEntity> getCollectedClasses() {
         return Collections.unmodifiableMap(collectedClasses);
     }

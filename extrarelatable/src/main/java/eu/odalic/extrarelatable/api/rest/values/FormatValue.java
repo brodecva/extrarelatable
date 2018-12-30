@@ -7,11 +7,17 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.Preconditions;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
- * {@link Format} adapted for REST API.
+ * <p>
+ * Format of the CSV file. Essential for reliable parsing.
+ * </p>
+ * 
+ * <p>{@link Format} adapted for REST API.</p>
  *
  * @author Václav Brodec
  */
@@ -44,56 +50,74 @@ public final class FormatValue implements Serializable {
 
 
   /**
+   * the commentMarker
+   * 
    * @return the commentMarker
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("=")
   public Character getCommentMarker() {
     return this.commentMarker;
   }
 
 
   /**
+   * the delimiter
+   * 
    * @return the delimiter
    */
   @XmlElement
+  @DocumentationExample(",")
+  @TypeHint(String.class)
   public char getDelimiter() {
     return this.delimiter;
   }
 
 
   /**
+   * the escapeCharacter
+   * 
    * @return the escapeCharacter
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("\\")
   public Character getEscapeCharacter() {
     return this.escapeCharacter;
   }
 
 
   /**
+   * the character set
+   * 
    * @return the character set
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("UTF-8")
   public String getCharset() {
     return this.charset;
   }
 
 
   /**
-   * @return the quoteCharacter
+   * the quote character
+   * 
+   * @return the quote character
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("\"")
   public Character getQuoteCharacter() {
     return this.quoteCharacter;
   }
 
 
   /**
-   * @return the emptyLinesIgnored
+   * empty lines ignored
+   * 
+   * @return empty lines ignored
    */
   @XmlElement
   public boolean isEmptyLinesIgnored() {

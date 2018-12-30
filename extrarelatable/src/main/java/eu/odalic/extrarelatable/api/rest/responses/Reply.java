@@ -15,8 +15,13 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
+import com.webcohesion.enunciate.metadata.json.JsonSeeAlso;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
 
 import eu.odalic.extrarelatable.api.rest.conversions.StatusTypeJsonSerializer;
+import eu.odalic.extrarelatable.api.rest.values.AnnotationResultValue;
+import eu.odalic.extrarelatable.api.rest.values.SearchResultValue;
 import eu.odalic.extrarelatable.util.URL;
 
 /**
@@ -36,6 +41,7 @@ import eu.odalic.extrarelatable.util.URL;
  *
  */
 @XmlRootElement(name = "reply")
+@JsonSeeAlso({Message.class, AnnotationResultValue.class, SearchResultValue.class})
 public final class Reply {
 
   /**
@@ -98,6 +104,7 @@ public final class Reply {
    * @return the payload
    */
   @XmlElement
+  @DocumentationExample("...")
   public Object getPayload() {
     return this.payload;
   }
@@ -107,6 +114,8 @@ public final class Reply {
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("102324")
+  @TypeHint(String.class)
   public Object getStamp() {
     return this.stamp;
   }
@@ -116,6 +125,8 @@ public final class Reply {
    */
   @XmlElement
   @JsonSerialize(using = StatusTypeJsonSerializer.class)
+  @DocumentationExample("200")
+  @TypeHint(Integer.class)
   public StatusType getStatus() {
     return this.status;
   }
@@ -124,6 +135,8 @@ public final class Reply {
    * @return the type
    */
   @XmlElement
+  @DocumentationExample("<either DATA or MESSAGE, depending on the type of payload>")
+  @TypeHint(String.class)
   public ReplyType getType() {
     return this.type;
   }

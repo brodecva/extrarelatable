@@ -1,0 +1,27 @@
+<enunciate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://enunciate.webcohesion.com/schemas/enunciate-2.11.0.xsd">
+
+  <title>ExtraRelaTable REST API</title>
+  <description file="enunciate-api-overview"/>
+  <copyright>Václav Brodec</copyright>
+
+  <application root="http://localhost:8080/extrarelatable"/>
+
+  <modules>
+    <docs docsDir="target/rest-api-docs">
+      <download file="LICENSE" name="Apache II" description="The license governing this API" showLink="true"/>
+    </docs>
+    <c-xml-client disabled="true"/>
+    <csharp-xml-client disabled="true"/>
+    <java-xml-client disabled="true"/>
+    <java-json-client disabled="true"/>
+    <javascript-client disabled="true"/>
+    <gwt-json-overlay disabled="true"/>
+    <obj-c-xml-client disabled="true"/>
+    <php-xml-client disabled="true"/>
+    <php-json-client disabled="true"/>
+    <ruby-json-client disabled="true"/>
+    <idl disabled="true"/>
+    <swagger disabled="true"/>
+  </modules>
+
+</enunciate>

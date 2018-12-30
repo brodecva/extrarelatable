@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.webcohesion.enunciate.metadata.DocumentationExample;
 
 
 /**
@@ -59,6 +60,7 @@ public final class Message {
    * @return the additional resources
    */
   @XmlElement
+  @DocumentationExample(value = "https://github.com/brodecva/extrarelatable", value2 = "https://github.com/odalic/")
   public List<URI> getAdditionalResources() {
     return this.additionalResources;
   }
@@ -68,6 +70,7 @@ public final class Message {
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("Very detailed description, exception stack if needed.")
   public String getDebugContent() {
     return this.debugContent;
   }
@@ -77,6 +80,7 @@ public final class Message {
    */
   @XmlElement
   @Nullable
+  @DocumentationExample("Sample message text.")
   public String getText() {
     return this.text;
   }

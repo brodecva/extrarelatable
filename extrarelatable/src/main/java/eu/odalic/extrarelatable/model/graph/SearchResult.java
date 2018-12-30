@@ -12,7 +12,8 @@ import com.google.common.collect.ImmutableList;
 import eu.odalic.extrarelatable.api.rest.adapters.SearchResultAdapter;
 
 /**
- * Properties matching a search query done on {@link BackgroundKnowledgeGraph}.
+ * Properties matching a search query executed on a
+ * {@link BackgroundKnowledgeGraph}.
  * 
  * @author Václav Brodec
  *
@@ -34,11 +35,12 @@ public final class SearchResult implements Serializable {
 	/**
 	 * Creates a search result.
 	 * 
-	 * @param properties matching properties
+	 * @param properties
+	 *            matching properties
 	 */
 	public SearchResult(final List<? extends Property> properties) {
 		checkNotNull(properties);
-		
+
 		this.properties = ImmutableList.copyOf(properties);
 	}
 

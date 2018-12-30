@@ -326,20 +326,17 @@
 			</plugin>
 
 			<plugin>
-				<groupId>com.webcohesion.enunciate</groupId>
-				<artifactId>enunciate-slim-maven-plugin</artifactId>
-				<version>2.11.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>docs</goal>
-						</goals>
-						<!-- <configuration>
-							<docsDir>${project.build.directory}/docs</docsDir>
-						</configuration> -->
-					</execution>
-				</executions>
-			</plugin>
+		        <groupId>com.webcohesion.enunciate</groupId>
+		        <artifactId>enunciate-slim-maven-plugin</artifactId>
+		        <version>2.11.1</version>
+		        <executions>
+		            <execution>
+		                <goals>
+		                    <goal>docs</goal>
+		                </goals>
+		            </execution>
+		        </executions>
+		    </plugin>
 		</plugins>
 	</build>
 </project>

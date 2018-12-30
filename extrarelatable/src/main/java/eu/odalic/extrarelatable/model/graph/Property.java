@@ -23,7 +23,7 @@ import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 /**
  * RDFS property representation within the context of background knowledge base
  * derived from learned files. It encapsulates its URI (which may be left-out), internal unique
- * identifier, all the label (collected from column headers) associated with it
+ * identifier, all the labels (collected from column headers) associated with it
  * and finally the set of {@link PropertyTree}s, which are instances of the
  * property as found in the learned files.
  * 

@@ -13,7 +13,7 @@ import eu.odalic.extrarelatable.util.Characters;
 
 /**
  * <p>
- * Format of the CSV file.
+ * Format of the CSV file. Essential for reliable parsing.
  * </p>
  * 
  * <p>

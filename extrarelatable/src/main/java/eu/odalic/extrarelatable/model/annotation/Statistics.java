@@ -8,7 +8,8 @@ import eu.odalic.extrarelatable.api.rest.adapters.StatisticsAdapter;
 
 /**
  * Statistics taken from the algorithm run. Usually meant to be associated each
- * computed annotation.
+ * computed annotation. Contains various metrics which can be used to derive
+ * a score for each returned annotation.
  * 
  * @author Václav Brodec
  *

@@ -7,11 +7,15 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import com.google.common.collect.ImmutableList;
+import com.webcohesion.enunciate.metadata.rs.TypeHint;
+
 import eu.odalic.extrarelatable.model.graph.Property;
 import eu.odalic.extrarelatable.model.graph.SearchResult;
 
 /**
- * {@link SearchResult} adapted for REST API.
+ * Properties matching a search query executed on a graph.
+ * 
+ * <p>{@link SearchResult} adapted for REST API.</p>
  * 
  * @author Václav Brodec
  *
@@ -31,7 +35,13 @@ public final class SearchResultValue implements Serializable {
 		this.properties = searchResult.getProperties();
 	}
 
+	/**
+	 * the matching {@link PropertyValue}s
+	 * 
+	 * @return the matching {@link PropertyValue}s
+	 */
 	@XmlElement
+	@TypeHint(PropertyValue[].class)
 	public List<Property> getProperties() {
 		return properties;
 	}
