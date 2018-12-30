@@ -13,13 +13,13 @@ import eu.odalic.extrarelatable.model.table.DeclaredEntity;
  */
 public final class DeclaredEntityAdapter extends XmlAdapter<DeclaredEntityValue, DeclaredEntity> {
 
-  @Override
-  public DeclaredEntityValue marshal(final DeclaredEntity bound) throws Exception {
-	  return new DeclaredEntityValue(bound);
-  }
+	@Override
+	public DeclaredEntityValue marshal(final DeclaredEntity bound) throws Exception {
+		return new DeclaredEntityValue(bound);
+	}
 
-  @Override
-  public DeclaredEntity unmarshal(final DeclaredEntityValue value) throws Exception {
-    return new DeclaredEntity(value.getUri(), value.getLabels());
-  }
+	@Override
+	public DeclaredEntity unmarshal(final DeclaredEntityValue value) throws Exception {
+		return new DeclaredEntity(value.getUri(), value.getLabels());
+	}
 }

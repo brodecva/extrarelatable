@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration>
 <configuration>
-	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="consoleAppender"
+		class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n
 			</Pattern>
@@ -10,10 +11,10 @@
 			<level>TRACE</level>
 		</filter>
 	</appender>
-  		
+
 	<logger name="eu.odalic.extrarelatable" additivity="false">
-	    <level value="DEBUG" />
-	    <appender-ref ref="consoleAppender" />
+		<level value="DEBUG" />
+		<appender-ref ref="consoleAppender" />
 	</logger>
 
 	<root>

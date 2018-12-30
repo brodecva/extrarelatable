@@ -93,7 +93,7 @@ public interface GraphService {
 	 * @param format
 	 *            format of the CSV file to parse the input stream with
 	 * @param metadata
-	 *            meta-data accompanying the table         
+	 *            meta-data accompanying the table
 	 * @param onlyWithProperties
 	 *            determines whether only the numeric columns with associated
 	 *            declared property in the meta-data are learned

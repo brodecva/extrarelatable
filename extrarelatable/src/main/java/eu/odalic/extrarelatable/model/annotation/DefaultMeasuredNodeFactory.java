@@ -24,7 +24,8 @@ public class DefaultMeasuredNodeFactory implements MeasuredNodeFactory {
 	/**
 	 * Initializes the factory.
 	 * 
-	 * @param uuidGenerator the used {@link UuidGenerator}}
+	 * @param uuidGenerator
+	 *            the used {@link UuidGenerator}}
 	 */
 	public DefaultMeasuredNodeFactory(@Qualifier("UuidGenerator") final UuidGenerator uuidGenerator) {
 		checkNotNull(uuidGenerator);

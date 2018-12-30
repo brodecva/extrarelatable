@@ -23,19 +23,19 @@ public class DefaultComputationInputConverter implements ComputationInputConvert
 	@Override
 	public ComputationInputValue convert(final ParsedTable table, final int rowsLimit, final Random random) {
 		checkNotNull(table);
-		
+
 		if (rowsLimit >= table.getHeight()) {
 			return new ComputationInputValue(table.getRows(), table.getHeaders(), table.getMetadata().getTitle());
 		} else {
 			final List<List<String>> rows = new ArrayList<>(table.getRows());
 			final int initialRowsSize = table.getHeight();
 			final int toRemove = Math.max(0, initialRowsSize - rowsLimit);
-			
+
 			for (int i = 0; i < toRemove; i++) {
 				final int removedIndex = random.nextInt(rows.size());
 				rows.remove(removedIndex);
 			}
-			
+
 			return new ComputationInputValue(rows, table.getHeaders(), table.getMetadata().getTitle());
 		}
 	}

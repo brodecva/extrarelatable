@@ -39,14 +39,14 @@ public final class DefaultCsvProfilerService implements CsvProfilerService {
 	private static final String TARGET_PATH = "https://data.wu.ac.at/csvengine/api/v1/profiler/";
 	private static final MediaType CSV_MEDIA_TYPE = new MediaType("text", "csv");
 	private static final long MINIMUM_QUERY_INTERVAL_MILIS = 2000;
-	
+
 	private Client client;
-	
+
 	private Instant lastQueried = null;
 
 	public DefaultCsvProfilerService() {
-		this.client = ClientBuilder.newBuilder().register(MultiPartFeature.class)
-		        .register(JacksonFeature.class).build();
+		this.client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(JacksonFeature.class)
+				.build();
 	}
 
 	@Override
@@ -58,16 +58,16 @@ public final class DefaultCsvProfilerService implements CsvProfilerService {
 		} else {
 			final Instant now = Instant.now();
 			final long differenceMilis = lastQueried.until(now, ChronoUnit.MILLIS);
-			
+
 			try {
 				Thread.sleep(Math.max(MINIMUM_QUERY_INTERVAL_MILIS - differenceMilis, 0));
 			} catch (final InterruptedException e) {
 				throw new IllegalStateException(e);
 			}
-			
+
 			lastQueried = Instant.now();
 		}
-		
+
 		try (final FormDataMultiPart multipartEntity = new FormDataMultiPart()) {
 			final MultiPart multiPartWithFile = multipartEntity
 					.bodyPart(new FileDataBodyPart(BODY_PART_NAME, file, CSV_MEDIA_TYPE));
@@ -76,9 +76,10 @@ public final class DefaultCsvProfilerService implements CsvProfilerService {
 					.post(Entity.entity(multiPartWithFile, multiPartWithFile.getMediaType()));
 
 			if (!isSuccessful(response)) {
-				throw new IllegalStateException("The request to profile the file failed: " + response.getStatus() + "[" + response.readEntity(String.class) + "]");
+				throw new IllegalStateException("The request to profile the file failed: " + response.getStatus() + "["
+						+ response.readEntity(String.class) + "]");
 			}
-			
+
 			return response.readEntity(CsvProfile.class);
 		}
 	}

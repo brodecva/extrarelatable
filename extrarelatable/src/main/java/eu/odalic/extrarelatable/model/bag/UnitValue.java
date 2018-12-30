@@ -12,26 +12,26 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class UnitValue extends NumberLikeValue implements Serializable {
-	
-private static final long serialVersionUID = -25440715468458309L;
-	
+
+	private static final long serialVersionUID = -25440715468458309L;
+
 	private final double figure;
 	private final String text;
 
 	public static final UnitValue of(double figure, String text) {
 		return new UnitValue(figure, text);
 	}
-	
+
 	private UnitValue(double figure, String text) {
 		this.figure = figure;
 		this.text = text;
-	}	
-	
+	}
+
 	@Override
 	public double getFigure() {
 		return figure;
 	}
-	
+
 	@Override
 	public String getText() {
 		return text;
@@ -41,7 +41,7 @@ private static final long serialVersionUID = -25440715468458309L;
 	public boolean isUnit() {
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

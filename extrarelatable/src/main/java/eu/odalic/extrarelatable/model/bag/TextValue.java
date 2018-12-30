@@ -13,16 +13,16 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class TextValue extends AbstractValue implements Serializable {
 	private static final long serialVersionUID = 3455997307710854648L;
-	
+
 	private final String text;
 
 	public static TextValue of(final String text) {
 		return new TextValue(text);
 	}
-	
+
 	private TextValue(final String text) {
 		this.text = text;
-	}	
+	}
 
 	@Override
 	public String getText() {
@@ -33,7 +33,7 @@ public final class TextValue extends AbstractValue implements Serializable {
 	public boolean isTextual() {
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

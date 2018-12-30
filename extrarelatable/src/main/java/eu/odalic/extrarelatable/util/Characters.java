@@ -11,34 +11,36 @@ package eu.odalic.extrarelatable.util;
  */
 public final class Characters {
 
-  /**
-   * Carriage return character.
-   */
-  public static final char CARRIAGE_RETURN = '\r';
+	/**
+	 * Carriage return character.
+	 */
+	public static final char CARRIAGE_RETURN = '\r';
 
-  /**
-   * Line feed character.
-   */
-  public static final char LINE_FEED = '\n';
+	/**
+	 * Line feed character.
+	 */
+	public static final char LINE_FEED = '\n';
 
-  /**
-   * Indicates line-breaking character.
-   *
-   * @param character character
-   * @return when the character is not null and is a line-breaking character
-   */
-  public static boolean isLineBreak(final Character character) {
-    if (character == null) {
-      return false;
-    }
+	/**
+	 * Indicates line-breaking character.
+	 *
+	 * @param character
+	 *            character
+	 * @return when the character is not null and is a line-breaking character
+	 */
+	public static boolean isLineBreak(final Character character) {
+		if (character == null) {
+			return false;
+		}
 
-    final char value = character.charValue();
-    return (value == LINE_FEED) || (value == CARRIAGE_RETURN);
-  }
+		final char value = character.charValue();
+		return (value == LINE_FEED) || (value == CARRIAGE_RETURN);
+	}
 
-  /**
+	/**
 	 * We want to keep this class uninstantiable, so no visible constructor is
 	 * available.
 	 */
-  private Characters() {}
+	private Characters() {
+	}
 }

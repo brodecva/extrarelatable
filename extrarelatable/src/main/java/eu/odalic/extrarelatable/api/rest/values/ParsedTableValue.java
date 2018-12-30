@@ -23,11 +23,15 @@ import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
- * <p>A table which has already been parsed into logical cells containing the
+ * <p>
+ * A table which has already been parsed into logical cells containing the
  * original text, grouped into table rows and columns. It can be accompanied by
- * meta-data.</p>
+ * meta-data.
+ * </p>
  * 
- * <p>{@link ParsedTable} adapted for REST API.</p>
+ * <p>
+ * {@link ParsedTable} adapted for REST API.
+ * </p>
  * 
  * @author Václav Brodec
  *
@@ -45,7 +49,7 @@ public final class ParsedTableValue implements Serializable {
 	private List<String> headers;
 
 	private Metadata metadata;
-	
+
 	public ParsedTableValue() {
 		this.rows = ImmutableList.of();
 		this.headers = ImmutableList.of();
@@ -58,7 +62,6 @@ public final class ParsedTableValue implements Serializable {
 		this.metadata = adaptee.getMetadata();
 	}
 
-	
 	/**
 	 * array of string arrays [[...,...],[...,...]] representing the table
 	 * 
@@ -71,14 +74,11 @@ public final class ParsedTableValue implements Serializable {
 		return rows;
 	}
 
-
-
 	public void setRows(List<List<String>> rows) {
 		checkNotNull(rows);
-		
+
 		this.rows = rows.stream().map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
 	}
-
 
 	/**
 	 * column headers
@@ -90,15 +90,12 @@ public final class ParsedTableValue implements Serializable {
 	public List<String> getHeaders() {
 		return headers;
 	}
-	
-
 
 	public void setHeaders(List<String> headers) {
 		checkNotNull(headers);
-		
+
 		this.headers = ImmutableList.copyOf(headers);
 	}
-
 
 	/**
 	 * the table meta-data
@@ -116,8 +113,6 @@ public final class ParsedTableValue implements Serializable {
 	public void setMetadata(Metadata metadata) {
 		this.metadata = metadata;
 	}
-
-
 
 	@Override
 	public String toString() {

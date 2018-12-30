@@ -19,17 +19,18 @@ import eu.odalic.extrarelatable.model.subcontext.Subcontext;
 public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 
 	private final Distance distance;
-	
+
 	@Autowired
 	public DistanceSubcontextMatcher(final Distance distance) {
 		checkNotNull(distance);
-		
+
 		this.distance = distance;
 	}
 
 	@Override
 	public Subcontext match(final Set<? extends Subcontext> candidates, final Partition inputPartition,
-			final double minimumPartitionRelativeSize, final double maximumPartitionRelativeSize, final int minimumPartitionSize) {
+			final double minimumPartitionRelativeSize, final double maximumPartitionRelativeSize,
+			final int minimumPartitionSize) {
 		checkNotNull(candidates);
 		checkNotNull(inputPartition);
 		checkArgument(!candidates.isEmpty());
@@ -38,7 +39,7 @@ public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 		checkArgument(maximumPartitionRelativeSize <= 1);
 		checkArgument(minimumPartitionRelativeSize <= maximumPartitionRelativeSize);
 		checkArgument(minimumPartitionSize >= 0);
-		
+
 		final int inputPartitionSize = inputPartition.size();
 		checkArgument(inputPartitionSize >= minimumPartitionSize);
 
@@ -50,19 +51,19 @@ public final class DistanceSubcontextMatcher implements SubcontextMatcher {
 		for (final Subcontext candidate : candidates) {
 			for (final Partition candidatePartition : candidate.getPartitions().values()) {
 				final int candidatePartitionSize = candidatePartition.size();
-				
+
 				if (candidatePartitionSize < minimumPartitionRelativeSize * inputPartitionSize) {
 					continue;
 				}
-				
+
 				if (candidatePartitionSize > maximumPartitionRelativeSize * inputPartitionSize) {
 					continue;
 				}
-				
+
 				if (candidatePartitionSize < minimumPartitionSize) {
 					continue;
 				}
-				
+
 				final double[] candidateValues = candidatePartition.getDoubleValuesArray();
 
 				final double computedDistance = distance.compute(inputValues, candidateValues);

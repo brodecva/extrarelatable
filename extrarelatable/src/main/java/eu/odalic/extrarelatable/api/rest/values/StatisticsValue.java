@@ -13,8 +13,8 @@ import eu.odalic.extrarelatable.model.annotation.Statistics;
 
 /**
  * Statistics taken from the algorithm run. Usually meant to be associated each
- * computed annotation. Contains various metrics which can be used to derive
- * a score for each returned annotation.
+ * computed annotation. Contains various metrics which can be used to derive a
+ * score for each returned annotation.
  * 
  * <p>
  * {@link Statistics} adapted for REST API.
@@ -97,7 +97,8 @@ public final class StatisticsValue implements Serializable {
 	/**
 	 * ratio of number of occurrences to total of occurrences of all instances
 	 * 
-	 * @return ratio of number of occurrences to total of occurrences of all instances
+	 * @return ratio of number of occurrences to total of occurrences of all
+	 *         instances
 	 */
 	@XmlElement
 	@Nullable

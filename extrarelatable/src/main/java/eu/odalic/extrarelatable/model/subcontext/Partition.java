@@ -17,7 +17,8 @@ import com.google.common.collect.Streams;
 import eu.odalic.extrarelatable.model.bag.NumberLikeValue;
 
 /**
- * Collection of number-like cells from a table column associated with their row index.
+ * Collection of number-like cells from a table column associated with their row
+ * index.
  * 
  * @author Václav Brodec
  *
@@ -29,27 +30,31 @@ public final class Partition {
 	/**
 	 * Creates a partition.
 	 * 
-	 * @param values number-like values from a single column
+	 * @param values
+	 *            number-like values from a single column
 	 */
 	public Partition(final List<? extends NumberLikeValue> values) {
-		this(Streams.mapWithIndex(values.stream(), (e, i) -> new NumericCell((int) i, e)).collect(toImmutableMap(e -> e.getRowIndex(), e -> e.getValue())));
+		this(Streams.mapWithIndex(values.stream(), (e, i) -> new NumericCell((int) i, e))
+				.collect(toImmutableMap(e -> e.getRowIndex(), e -> e.getValue())));
 	}
-	
+
 	/**
 	 * Creates a partition.
 	 * 
-	 * @param cells cells containing number-like values, from a single column
+	 * @param cells
+	 *            cells containing number-like values, from a single column
 	 */
 	public Partition(final Set<? extends NumericCell> cells) {
 		checkNotNull(cells);
-		
+
 		this.cells = cells.stream().collect(toImmutableMap(k -> k.getRowIndex(), v -> v.getValue()));
 	}
-	
+
 	/**
 	 * Creates a partition.
 	 * 
-	 * @param rowsIndicesToValues map of row indices to values, from a single column 
+	 * @param rowsIndicesToValues
+	 *            map of row indices to values, from a single column
 	 */
 	public Partition(final Map<? extends Integer, ? extends NumberLikeValue> rowsIndicesToValues) {
 		checkNotNull(rowsIndicesToValues);
@@ -62,21 +67,22 @@ public final class Partition {
 	}
 
 	/**
-	 * Provides partition cells represented by a map of row indices to the values contained in them.
+	 * Provides partition cells represented by a map of row indices to the values
+	 * contained in them.
 	 * 
 	 * @return map of indices to cells
 	 */
 	public Map<Integer, NumberLikeValue> getCells() {
 		return cells;
 	}
-	
+
 	/**
 	 * @return all the number-like values in a partition
 	 */
 	public Collection<NumberLikeValue> getValues() {
 		return cells.values();
 	}
-	
+
 	/**
 	 * @return all the number-like values in a partition in double representation
 	 */
@@ -85,7 +91,8 @@ public final class Partition {
 	}
 
 	/**
-	 * @return size of the partition (determined by the number of captured number-like values)
+	 * @return size of the partition (determined by the number of captured
+	 *         number-like values)
 	 */
 	public int size() {
 		return getValues().size();

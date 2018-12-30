@@ -78,9 +78,9 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
  * <p>
- * Part of the test framework for the raw tables format (as found in the data.gv.at and
- * www.opendataportal.at datasets) which allows to employ Odalic instead of ERT
- * to annotate the inputs.
+ * Part of the test framework for the raw tables format (as found in the
+ * data.gv.at and www.opendataportal.at datasets) which allows to employ Odalic
+ * instead of ERT to annotate the inputs.
  * </p>
  * 
  * <p>

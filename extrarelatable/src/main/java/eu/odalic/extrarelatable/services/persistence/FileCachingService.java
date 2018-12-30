@@ -13,11 +13,14 @@ import java.nio.file.Path;
 public interface FileCachingService {
 
 	/**
-	 * Caches the content of the input stream as file accessible on the returned path.
+	 * Caches the content of the input stream as file accessible on the returned
+	 * path.
 	 * 
-	 * @param input cached input stream
+	 * @param input
+	 *            cached input stream
 	 * @return file cache
-	 * @throws IOException whenever I/O exception occurs
+	 * @throws IOException
+	 *             whenever I/O exception occurs
 	 */
 	Path cache(InputStream input) throws IOException;
 
@@ -25,7 +28,8 @@ public interface FileCachingService {
 	 * Creates a temporary file and returns its path.
 	 * 
 	 * @return path to the newly created temporary file
-	 * @throws IOException whenever I/O exception occurs
+	 * @throws IOException
+	 *             whenever I/O exception occurs
 	 */
 	Path provideTemporaryFile() throws IOException;
 

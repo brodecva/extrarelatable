@@ -23,30 +23,35 @@ import eu.odalic.extrarelatable.model.table.SlicedTable;
 public class DefaultPropertyTreesBuilder implements PropertyTreesBuilder {
 
 	private final PropertyTreeBuilder propertyTreeBuilder;
-	
+
 	/**
 	 * Constructs a set builder from a builder for a single tree.
 	 * 
-	 * @param propertyTreeBuilder the builder used to build the individual trees
+	 * @param propertyTreeBuilder
+	 *            the builder used to build the individual trees
 	 */
 	public DefaultPropertyTreesBuilder(final PropertyTreeBuilder propertyTreeBuilder) {
 		checkNotNull(propertyTreeBuilder);
-		
+
 		this.propertyTreeBuilder = propertyTreeBuilder;
 	}
 
 	@Override
 	public Set<PropertyTree> build(final SlicedTable slicedTable) {
-		return build(slicedTable, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), false, false);
+		return build(slicedTable, ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), false,
+				false);
 	}
 
 	@Override
-	public Set<PropertyTree> build(final SlicedTable slicedTable, final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
+	public Set<PropertyTree> build(final SlicedTable slicedTable,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
-			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties, final boolean onlyDeclaredAsContext) {
-		return slicedTable.getDataColumns().keySet().stream().map(columnIndex -> 
-		this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties, declaredClasses, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext)
-	).filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyWithProperties,
+			final boolean onlyDeclaredAsContext) {
+		return slicedTable.getDataColumns().keySet().stream()
+				.map(columnIndex -> this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties,
+						declaredClasses, contextProperties, contextClasses, onlyWithProperties, onlyDeclaredAsContext))
+				.filter(tree -> tree != null).collect(ImmutableSet.toImmutableSet());
 	}
 }

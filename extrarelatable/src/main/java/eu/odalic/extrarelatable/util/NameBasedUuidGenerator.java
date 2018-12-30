@@ -18,19 +18,20 @@ import org.springframework.stereotype.Component;
 public class NameBasedUuidGenerator implements UuidGenerator {
 
 	private final NamesGenerator namesGenerator;
-	
+
 	/**
 	 * Creates new name-based UUID generator.
 	 * 
-	 * @param namesGenerator names generator which serves as the source of generated UUIDs
+	 * @param namesGenerator
+	 *            names generator which serves as the source of generated UUIDs
 	 */
 	@Autowired
 	public NameBasedUuidGenerator(final NamesGenerator namesGenerator) {
 		checkNotNull(namesGenerator);
-		
+
 		this.namesGenerator = namesGenerator;
 	}
-	
+
 	@Override
 	public UUID generate() {
 		return UUID.nameUUIDFromBytes(namesGenerator.generate().getBytes());

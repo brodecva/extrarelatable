@@ -22,7 +22,8 @@ public final class Lists {
 	 *            list
 	 * @return map of list indices to the elements
 	 * 
-	 * @param <T> type of elements
+	 * @param <T>
+	 *            type of elements
 	 */
 	public static final <T> Map<Integer, T> toMap(final List<? extends T> list) {
 		return IntStream.range(0, list.size()).mapToObj(i -> Integer.valueOf(i))

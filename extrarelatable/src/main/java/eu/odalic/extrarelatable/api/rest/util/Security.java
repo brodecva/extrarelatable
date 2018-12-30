@@ -10,51 +10,54 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.SecurityContext;
 
 /**
- * <p>REST API security utility methods.</p>
+ * <p>
+ * REST API security utility methods.
+ * </p>
  * 
- * <p>Adapted from Odalic with permission.</p>
+ * <p>
+ * Adapted from Odalic with permission.
+ * </p>
  *
  * @author Václav Brodec
  *
  */
 public final class Security {
 
+	/**
+	 * <p>
+	 * Verifies that the authenticated user is either {@link Role#ADMINISTRATOR} or
+	 * it can access resources under the provided user ID.
+	 * </p>
+	 *
+	 * <p>
+	 * Raises standard {@link WebApplicationException}s when respective
+	 * authentication and authorization requirements are not met.
+	 * </p>
+	 *
+	 * @param securityContext
+	 *            a {@link SecurityContext} instance
+	 * @param userId
+	 *            user ID
+	 */
+	public static void checkAuthorization(final SecurityContext securityContext, final String userId) {
+		checkNotNull(userId, "The user ID cannot be null!");
 
+		final Principal userPrincipal = securityContext.getUserPrincipal();
+		if (userPrincipal == null) {
+			throw new BadRequestException("No authenticated user!");
+		}
 
-  /**
-   * <p>
-   * Verifies that the authenticated user is either {@link Role#ADMINISTRATOR} or it can access
-   * resources under the provided user ID.
-   * </p>
-   *
-   * <p>
-   * Raises standard {@link WebApplicationException}s when respective authentication and
-   * authorization requirements are not met.
-   * </p>
-   *
-   * @param securityContext a {@link SecurityContext} instance
-   * @param userId user ID
-   */
-  public static void checkAuthorization(final SecurityContext securityContext,
-      final String userId) {
-    checkNotNull(userId, "The user ID cannot be null!");
+		if (securityContext.isUserInRole(Role.ADMINISTRATOR.toString())) {
+			return;
+		}
 
-    final Principal userPrincipal = securityContext.getUserPrincipal();
-    if (userPrincipal == null) {
-      throw new BadRequestException("No authenticated user!");
-    }
+		if (userId.equals(userPrincipal.getName())) {
+			return;
+		}
 
-    if (securityContext.isUserInRole(Role.ADMINISTRATOR.toString())) {
-      return;
-    }
+		throw new ForbiddenException("The authenticated user is not authorized to access the resource!");
+	}
 
-    if (userId.equals(userPrincipal.getName())) {
-      return;
-    }
-
-    throw new ForbiddenException(
-        "The authenticated user is not authorized to access the resource!");
-  }
-
-  private Security() {}
+	private Security() {
+	}
 }

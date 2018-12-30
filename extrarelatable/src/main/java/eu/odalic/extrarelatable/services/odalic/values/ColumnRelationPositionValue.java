@@ -15,55 +15,58 @@ import com.google.common.base.Preconditions;
 @XmlRootElement(name = "columnRelationPosition")
 public final class ColumnRelationPositionValue {
 
-  private ColumnPositionValue first;
+	private ColumnPositionValue first;
 
-  private ColumnPositionValue second;
+	private ColumnPositionValue second;
 
-  public ColumnRelationPositionValue() {}
-  
-  public ColumnRelationPositionValue(final int firstIndex, final int secondIndex) {
-	  this.first = new ColumnPositionValue(firstIndex);
-	  this.second = new ColumnPositionValue(secondIndex);
-  }
+	public ColumnRelationPositionValue() {
+	}
 
-  /**
-   * @return the first
-   */
-  @XmlElement
-  @Nullable
-  public ColumnPositionValue getFirst() {
-    return this.first;
-  }
+	public ColumnRelationPositionValue(final int firstIndex, final int secondIndex) {
+		this.first = new ColumnPositionValue(firstIndex);
+		this.second = new ColumnPositionValue(secondIndex);
+	}
 
-  /**
-   * @return the second
-   */
-  @XmlElement
-  @Nullable
-  public ColumnPositionValue getSecond() {
-    return this.second;
-  }
+	/**
+	 * @return the first
+	 */
+	@XmlElement
+	@Nullable
+	public ColumnPositionValue getFirst() {
+		return this.first;
+	}
 
-  /**
-   * @param first the first to set
-   */
-  public void setFirst(final ColumnPositionValue first) {
-    Preconditions.checkNotNull(first, "The first cannot be null!");
+	/**
+	 * @return the second
+	 */
+	@XmlElement
+	@Nullable
+	public ColumnPositionValue getSecond() {
+		return this.second;
+	}
 
-    this.first = first;
-  }
+	/**
+	 * @param first
+	 *            the first to set
+	 */
+	public void setFirst(final ColumnPositionValue first) {
+		Preconditions.checkNotNull(first, "The first cannot be null!");
 
-  /**
-   * @param second the second to set
-   */
-  public void setSecond(final ColumnPositionValue second) {
-    Preconditions.checkNotNull(second, "The second cannot be null!");
+		this.first = first;
+	}
 
-    this.second = second;
-  }
+	/**
+	 * @param second
+	 *            the second to set
+	 */
+	public void setSecond(final ColumnPositionValue second) {
+		Preconditions.checkNotNull(second, "The second cannot be null!");
 
-  @Override
-  public String toString() {
-    return "ColumnRelationPositionValue [first=" + this.first + ", second=" + this.second + "]";
-  }
+		this.second = second;
+	}
+
+	@Override
+	public String toString() {
+		return "ColumnRelationPositionValue [first=" + this.first + ", second=" + this.second + "]";
+	}
 }

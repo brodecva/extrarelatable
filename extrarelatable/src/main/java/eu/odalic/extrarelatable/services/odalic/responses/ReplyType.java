@@ -16,13 +16,15 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum(String.class)
 @XmlRootElement
 public enum ReplyType {
-  /**
-   * Reply contains actual data.
-   */
-  @XmlEnumValue("DATA") DATA,
+	/**
+	 * Reply contains actual data.
+	 */
+	@XmlEnumValue("DATA")
+	DATA,
 
-  /**
-   * Reply contains no actual data, only a message.
-   */
-  @XmlEnumValue("MESSAGE") MESSAGE
+	/**
+	 * Reply contains no actual data, only a message.
+	 */
+	@XmlEnumValue("MESSAGE")
+	MESSAGE
 }

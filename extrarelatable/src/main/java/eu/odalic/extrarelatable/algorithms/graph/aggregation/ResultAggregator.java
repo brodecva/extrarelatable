@@ -30,8 +30,8 @@ public interface ResultAggregator<U> {
 	<T extends Comparable<T>> SortedSet<T> aggregate(SetMultimap<T, ? extends U> levelAggregates);
 
 	/**
-	 * Aggregates according to the inner logic of the comparator, in case of tie
-	 * the provided comparator on the aggregation product is used.
+	 * Aggregates according to the inner logic of the comparator, in case of tie the
+	 * provided comparator on the aggregation product is used.
 	 * 
 	 * @param levelAggregates
 	 *            map of the aggregation products to the aggregated items
@@ -48,7 +48,8 @@ public interface ResultAggregator<U> {
 	/**
 	 * Return the comparator from
 	 * {@link #aggregatesComparator(Map, Comparator, Comparator)} where the input
-	 * comparators are both derived from the natural ordering of the keys and the values.
+	 * comparators are both derived from the natural ordering of the keys and the
+	 * values.
 	 * 
 	 * @param map
 	 *            reference map

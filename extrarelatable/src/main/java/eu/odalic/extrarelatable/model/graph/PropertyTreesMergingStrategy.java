@@ -14,9 +14,12 @@ public interface PropertyTreesMergingStrategy {
 	/**
 	 * Attempts to merge the tree into one of the properties.
 	 * 
-	 * @param propertyTree property tree
-	 * @param properties existing properties
-	 * @return a newly created property holding the tree, {@code null} if merge was successful
+	 * @param propertyTree
+	 *            property tree
+	 * @param properties
+	 *            existing properties
+	 * @return a newly created property holding the tree, {@code null} if merge was
+	 *         successful
 	 */
 	Property merge(PropertyTree propertyTree, Set<? extends Property> properties);
 }

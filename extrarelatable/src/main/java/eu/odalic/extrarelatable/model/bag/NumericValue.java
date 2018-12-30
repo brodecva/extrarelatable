@@ -12,19 +12,19 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public final class NumericValue extends NumberLikeValue implements Serializable {
-	
+
 	private static final long serialVersionUID = -25440715468458309L;
-	
+
 	private final double figure;
 
 	public static final NumericValue of(double figure) {
 		return new NumericValue(figure);
 	}
-	
+
 	private NumericValue(double figure) {
 		this.figure = figure;
-	}	
-	
+	}
+
 	@Override
 	public double getFigure() {
 		return figure;

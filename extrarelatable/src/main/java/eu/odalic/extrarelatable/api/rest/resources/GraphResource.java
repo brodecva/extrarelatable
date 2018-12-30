@@ -87,7 +87,8 @@ public final class GraphResource {
 	 *            name of the graph
 	 * @param graphValue
 	 *            graph-representing object {@link GraphValue}
-	 * @return a {@link Reply} containing {@link Message} in {@code payload} attribute and "MESSAGE" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link Message} in {@code payload}
+	 *         attribute and "MESSAGE" in {@code type} attribute
 	 * @throws MalformedURLException
 	 *             when the combination of the base URL and the provided graph name
 	 *             forms invalid URL
@@ -121,7 +122,8 @@ public final class GraphResource {
 	 * 
 	 * @param graphValue
 	 *            graph-representing object {@link GraphValue}
-	 * @return a {@link Reply} containing {@link Message} in {@code payload} attribute and "MESSAGE" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link Message} in {@code payload}
+	 *         attribute and "MESSAGE" in {@code type} attribute
 	 * @throws MalformedURLException
 	 *             when the combination of the base URL and the provided graph name
 	 *             forms invalid URL
@@ -163,7 +165,8 @@ public final class GraphResource {
 	 * 
 	 * @param name
 	 *            name of the graph
-	 * @return a {@link Reply} containing {@link Message} in {@code payload} attribute and "MESSAGE" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link Message} in {@code payload}
+	 *         attribute and "MESSAGE" in {@code type} attribute
 	 * 
 	 */
 	@DELETE
@@ -193,11 +196,14 @@ public final class GraphResource {
 	 * @param name
 	 *            name of the graph
 	 * @param input
-	 *            input stream used as the source of the CSV data to parse (form multi-part segment named "input")
+	 *            input stream used as the source of the CSV data to parse (form
+	 *            multi-part segment named "input")
 	 * @param formatValue
-	 *            format of the CSV file ({@link FormatValue}) to parse the input stream with (form multi-part segment named "format")
+	 *            format of the CSV file ({@link FormatValue}) to parse the input
+	 *            stream with (form multi-part segment named "format")
 	 * @param metadata
-	 *            meta-data ({@link MetadataValue}) accompanying the table (form multi-part segment named "metadata")
+	 *            meta-data ({@link MetadataValue}) accompanying the table (form
+	 *            multi-part segment named "metadata")
 	 * @param onlyWithProperties
 	 *            determines whether only the numeric columns with associated
 	 *            declared property in the meta-data are learned
@@ -215,7 +221,8 @@ public final class GraphResource {
 	 *            associated Odalic instance
 	 * @param primaryBase
 	 *            name of one of the used bases, which takes precedence
-	 * @return a {@link Reply} containing {@link Message} in {@code payload} attribute and "MESSAGE" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link Message} in {@code payload}
+	 *         attribute and "MESSAGE" in {@code type} attribute
 	 * @throws IOException
 	 *             whenever I/O exception occurs
 	 * 
@@ -229,8 +236,8 @@ public final class GraphResource {
 	@TypeHint(Reply.class)
 	public Response learn(final @DocumentationExample("example_dataset__en-us") @PathParam("name") String name,
 			final @FormDataParam("input") InputStream input,
-			final @DocumentationExample(type=@TypeHint(FormatValue.class)) @TypeHint(FormatValue.class) @FormDataParam("format") FormatValue formatValue,
-			final @DocumentationExample(type=@TypeHint(Metadata.class)) @TypeHint(Metadata.class) @FormDataParam("metadata") Metadata metadata,
+			final @DocumentationExample(type = @TypeHint(FormatValue.class)) @TypeHint(FormatValue.class) @FormDataParam("format") FormatValue formatValue,
+			final @DocumentationExample(type = @TypeHint(Metadata.class)) @TypeHint(Metadata.class) @FormDataParam("metadata") Metadata metadata,
 			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
 			final @QueryParam("collectContext") Boolean contextCollected,
 			final @QueryParam("onlyDeclaredAsContext") Boolean onlyDeclaredAsContext,
@@ -300,7 +307,8 @@ public final class GraphResource {
 	 *            associated Odalic instance
 	 * @param primaryBase
 	 *            name of one of the used bases, which takes precedence
-	 * @return a {@link Reply} containing {@link Message} in {@code payload} attribute and "MESSAGE" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link Message} in {@code payload}
+	 *         attribute and "MESSAGE" in {@code type} attribute
 	 * @throws IOException
 	 *             whenever I/O exception occurs
 	 * 
@@ -363,11 +371,14 @@ public final class GraphResource {
 	 * @param name
 	 *            name of the graph
 	 * @param input
-	 *            input stream used as the source of the CSV data to parse (form multi-part segment named "input")
+	 *            input stream used as the source of the CSV data to parse (form
+	 *            multi-part segment named "input")
 	 * @param formatValue
-	 *            format of the CSV file ({@link FormatValue}) to parse the input stream with (form multi-part segment named "format")
+	 *            format of the CSV file ({@link FormatValue}) to parse the input
+	 *            stream with (form multi-part segment named "format")
 	 * @param metadata
-	 *            meta-data ({@link MetadataValue}) accompanying the table (form multi-part segment named "metadata")
+	 *            meta-data ({@link MetadataValue}) accompanying the table (form
+	 *            multi-part segment named "metadata")
 	 * @param learn
 	 *            whether to also learn the annotated input
 	 * @param onlyWithProperties
@@ -387,7 +398,8 @@ public final class GraphResource {
 	 *            associated Odalic instance
 	 * @param primaryBase
 	 *            name of one of the used bases, which takes precedence
-	 * @return a {@link Reply} containing {@link AnnotationResultValue} in {@code payload} attribute and "DATA" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link AnnotationResultValue} in
+	 *         {@code payload} attribute and "DATA" in {@code type} attribute
 	 * @throws IOException
 	 *             whenever I/O exception occurs
 	 * 
@@ -401,8 +413,8 @@ public final class GraphResource {
 	@TypeHint(Reply.class)
 	public Response annotate(final @DocumentationExample("example_dataset__en-us") @PathParam("name") String name,
 			final @FormDataParam("input") InputStream input,
-			final @DocumentationExample(type=@TypeHint(FormatValue.class)) @TypeHint(FormatValue.class) @FormDataParam("format") FormatValue formatValue,
-			final @DocumentationExample(type=@TypeHint(Metadata.class)) @TypeHint(Metadata.class) @FormDataParam("metadata") Metadata metadata,
+			final @DocumentationExample(type = @TypeHint(FormatValue.class)) @TypeHint(FormatValue.class) @FormDataParam("format") FormatValue formatValue,
+			final @DocumentationExample(type = @TypeHint(Metadata.class)) @TypeHint(Metadata.class) @FormDataParam("metadata") Metadata metadata,
 			final @QueryParam("learn") Boolean learn,
 			final @QueryParam("onlyWithProperties") Boolean onlyWithProperties,
 			final @QueryParam("collectContext") Boolean contextCollected,
@@ -481,10 +493,11 @@ public final class GraphResource {
 	 *            associated Odalic instance
 	 * @param primaryBase
 	 *            name of one of the used bases, which takes precedence
-	 * @return a {@link Reply} containing {@link AnnotationResultValue} in {@code payload} attribute and "DATA" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link AnnotationResultValue} in
+	 *         {@code payload} attribute and "DATA" in {@code type} attribute
 	 * @throws IOException
 	 *             whenever I/O exception occurs
-	 *             
+	 * 
 	 */
 	@POST
 	@Path("{name}/annotated")
@@ -541,7 +554,8 @@ public final class GraphResource {
 	 *            Java regex pattern flags
 	 * @param limit
 	 *            maximum number of returned results
-	 * @return a {@link Reply} containing {@link SearchResultValue} in {@code payload} attribute and "DATA" in {@code type} attribute
+	 * @return a {@link Reply} containing {@link SearchResultValue} in
+	 *         {@code payload} attribute and "DATA" in {@code type} attribute
 	 * 
 	 */
 	@GET

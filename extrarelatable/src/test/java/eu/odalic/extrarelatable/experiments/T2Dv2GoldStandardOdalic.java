@@ -79,9 +79,9 @@ import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
  * <p>
- * Part of the test framework for the modiied DWTC format (as found in the provided T2Dv2
- * Gold Standard dataset) which allows to employ Odalic instead of ERT to
- * annotate the inputs.
+ * Part of the test framework for the modiied DWTC format (as found in the
+ * provided T2Dv2 Gold Standard dataset) which allows to employ Odalic instead
+ * of ERT to annotate the inputs.
  * </p>
  * 
  * <p>

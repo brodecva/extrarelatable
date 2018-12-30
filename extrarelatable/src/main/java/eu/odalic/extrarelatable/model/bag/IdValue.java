@@ -13,22 +13,23 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class IdValue extends AbstractValue implements Serializable {
 	private static final long serialVersionUID = 2331954295033377038L;
-	
+
 	private final String id;
 
 	/**
 	 * Creates the value.
 	 * 
-	 * @param id the ID text
+	 * @param id
+	 *            the ID text
 	 * @return the value
 	 */
 	public static IdValue of(final String id) {
 		return new IdValue(id);
 	}
-	
+
 	private IdValue(final String id) {
 		this.id = id;
-	}	
+	}
 
 	@Override
 	public String getText() {
@@ -39,11 +40,11 @@ public final class IdValue extends AbstractValue implements Serializable {
 	public boolean isId() {
 		return true;
 	}
-	
+
 	public String getId() {
 		return id;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

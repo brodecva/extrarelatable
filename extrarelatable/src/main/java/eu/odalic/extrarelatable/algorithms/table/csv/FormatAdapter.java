@@ -12,12 +12,13 @@ import eu.odalic.extrarelatable.model.table.csv.Format;
  *
  */
 public interface FormatAdapter {
-  /**
-   * Converts to the CSV file formatting configuration used by {@link CSVParser}.
-   *
-   * @param format application CSV format
-   * 
-   * @return a {@link CSVFormat} instance derived from the application format
-   */
-  CSVFormat convert(Format format);
+	/**
+	 * Converts to the CSV file formatting configuration used by {@link CSVParser}.
+	 *
+	 * @param format
+	 *            application CSV format
+	 * 
+	 * @return a {@link CSVFormat} instance derived from the application format
+	 */
+	CSVFormat convert(Format format);
 }

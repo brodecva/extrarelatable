@@ -15,14 +15,13 @@ import com.google.common.collect.ImmutableList;
  * @author Václav Brodec
  *
  */
-public final class OutliersValueListDeserializer
-    extends JsonDeserializer<List<Double>> {
+public final class OutliersValueListDeserializer extends JsonDeserializer<List<Double>> {
 
-  @Override
-  public List<Double> deserialize(final JsonParser parser,
-      final DeserializationContext ctxt) throws IOException, JsonProcessingException {
-    final Double[] array = ctxt.readValue(parser, Double[].class);
+	@Override
+	public List<Double> deserialize(final JsonParser parser, final DeserializationContext ctxt)
+			throws IOException, JsonProcessingException {
+		final Double[] array = ctxt.readValue(parser, Double[].class);
 
-    return ImmutableList.copyOf(array);
-  }
+		return ImmutableList.copyOf(array);
+	}
 }

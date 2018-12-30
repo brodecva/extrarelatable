@@ -15,20 +15,28 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
  */
 public interface TableAnalyzer {
 	/**
-	 * Infers cell data types and converts the text values, producing {@link TypedTable}.
+	 * Infers cell data types and converts the text values, producing
+	 * {@link TypedTable}.
 	 * 
-	 * @param table table parsed into cells
-	 * @param locale the {@link Locale} used to determine the data types
+	 * @param table
+	 *            table parsed into cells
+	 * @param locale
+	 *            the {@link Locale} used to determine the data types
 	 * @return the typed table
 	 */
 	TypedTable infer(ParsedTable table, Locale locale);
 
 	/**
-	 * Infers cell data types and converts the text values, producing {@link TypedTable}.
+	 * Infers cell data types and converts the text values, producing
+	 * {@link TypedTable}.
 	 * 
-	 * @param table table parsed into cells
-	 * @param locale the {@link Locale} used to determine the data types
-	 * @param columnTypeHints overriding type hints for some of the columns (all cells in the column are converted to that type)
+	 * @param table
+	 *            table parsed into cells
+	 * @param locale
+	 *            the {@link Locale} used to determine the data types
+	 * @param columnTypeHints
+	 *            overriding type hints for some of the columns (all cells in the
+	 *            column are converted to that type)
 	 * @return the typed table
 	 */
 	TypedTable infer(ParsedTable table, Locale locale, Map<? extends Integer, ? extends Type> columnTypeHints);

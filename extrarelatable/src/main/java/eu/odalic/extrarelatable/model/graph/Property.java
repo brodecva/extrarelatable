@@ -22,10 +22,10 @@ import eu.odalic.extrarelatable.api.rest.adapters.PropertyAdapter;
 
 /**
  * RDFS property representation within the context of background knowledge base
- * derived from learned files. It encapsulates its URI (which may be left-out), internal unique
- * identifier, all the labels (collected from column headers) associated with it
- * and finally the set of {@link PropertyTree}s, which are instances of the
- * property as found in the learned files.
+ * derived from learned files. It encapsulates its URI (which may be left-out),
+ * internal unique identifier, all the labels (collected from column headers)
+ * associated with it and finally the set of {@link PropertyTree}s, which are
+ * instances of the property as found in the learned files.
  * 
  * @author Václav Brodec
  *
@@ -46,7 +46,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	/**
 	 * Creates a property.
 	 * 
-	 * @param uuid UUID of the property
+	 * @param uuid
+	 *            UUID of the property
 	 */
 	public Property(final UUID uuid) {
 		checkNotNull(uuid);
@@ -60,7 +61,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	/**
 	 * Copies the property.
 	 * 
-	 * @param original copied instance
+	 * @param original
+	 *            copied instance
 	 */
 	public Property(final Property original) {
 		this.uuid = original.uuid;
@@ -85,7 +87,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	}
 
 	/**
-	 * @param uri the URI to set
+	 * @param uri
+	 *            the URI to set
 	 */
 	public void setUri(@Nullable URI uri) {
 		this.uri = uri;
@@ -116,7 +119,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	/**
 	 * Adds property tree, an instance of the property in some learned file.
 	 * 
-	 * @param instance property tree instance
+	 * @param instance
+	 *            property tree instance
 	 */
 	@XmlTransient
 	@JsonIgnore
@@ -130,7 +134,8 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 	/**
 	 * Executes {@link #add(PropertyTree)} in bulk.
 	 * 
-	 * @param instances property tree instances
+	 * @param instances
+	 *            property tree instances
 	 */
 	@XmlTransient
 	@JsonIgnore

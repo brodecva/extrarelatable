@@ -53,7 +53,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		/**
 		 * Initializes the shared attributes of a node.
 		 * 
-		 * @param values held values
+		 * @param values
+		 *            held values
 		 */
 		public Node(final Multiset<? extends NumberLikeValue> values) {
 			checkNotNull(values);
@@ -72,7 +73,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		/**
 		 * Adds a child to the node.
 		 * 
-		 * @param child added child node
+		 * @param child
+		 *            added child node
 		 */
 		public void addChild(final CommonNode child) {
 			checkNotNull(child);
@@ -84,7 +86,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		/**
 		 * Executes {@link PropertyTree.Node#addChild(PropertyTree.CommonNode)} in bulk.
 		 * 
-		 * @param children added children nodes
+		 * @param children
+		 *            added children nodes
 		 */
 		public void addChildren(final Set<? extends CommonNode> children) {
 			checkNotNull(children);
@@ -102,7 +105,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		}
 
 		/**
-		 * @return label originating as the header of the column from which the property tree came from
+		 * @return label originating as the header of the column from which the property
+		 *         tree came from
 		 */
 		public abstract Label getLabel();
 
@@ -174,7 +178,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 	}
 
 	/**
-	 * The root node has no parent and keeps reference to the owning property tree and the label coming from the header of the original table column.
+	 * The root node has no parent and keeps reference to the owning property tree
+	 * and the label coming from the header of the original table column.
 	 * 
 	 * @author Václav Brodec
 	 *
@@ -190,8 +195,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 		/**
 		 * Creates a root node.
 		 * 
-		 * @param label property tree label
-		 * @param values contained values
+		 * @param label
+		 *            property tree label
+		 * @param values
+		 *            contained values
 		 */
 		public RootNode(final Label label, final Multiset<? extends NumberLikeValue> values) {
 			super(values);
@@ -296,8 +303,10 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 	/**
 	 * Creates a property tree.
 	 * 
-	 * @param root root node
-	 * @param context property tree context
+	 * @param root
+	 *            root node
+	 * @param context
+	 *            property tree context
 	 */
 	public PropertyTree(final RootNode root, final Context context) {
 		checkNotNull(root);
@@ -329,7 +338,8 @@ public final class PropertyTree implements Iterable<PropertyTree.Node>, Serializ
 	}
 
 	/**
-	 * @param property sets the property of the tree
+	 * @param property
+	 *            sets the property of the tree
 	 */
 	public void setProperty(final Property property) {
 		this.property = property;

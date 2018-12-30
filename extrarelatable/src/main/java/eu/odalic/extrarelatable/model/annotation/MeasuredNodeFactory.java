@@ -13,8 +13,10 @@ public interface MeasuredNodeFactory {
 	/**
 	 * Associates the node with the measured distance.
 	 * 
-	 * @param node node under measurement
-	 * @param distance measured distance
+	 * @param node
+	 *            node under measurement
+	 * @param distance
+	 *            measured distance
 	 * @return the measured node
 	 */
 	MeasuredNode create(Node node, double distance);

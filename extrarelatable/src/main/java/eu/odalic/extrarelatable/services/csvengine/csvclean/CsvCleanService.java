@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Cleans the input CSV files (mainly adds missing headers, normalizes number of columns and converts to uniform format).
+ * Cleans the input CSV files (mainly adds missing headers, normalizes number of
+ * columns and converts to uniform format).
  * 
  * @author Václav Brodec
  *

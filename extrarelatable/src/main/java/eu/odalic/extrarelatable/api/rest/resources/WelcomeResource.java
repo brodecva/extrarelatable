@@ -16,15 +16,14 @@ import com.webcohesion.enunciate.metadata.Ignore;
 @Ignore
 public final class WelcomeResource {
 
-  private static final String WELCOME_PAGE_CONTENT =
-      "<html>" + "<title>ExtraRelaTable REST API</title>" + "<body>"
-          + "<h1>ExtraRelaTable REST API is working!</h1>" + "<p>For more information about ExtraRelaTable visit "
-          + "<a href=\"https://github.com/brodecva/extrarelatable\">the project GitHub page.</a>" + "</p>"
-          + "</body>" + "</html>";
+	private static final String WELCOME_PAGE_CONTENT = "<html>" + "<title>ExtraRelaTable REST API</title>" + "<body>"
+			+ "<h1>ExtraRelaTable REST API is working!</h1>" + "<p>For more information about ExtraRelaTable visit "
+			+ "<a href=\"https://github.com/brodecva/extrarelatable\">the project GitHub page.</a>" + "</p>" + "</body>"
+			+ "</html>";
 
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  public String welcome() {
-    return WELCOME_PAGE_CONTENT;
-  }
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public String welcome() {
+		return WELCOME_PAGE_CONTENT;
+	}
 }

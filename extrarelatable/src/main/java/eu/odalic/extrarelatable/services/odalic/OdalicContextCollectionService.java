@@ -59,10 +59,15 @@ public final class OdalicContextCollectionService implements ContextCollectionSe
 	/**
 	 * Initializes the context-collecting service.
 	 * 
-	 * @param computationInputConverter converter of the ERT format to the one recognized by Odalic
-	 * @param basePath URI string of the Odalic instance (e.g. "http://localhost:8080/odalic/")
-	 * @param userId user ID used to query the Odalic instance
-	 * @param rowsLimit limit on number of rows sent to Odalic
+	 * @param computationInputConverter
+	 *            converter of the ERT format to the one recognized by Odalic
+	 * @param basePath
+	 *            URI string of the Odalic instance (e.g.
+	 *            "http://localhost:8080/odalic/")
+	 * @param userId
+	 *            user ID used to query the Odalic instance
+	 * @param rowsLimit
+	 *            limit on number of rows sent to Odalic
 	 */
 	@Autowired
 	public OdalicContextCollectionService(final ComputationInputConverter computationInputConverter,

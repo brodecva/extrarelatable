@@ -21,7 +21,9 @@
  * usage of a wrapper around the returned objects, which follows this structure:
  * </p>
  * 
- * <pre>{ status: 200, type: "DATA", payload: { ... }, stamp "15434" }</pre>
+ * <pre>
+ * { status: 200, type: "DATA", payload: { ... }, stamp "15434" }
+ * </pre>
  * 
  * <p>
  * The status is the HTTP status code of the response. Type is either DATA, when

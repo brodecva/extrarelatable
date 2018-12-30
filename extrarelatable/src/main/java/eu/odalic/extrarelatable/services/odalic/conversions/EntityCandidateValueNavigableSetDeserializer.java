@@ -18,13 +18,13 @@ import eu.odalic.extrarelatable.services.odalic.values.EntityCandidateValue;
  *
  */
 public final class EntityCandidateValueNavigableSetDeserializer
-    extends JsonDeserializer<NavigableSet<EntityCandidateValue>> {
+		extends JsonDeserializer<NavigableSet<EntityCandidateValue>> {
 
-  @Override
-  public NavigableSet<EntityCandidateValue> deserialize(final JsonParser parser,
-      final DeserializationContext ctxt) throws IOException, JsonProcessingException {
-    final EntityCandidateValue[] array = ctxt.readValue(parser, EntityCandidateValue[].class);
+	@Override
+	public NavigableSet<EntityCandidateValue> deserialize(final JsonParser parser, final DeserializationContext ctxt)
+			throws IOException, JsonProcessingException {
+		final EntityCandidateValue[] array = ctxt.readValue(parser, EntityCandidateValue[].class);
 
-    return ImmutableSortedSet.copyOf(array);
-  }
+		return ImmutableSortedSet.copyOf(array);
+	}
 }

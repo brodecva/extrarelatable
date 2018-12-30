@@ -9,14 +9,15 @@ package eu.odalic.extrarelatable.algorithms.distance;
  */
 public interface Distance {
 	/**
-	 * Measures the distance. The implementations may further restrict the valid inputs.
+	 * Measures the distance. The implementations may further restrict the valid
+	 * inputs.
 	 * 
 	 * @param first
 	 *            first bag of values
 	 * @param second
 	 *            second bag of values
-	 * @return measured distance (no guarantee regarding the range of values, depends
-	 *         on implementation)
+	 * @return measured distance (no guarantee regarding the range of values,
+	 *         depends on implementation)
 	 */
 	double compute(double[] first, double[] second);
 }

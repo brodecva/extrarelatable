@@ -17,12 +17,12 @@ import eu.odalic.extrarelatable.services.odalic.values.ColumnRelationPositionVal
  */
 public final class ColumnRelationPositionKeyJsonSerializer extends JsonSerializer<ColumnRelationPositionValue> {
 
-  public static final String DELIMITER = ";";
+	public static final String DELIMITER = ";";
 
-  @Override
-  public void serialize(final ColumnRelationPositionValue value, final JsonGenerator jgen,
-      final SerializerProvider provider) throws IOException, JsonProcessingException {
-    jgen.writeFieldName(value.getFirst().getIndex() + DELIMITER + value.getSecond().getIndex());
-  }
+	@Override
+	public void serialize(final ColumnRelationPositionValue value, final JsonGenerator jgen,
+			final SerializerProvider provider) throws IOException, JsonProcessingException {
+		jgen.writeFieldName(value.getFirst().getIndex() + DELIMITER + value.getSecond().getIndex());
+	}
 
 }

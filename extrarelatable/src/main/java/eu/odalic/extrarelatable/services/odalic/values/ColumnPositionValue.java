@@ -16,35 +16,37 @@ import com.google.common.base.Preconditions;
 @XmlRootElement(name = "columnPosition")
 public final class ColumnPositionValue {
 
-  private int index;
+	private int index;
 
-  public ColumnPositionValue() {}
-  
-  public ColumnPositionValue(final int index) {
-	  checkArgument(index >= 0, "The column position index must be nonnegative!");
-	  
-	  this.index = index;
-  }
+	public ColumnPositionValue() {
+	}
 
-  /**
-   * @return the index
-   */
-  @XmlElement
-  public int getIndex() {
-    return this.index;
-  }
+	public ColumnPositionValue(final int index) {
+		checkArgument(index >= 0, "The column position index must be nonnegative!");
 
-  /**
-   * @param index the index to set
-   */
-  public void setIndex(final int index) {
-    Preconditions.checkArgument(index >= 0, "The column position index must be nonnegative!");
+		this.index = index;
+	}
 
-    this.index = index;
-  }
+	/**
+	 * @return the index
+	 */
+	@XmlElement
+	public int getIndex() {
+		return this.index;
+	}
 
-  @Override
-  public String toString() {
-    return "ColumnPositionValue [index=" + this.index + "]";
-  }
+	/**
+	 * @param index
+	 *            the index to set
+	 */
+	public void setIndex(final int index) {
+		Preconditions.checkArgument(index >= 0, "The column position index must be nonnegative!");
+
+		this.index = index;
+	}
+
+	@Override
+	public String toString() {
+		return "ColumnPositionValue [index=" + this.index + "]";
+	}
 }

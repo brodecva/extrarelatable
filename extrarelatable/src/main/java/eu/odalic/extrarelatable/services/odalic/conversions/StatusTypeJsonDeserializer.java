@@ -17,10 +17,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
  */
 public final class StatusTypeJsonDeserializer extends JsonDeserializer<StatusType> {
 
-  @Override
-  public StatusType deserialize(final JsonParser jsonparser, final DeserializationContext context)
-      throws IOException, JsonProcessingException {
-    return Status.fromStatusCode(Integer.parseInt(jsonparser.getText()));
-  }
+	@Override
+	public StatusType deserialize(final JsonParser jsonparser, final DeserializationContext context)
+			throws IOException, JsonProcessingException {
+		return Status.fromStatusCode(Integer.parseInt(jsonparser.getText()));
+	}
 
 }

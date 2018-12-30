@@ -10,9 +10,9 @@ import javax.annotation.concurrent.Immutable;
  */
 @Immutable
 public enum EmptyValue implements Value {
-	
+
 	INSTANCE; // Empty value singleton.
-	
+
 	/**
 	 * @return an empty value
 	 */
@@ -24,7 +24,7 @@ public enum EmptyValue implements Value {
 	public double getFigure() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public String getText() {
 		throw new UnsupportedOperationException();

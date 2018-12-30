@@ -15,14 +15,16 @@ import eu.odalic.extrarelatable.model.bag.Value;
  */
 public interface SlicedTable extends TypedTable {
 	/**
-	 * Indicates which columns are marked to contain numric data and allows their instant retrieval.
+	 * Indicates which columns are marked to contain numric data and allows their
+	 * instant retrieval.
 	 * 
 	 * @return map of column indices to list of cells in the indexed numeric column
 	 */
 	Map<Integer, List<Value>> getDataColumns();
 
 	/**
-	 * Indicates which columns are marked to contain context data and allows their instant retrieval.
+	 * Indicates which columns are marked to contain context data and allows their
+	 * instant retrieval.
 	 * 
 	 * @return map of column indices to list of cells in the indexed context column
 	 */

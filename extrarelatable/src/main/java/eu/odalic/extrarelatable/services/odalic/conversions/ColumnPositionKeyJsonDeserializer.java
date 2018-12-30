@@ -13,8 +13,8 @@ import eu.odalic.extrarelatable.services.odalic.values.ColumnPositionValue;
  */
 public final class ColumnPositionKeyJsonDeserializer extends KeyDeserializer {
 
-  @Override
-  public Object deserializeKey(final String key, final DeserializationContext ctxt) {
-    return new ColumnPositionValue(Integer.parseInt(key));
-  }
+	@Override
+	public Object deserializeKey(final String key, final DeserializationContext ctxt) {
+		return new ColumnPositionValue(Integer.parseInt(key));
+	}
 }

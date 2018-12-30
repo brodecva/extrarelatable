@@ -13,13 +13,13 @@ import eu.odalic.extrarelatable.model.annotation.AnnotationResult;
  */
 public final class AnnotationResultAdapter extends XmlAdapter<AnnotationResultValue, AnnotationResult> {
 
-  @Override
-  public AnnotationResultValue marshal(final AnnotationResult bound) throws Exception {
-	  return new AnnotationResultValue(bound);
-  }
+	@Override
+	public AnnotationResultValue marshal(final AnnotationResult bound) throws Exception {
+		return new AnnotationResultValue(bound);
+	}
 
-  @Override
-  public AnnotationResult unmarshal(final AnnotationResultValue value) throws Exception {
-    throw new UnsupportedOperationException();
-  }
+	@Override
+	public AnnotationResult unmarshal(final AnnotationResultValue value) throws Exception {
+		throw new UnsupportedOperationException();
+	}
 }

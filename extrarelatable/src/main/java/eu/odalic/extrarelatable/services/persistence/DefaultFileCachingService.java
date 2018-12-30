@@ -24,19 +24,19 @@ public class DefaultFileCachingService implements FileCachingService {
 	@Override
 	public Path cache(final InputStream input) throws IOException {
 		final Path temporaryFilePath = Files.createTempFile(PREFIX, null);
-		
+
 		Files.copy(input, temporaryFilePath);
-		
+
 		temporaryFilePath.toFile().deleteOnExit();
-		
+
 		return temporaryFilePath;
 	}
-	
+
 	@Override
 	public Path provideTemporaryFile() throws IOException {
 		final Path temporaryFilePath = Files.createTempFile(PREFIX, null);
 		temporaryFilePath.toFile().deleteOnExit();
-				
+
 		return temporaryFilePath;
 	}
 }

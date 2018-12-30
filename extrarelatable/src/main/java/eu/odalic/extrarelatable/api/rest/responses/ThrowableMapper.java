@@ -21,64 +21,67 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
- * <p>Catch-all throwable mapper.</p>
+ * <p>
+ * Catch-all throwable mapper.
+ * </p>
  * 
- * <p>Adapted from Odalic with permission.</p>
+ * <p>
+ * Adapted from Odalic with permission.
+ * </p>
  *
  * @author Václav Brodec
  *
  */
 public final class ThrowableMapper implements ExceptionMapper<Throwable> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ThrowableMapper.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ThrowableMapper.class);
 
-  @Context
-  private HttpHeaders headers;
+	@Context
+	private HttpHeaders headers;
 
-  @Context
-  private UriInfo uriInfo;
+	@Context
+	private UriInfo uriInfo;
 
-  /**
-   * Tests the throwable against JSON mapping exception to detect {@link JsonMappingException}
-   * mappable to {@link BadRequestException}.
-   *
-   * Defaults to internal server error in case the exception is not instance of
-   * {@link WebApplicationException}.
-   *
-   * @param throwable throwable instance
-   * @return HTTP status
-   */
-  private StatusType getHttpStatus(final Throwable throwable) {
-    if (throwable instanceof WebApplicationException) {
-      return ((WebApplicationException) throwable).getResponse().getStatusInfo();
-    } else if (throwable instanceof JsonMappingException) {
-      return Status.BAD_REQUEST;
-    } else {
-      return Response.Status.INTERNAL_SERVER_ERROR;
-    }
-  }
+	/**
+	 * Tests the throwable against JSON mapping exception to detect
+	 * {@link JsonMappingException} mappable to {@link BadRequestException}.
+	 *
+	 * Defaults to internal server error in case the exception is not instance of
+	 * {@link WebApplicationException}.
+	 *
+	 * @param throwable
+	 *            throwable instance
+	 * @return HTTP status
+	 */
+	private StatusType getHttpStatus(final Throwable throwable) {
+		if (throwable instanceof WebApplicationException) {
+			return ((WebApplicationException) throwable).getResponse().getStatusInfo();
+		} else if (throwable instanceof JsonMappingException) {
+			return Status.BAD_REQUEST;
+		} else {
+			return Response.Status.INTERNAL_SERVER_ERROR;
+		}
+	}
 
-  @Override
-  public Response toResponse(final Throwable throwable) {
-    final StatusType statusType = getHttpStatus(throwable);
+	@Override
+	public Response toResponse(final Throwable throwable) {
+		final StatusType statusType = getHttpStatus(throwable);
 
-    final String text = throwable.getMessage();
+		final String text = throwable.getMessage();
 
-    LOGGER.warn("Mapping of throwable " + text, throwable);
+		LOGGER.warn("Mapping of throwable " + text, throwable);
 
-    final StringWriter trace = new StringWriter();
-    throwable.printStackTrace(new PrintWriter(trace));
-    final String debugContent = trace.toString();
+		final StringWriter trace = new StringWriter();
+		throwable.printStackTrace(new PrintWriter(trace));
+		final String debugContent = trace.toString();
 
-    final List<MediaType> acceptable = this.headers.getAcceptableMediaTypes();
+		final List<MediaType> acceptable = this.headers.getAcceptableMediaTypes();
 
-    // Send the default message only if acceptable by the client.
-    if (acceptable.contains(MediaType.WILDCARD_TYPE)
-        || acceptable.contains(MediaType.APPLICATION_JSON_TYPE)) {
-      return Message.of(text, debugContent).toResponse(statusType, this.uriInfo);
-    } else {
-      return Response.status(statusType).type(acceptable.get(0)).build();
-    }
-  }
+		// Send the default message only if acceptable by the client.
+		if (acceptable.contains(MediaType.WILDCARD_TYPE) || acceptable.contains(MediaType.APPLICATION_JSON_TYPE)) {
+			return Message.of(text, debugContent).toResponse(statusType, this.uriInfo);
+		} else {
+			return Response.status(statusType).type(acceptable.get(0)).build();
+		}
+	}
 }
-

@@ -17,13 +17,17 @@ import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 import eu.odalic.extrarelatable.model.table.Metadata;
 
 /**
- * <p>Table meta-data. Next to optional values such as title, author and language
+ * <p>
+ * Table meta-data. Next to optional values such as title, author and language
  * tag according to BCP 47 norm, it contains both the declared and collected
  * context for that table. The declared context is considered to be of high
  * quality, as it is a result of manual curation, whereas the collected one may
- * originate from unsupervised automatic processing.</p>
+ * originate from unsupervised automatic processing.
+ * </p>
  * 
- * <p>{@link Metadata} adapted for REST API.</p>
+ * <p>
+ * {@link Metadata} adapted for REST API.
+ * </p>
  * 
  * @author Václav Brodec
  *
@@ -102,70 +106,78 @@ public final class MetadataValue implements Serializable {
 	public void setLanguageTag(@Nullable String languageTag) {
 		this.languageTag = languageTag;
 	}
-	
+
 	/**
-	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated properties
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping
+	 * the manually curated properties
 	 * 
-	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated properties
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects
+	 *         keeping the manually curated properties
 	 */
 	@XmlElement
 	public Map<Integer, DeclaredEntity> getDeclaredProperties() {
 		return Collections.unmodifiableMap(declaredProperties);
 	}
 
-	public void setDeclaredProperties(Map<? extends Integer, ? extends DeclaredEntity>  declaredProperties) {
+	public void setDeclaredProperties(Map<? extends Integer, ? extends DeclaredEntity> declaredProperties) {
 		checkNotNull(declaredProperties);
-		
+
 		this.declaredProperties = new HashMap<>(declaredProperties);
 	}
-	
+
 	/**
-	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated classes
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping
+	 * the manually curated classes
 	 * 
-	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the manually curated classes
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects
+	 *         keeping the manually curated classes
 	 */
 	@XmlElement
 	public Map<Integer, DeclaredEntity> getDeclaredClasses() {
 		return Collections.unmodifiableMap(declaredClasses);
 	}
 
-	public void setDeclaredClasses(Map<? extends Integer, ? extends DeclaredEntity>  declaredClasses) {
+	public void setDeclaredClasses(Map<? extends Integer, ? extends DeclaredEntity> declaredClasses) {
 		checkNotNull(declaredClasses);
-		
+
 		this.declaredClasses = new HashMap<>(declaredClasses);
 	}
-	
+
 	/**
-	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected properties
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping
+	 * the automatically collected properties
 	 * 
-	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected properties
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects
+	 *         keeping the automatically collected properties
 	 */
 	@XmlElement
-    public Map<Integer, DeclaredEntity> getCollectedProperties() {
-        return Collections.unmodifiableMap(collectedProperties);
-    }
+	public Map<Integer, DeclaredEntity> getCollectedProperties() {
+		return Collections.unmodifiableMap(collectedProperties);
+	}
 
-    public void setCollectedProperties(Map<? extends Integer, ? extends DeclaredEntity>  collectedProperties) {
-        checkNotNull(collectedProperties);
-        
-        this.collectedProperties = new HashMap<>(collectedProperties);
-    }
-    
-    /**
-	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected classes
+	public void setCollectedProperties(Map<? extends Integer, ? extends DeclaredEntity> collectedProperties) {
+		checkNotNull(collectedProperties);
+
+		this.collectedProperties = new HashMap<>(collectedProperties);
+	}
+
+	/**
+	 * map of integer column indices to {@link DeclaredEntityValue} objects keeping
+	 * the automatically collected classes
 	 * 
-	 * @return map of integer column indices to {@link DeclaredEntityValue} objects keeping the automatically collected classes
+	 * @return map of integer column indices to {@link DeclaredEntityValue} objects
+	 *         keeping the automatically collected classes
 	 */
 	@XmlElement
-    public Map<Integer, DeclaredEntity> getCollectedClasses() {
-        return Collections.unmodifiableMap(collectedClasses);
-    }
+	public Map<Integer, DeclaredEntity> getCollectedClasses() {
+		return Collections.unmodifiableMap(collectedClasses);
+	}
 
-    public void setCollectedClasses(Map<? extends Integer, ? extends DeclaredEntity>  collectedClasses) {
-        checkNotNull(collectedClasses);
-        
-        this.collectedClasses = new HashMap<>(collectedClasses);
-    }
+	public void setCollectedClasses(Map<? extends Integer, ? extends DeclaredEntity> collectedClasses) {
+		checkNotNull(collectedClasses);
+
+		this.collectedClasses = new HashMap<>(collectedClasses);
+	}
 
 	@Override
 	public String toString() {

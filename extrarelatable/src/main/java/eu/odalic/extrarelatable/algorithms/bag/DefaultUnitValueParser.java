@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 /**
  * A {@link UnitValueParser} implementation that first strips away any non-digit
  * characters from the parsed text. This has its drawbacks (e.g. losing
- * information about the position of a possible decimal separator),
- * which are mostly acceptable for the purpose.
+ * information about the position of a possible decimal separator), which are
+ * mostly acceptable for the purpose.
  * 
  * @author Václav Brodec
  *
@@ -33,7 +33,8 @@ public final class DefaultUnitValueParser implements UnitValueParser {
 	/**
 	 * Instantiates the parser.
 	 * 
-	 * @param limit maximum number of characters that are parsed
+	 * @param limit
+	 *            maximum number of characters that are parsed
 	 */
 	@Autowired
 	public DefaultUnitValueParser(final @Value("${eu.odalic.extrarelatable.parseLimit:50}") int limit) {

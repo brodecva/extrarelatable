@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import com.google.common.collect.ImmutableList;
 
-
 /**
  * Reporting message with extra details for developers.
  *
@@ -18,59 +17,59 @@ import com.google.common.collect.ImmutableList;
 @XmlRootElement
 public final class Message {
 
-  private String text;
+	private String text;
 
-  private List<URI> additionalResources;
+	private List<URI> additionalResources;
 
-  private String debugContent;
+	private String debugContent;
 
-  public Message() {
-    this.text = null;
-    this.additionalResources = ImmutableList.of();
-    this.debugContent = null;
-  }
-  
-  /**
-   * @return the additional resources
-   */
-  @XmlElement
-  public List<URI> getAdditionalResources() {
-    return this.additionalResources;
-  }
+	public Message() {
+		this.text = null;
+		this.additionalResources = ImmutableList.of();
+		this.debugContent = null;
+	}
 
-  /**
-   * @return the debug content
-   */
-  @XmlElement
-  @Nullable
-  public String getDebugContent() {
-    return this.debugContent;
-  }
+	/**
+	 * @return the additional resources
+	 */
+	@XmlElement
+	public List<URI> getAdditionalResources() {
+		return this.additionalResources;
+	}
 
-  /**
-   * @return the text
-   */
-  @XmlElement
-  @Nullable
-  public String getText() {
-    return this.text;
-  }
-  
-  public void setText(String text) {
-    this.text = text;
-  }
+	/**
+	 * @return the debug content
+	 */
+	@XmlElement
+	@Nullable
+	public String getDebugContent() {
+		return this.debugContent;
+	}
 
-  public void setAdditionalResources(List<? extends URI> additionalResources) {
-    this.additionalResources = ImmutableList.copyOf(additionalResources);
-  }
+	/**
+	 * @return the text
+	 */
+	@XmlElement
+	@Nullable
+	public String getText() {
+		return this.text;
+	}
 
-  public void setDebugContent(String debugContent) {
-    this.debugContent = debugContent;
-  }
+	public void setText(String text) {
+		this.text = text;
+	}
 
-  @Override
-  public String toString() {
-    return "Message [text=" + this.text + ", additionalResources=" + this.additionalResources
-        + ", debugContent=" + this.debugContent + "]";
-  }
+	public void setAdditionalResources(List<? extends URI> additionalResources) {
+		this.additionalResources = ImmutableList.copyOf(additionalResources);
+	}
+
+	public void setDebugContent(String debugContent) {
+		this.debugContent = debugContent;
+	}
+
+	@Override
+	public String toString() {
+		return "Message [text=" + this.text + ", additionalResources=" + this.additionalResources + ", debugContent="
+				+ this.debugContent + "]";
+	}
 }

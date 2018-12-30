@@ -41,9 +41,12 @@ public final class AttributeValuePair implements Comparable<AttributeValuePair>,
 	/**
 	 * Creates an attribute-value pair.
 	 * 
-	 * @param uuid UUID of the pair
-	 * @param attribute attribute part of the pair
-	 * @param value value part of the pair
+	 * @param uuid
+	 *            UUID of the pair
+	 * @param attribute
+	 *            attribute part of the pair
+	 * @param value
+	 *            value part of the pair
 	 */
 	public AttributeValuePair(final UUID uuid, Attribute attribute, Value value) {
 		checkNotNull(uuid);

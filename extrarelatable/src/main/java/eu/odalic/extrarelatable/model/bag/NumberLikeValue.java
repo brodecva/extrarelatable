@@ -2,9 +2,9 @@ package eu.odalic.extrarelatable.model.bag;
 
 /**
  * Sub-type of {@link AbstractValue} which instances can be naturally converted
- * to a number. Extending classes are required to override
- * the {@link AbstractValue#getFigure()} method to make it always return a
- * double value.
+ * to a number. Extending classes are required to override the
+ * {@link AbstractValue#getFigure()} method to make it always return a double
+ * value.
  * 
  * @author Václav Brodec
  *

@@ -28,7 +28,8 @@ public final class Attribute implements Serializable {
 	/**
 	 * Creates an attribute.
 	 * 
-	 * @param name attribute name
+	 * @param name
+	 *            attribute name
 	 */
 	public Attribute(String name) {
 		checkNotNull(name);

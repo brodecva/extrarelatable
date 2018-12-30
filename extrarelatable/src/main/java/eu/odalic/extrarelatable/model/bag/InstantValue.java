@@ -14,23 +14,24 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class InstantValue extends AbstractValue implements Serializable {
 	private static final long serialVersionUID = -8198368132975821586L;
-	
+
 	private final Instant instant;
 
 	/**
 	 * Creates the value.
 	 * 
-	 * @param instant instant in time
+	 * @param instant
+	 *            instant in time
 	 * @return the value
 	 */
 	public static final InstantValue of(Instant instant) {
 		return new InstantValue(instant);
 	}
-	
+
 	private InstantValue(Instant figure) {
 		this.instant = figure;
-	}	
-	
+	}
+
 	/**
 	 * @return the encapsualted instant in time
 	 */
@@ -42,7 +43,7 @@ public final class InstantValue extends AbstractValue implements Serializable {
 	public String getText() {
 		return instant.toString();
 	}
-	
+
 	@Override
 	public double getFigure() {
 		return (double) instant.toEpochMilli();

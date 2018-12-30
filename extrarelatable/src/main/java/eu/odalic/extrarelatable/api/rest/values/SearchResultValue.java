@@ -15,7 +15,9 @@ import eu.odalic.extrarelatable.model.graph.SearchResult;
 /**
  * Properties matching a search query executed on a graph.
  * 
- * <p>{@link SearchResult} adapted for REST API.</p>
+ * <p>
+ * {@link SearchResult} adapted for REST API.
+ * </p>
  * 
  * @author Václav Brodec
  *

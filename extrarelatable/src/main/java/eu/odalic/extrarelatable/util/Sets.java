@@ -22,7 +22,8 @@ public final class Sets {
 	 *            comparator of elements
 	 * @return comparator of two sets based on the comparator of the elements
 	 * 
-	 * @param <T> type of elements
+	 * @param <T>
+	 *            type of elements
 	 */
 	public static <T> Comparator<Set<T>> comparator(final Comparator<? super T> comparator) {
 		return (first, second) -> {
@@ -53,7 +54,8 @@ public final class Sets {
 	 * 
 	 * @return natural comparator of the sets
 	 * 
-	 * @param <T> type of elements
+	 * @param <T>
+	 *            type of elements
 	 */
 	public static <T extends Comparable<? super T>> Comparator<Set<T>> comparator() {
 		return comparator(Comparator.naturalOrder());

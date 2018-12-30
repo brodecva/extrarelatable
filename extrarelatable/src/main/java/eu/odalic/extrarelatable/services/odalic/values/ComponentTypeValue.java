@@ -15,18 +15,21 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum(String.class)
 @XmlRootElement(name = "component")
 public enum ComponentTypeValue {
-  /**
-   * statistical component representing dimension
-   */
-  @XmlEnumValue("DIMENSION") DIMENSION,
+	/**
+	 * statistical component representing dimension
+	 */
+	@XmlEnumValue("DIMENSION")
+	DIMENSION,
 
-  /**
-   * statistical component representing measure
-   */
-  @XmlEnumValue("MEASURE") MEASURE,
+	/**
+	 * statistical component representing measure
+	 */
+	@XmlEnumValue("MEASURE")
+	MEASURE,
 
-  /**
-   * no statistical component
-   */
-  @XmlEnumValue("NONE") NONE
+	/**
+	 * no statistical component
+	 */
+	@XmlEnumValue("NONE")
+	NONE
 }

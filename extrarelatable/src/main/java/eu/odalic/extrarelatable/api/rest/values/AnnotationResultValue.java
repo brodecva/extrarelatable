@@ -43,9 +43,11 @@ public class AnnotationResultValue implements Serializable {
 	}
 
 	/**
-	 * Maps integer column indices of numeric columns to relational {@link AnnotationValue}s.
+	 * Maps integer column indices of numeric columns to relational
+	 * {@link AnnotationValue}s.
 	 * 
-	 * @return map of integer column indices of numeric columns to relational {@link AnnotationValue}s
+	 * @return map of integer column indices of numeric columns to relational
+	 *         {@link AnnotationValue}s
 	 */
 	@XmlElement
 	public Map<Integer, Annotation> getAnnotations() {

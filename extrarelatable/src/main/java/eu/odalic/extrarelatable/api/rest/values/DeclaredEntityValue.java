@@ -16,11 +16,15 @@ import com.webcohesion.enunciate.metadata.rs.TypeHint;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 /**
- * <p>It encapsulates either the RDFS property or class that is a part of
- * either the declared or collected context associated with a table. The URI of
- * the property (or class) is accompanied by a list of associated text labels.</p>
+ * <p>
+ * It encapsulates either the RDFS property or class that is a part of either
+ * the declared or collected context associated with a table. The URI of the
+ * property (or class) is accompanied by a list of associated text labels.
+ * </p>
  * 
- * <p>{@link DeclaredEntity} adapted for REST API.</p>
+ * <p>
+ * {@link DeclaredEntity} adapted for REST API.
+ * </p>
  * 
  * @author Václav Brodec
  *

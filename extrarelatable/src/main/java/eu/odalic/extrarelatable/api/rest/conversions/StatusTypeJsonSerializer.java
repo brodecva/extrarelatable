@@ -10,19 +10,23 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
- * <p>Serializer of {@link StatusType} to integer status code.</p>
+ * <p>
+ * Serializer of {@link StatusType} to integer status code.
+ * </p>
  * 
- * <p>Adapted from Odalic with permission.</p>
+ * <p>
+ * Adapted from Odalic with permission.
+ * </p>
  *
  * @author Václav Brodec
  *
  */
 public final class StatusTypeJsonSerializer extends JsonSerializer<StatusType> {
 
-  @Override
-  public void serialize(final StatusType value, final JsonGenerator jgen,
-      final SerializerProvider provider) throws IOException, JsonProcessingException {
-    jgen.writeNumber(value.getStatusCode());
-  }
+	@Override
+	public void serialize(final StatusType value, final JsonGenerator jgen, final SerializerProvider provider)
+			throws IOException, JsonProcessingException {
+		jgen.writeNumber(value.getStatusCode());
+	}
 
 }

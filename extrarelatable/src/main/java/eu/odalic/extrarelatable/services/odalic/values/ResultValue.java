@@ -31,168 +31,175 @@ import eu.odalic.extrarelatable.services.odalic.conversions.ColumnRelationPositi
  *
  */
 @XmlRootElement(name = "result")
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class ResultValue implements Serializable {
 
-  private static final long serialVersionUID = -6359038623760039155L;
+	private static final long serialVersionUID = -6359038623760039155L;
 
-  private Map<String, Set<ColumnPositionValue>> subjectColumnsPositions;
+	private Map<String, Set<ColumnPositionValue>> subjectColumnsPositions;
 
-  private List<HeaderAnnotationValue> headerAnnotations;
+	private List<HeaderAnnotationValue> headerAnnotations;
 
-  private CellAnnotationValue[][] cellAnnotations;
+	private CellAnnotationValue[][] cellAnnotations;
 
-  private Map<ColumnRelationPositionValue, ColumnRelationAnnotationValue> columnRelationAnnotationsAlternative;
+	private Map<ColumnRelationPositionValue, ColumnRelationAnnotationValue> columnRelationAnnotationsAlternative;
 
-  private List<StatisticalAnnotationValue> statisticalAnnotations;
+	private List<StatisticalAnnotationValue> statisticalAnnotations;
 
-  private List<ColumnProcessingAnnotationValue> columnProcessingAnnotations;
+	private List<ColumnProcessingAnnotationValue> columnProcessingAnnotations;
 
-  private List<String> warnings;
+	private List<String> warnings;
 
-  public ResultValue() {
-    this.subjectColumnsPositions = ImmutableMap.of();
-    this.headerAnnotations = ImmutableList.of();
-    this.cellAnnotations = new CellAnnotationValue[0][0];;
-    this.columnRelationAnnotationsAlternative = ImmutableMap.of();
-    this.statisticalAnnotations = ImmutableList.of();
-    this.columnProcessingAnnotations = ImmutableList.of();
-    this.warnings = ImmutableList.of();
-  }
+	public ResultValue() {
+		this.subjectColumnsPositions = ImmutableMap.of();
+		this.headerAnnotations = ImmutableList.of();
+		this.cellAnnotations = new CellAnnotationValue[0][0];
+		;
+		this.columnRelationAnnotationsAlternative = ImmutableMap.of();
+		this.statisticalAnnotations = ImmutableList.of();
+		this.columnProcessingAnnotations = ImmutableList.of();
+		this.warnings = ImmutableList.of();
+	}
 
-  /**
-   * @return the cell annotations
-   */
-  @XmlElement
-  public CellAnnotationValue[][] getCellAnnotations() {
-    return eu.odalic.extrarelatable.util.Arrays.deepCopy(CellAnnotationValue.class, this.cellAnnotations);
-  }
+	/**
+	 * @return the cell annotations
+	 */
+	@XmlElement
+	public CellAnnotationValue[][] getCellAnnotations() {
+		return eu.odalic.extrarelatable.util.Arrays.deepCopy(CellAnnotationValue.class, this.cellAnnotations);
+	}
 
-  /**
-   * @return the column processing annotations
-   */
-  @XmlElement
-  public List<ColumnProcessingAnnotationValue> getColumnProcessingAnnotations() {
-    return this.columnProcessingAnnotations;
-  }
+	/**
+	 * @return the column processing annotations
+	 */
+	@XmlElement
+	public List<ColumnProcessingAnnotationValue> getColumnProcessingAnnotations() {
+		return this.columnProcessingAnnotations;
+	}
 
-  /**
-   * @return the column relation annotations
-   */
-  @XmlElement
-  @JsonDeserialize(keyUsing = ColumnRelationPositionKeyJsonDeserializer.class)
-  @JsonSerialize(keyUsing = ColumnRelationPositionKeyJsonSerializer.class)
-  public Map<ColumnRelationPositionValue, ColumnRelationAnnotationValue> getColumnRelationAnnotationsAlternative() {
-    return this.columnRelationAnnotationsAlternative;
-  }
+	/**
+	 * @return the column relation annotations
+	 */
+	@XmlElement
+	@JsonDeserialize(keyUsing = ColumnRelationPositionKeyJsonDeserializer.class)
+	@JsonSerialize(keyUsing = ColumnRelationPositionKeyJsonSerializer.class)
+	public Map<ColumnRelationPositionValue, ColumnRelationAnnotationValue> getColumnRelationAnnotationsAlternative() {
+		return this.columnRelationAnnotationsAlternative;
+	}
 
-  /**
-   * @return the header annotations
-   */
-  @XmlElement
-  public List<HeaderAnnotationValue> getHeaderAnnotations() {
-    return this.headerAnnotations;
-  }
+	/**
+	 * @return the header annotations
+	 */
+	@XmlElement
+	public List<HeaderAnnotationValue> getHeaderAnnotations() {
+		return this.headerAnnotations;
+	}
 
-  /**
-   * @return the statistical annotations
-   */
-  @XmlElement
-  public List<StatisticalAnnotationValue> getStatisticalAnnotations() {
-    return this.statisticalAnnotations;
-  }
+	/**
+	 * @return the statistical annotations
+	 */
+	@XmlElement
+	public List<StatisticalAnnotationValue> getStatisticalAnnotations() {
+		return this.statisticalAnnotations;
+	}
 
-  /**
-   * @return the subject columns positions
-   */
-  @XmlAnyElement
-  @JsonDeserialize(contentUsing = ColumnPositionValueSetDeserializer.class)
-  @JsonSerialize(contentUsing = ColumnPositionValueSetSerializer.class)
-  public Map<String, Set<ColumnPositionValue>> getSubjectColumnsPositions() {
-    return this.subjectColumnsPositions;
-  }
+	/**
+	 * @return the subject columns positions
+	 */
+	@XmlAnyElement
+	@JsonDeserialize(contentUsing = ColumnPositionValueSetDeserializer.class)
+	@JsonSerialize(contentUsing = ColumnPositionValueSetSerializer.class)
+	public Map<String, Set<ColumnPositionValue>> getSubjectColumnsPositions() {
+		return this.subjectColumnsPositions;
+	}
 
-  /**
-   * @return the warnings
-   */
-  @XmlElement
-  public List<String> getWarnings() {
-    return this.warnings;
-  }
+	/**
+	 * @return the warnings
+	 */
+	@XmlElement
+	public List<String> getWarnings() {
+		return this.warnings;
+	}
 
-  /**
-   * @param cellAnnotations the cell annotations to set
-   */
-  public void setCellAnnotations(final CellAnnotationValue[][] cellAnnotations) {
-    Preconditions.checkNotNull(cellAnnotations, "The cellAnnotations cannot be null!");
+	/**
+	 * @param cellAnnotations
+	 *            the cell annotations to set
+	 */
+	public void setCellAnnotations(final CellAnnotationValue[][] cellAnnotations) {
+		Preconditions.checkNotNull(cellAnnotations, "The cellAnnotations cannot be null!");
 
-    this.cellAnnotations =
-    		eu.odalic.extrarelatable.util.Arrays.deepCopy(CellAnnotationValue.class, cellAnnotations);
-  }
+		this.cellAnnotations = eu.odalic.extrarelatable.util.Arrays.deepCopy(CellAnnotationValue.class,
+				cellAnnotations);
+	}
 
-  /**
-   * @param columnProcessingAnnotations the column processing annotations to set
-   */
-  public void setColumnProcessingAnnotations(
-      final List<ColumnProcessingAnnotationValue> columnProcessingAnnotations) {
-    Preconditions.checkNotNull(columnProcessingAnnotations, "The columnProcessingAnnotations cannot be null!");
+	/**
+	 * @param columnProcessingAnnotations
+	 *            the column processing annotations to set
+	 */
+	public void setColumnProcessingAnnotations(
+			final List<ColumnProcessingAnnotationValue> columnProcessingAnnotations) {
+		Preconditions.checkNotNull(columnProcessingAnnotations, "The columnProcessingAnnotations cannot be null!");
 
-    this.columnProcessingAnnotations = ImmutableList.copyOf(columnProcessingAnnotations);
-  }
+		this.columnProcessingAnnotations = ImmutableList.copyOf(columnProcessingAnnotations);
+	}
 
-  /**
-   * @param columnRelationAnnotationsAlternative the column relation annotations to set
-   */
-  public void setColumnRelationAnnotationsAlternative(
-      final Map<? extends ColumnRelationPositionValue, ? extends ColumnRelationAnnotationValue> columnRelationAnnotationsAlternative) {
-    checkNotNull(columnRelationAnnotationsAlternative);
-    
-    this.columnRelationAnnotationsAlternative = ImmutableMap.copyOf(columnRelationAnnotationsAlternative);
-  }
+	/**
+	 * @param columnRelationAnnotationsAlternative
+	 *            the column relation annotations to set
+	 */
+	public void setColumnRelationAnnotationsAlternative(
+			final Map<? extends ColumnRelationPositionValue, ? extends ColumnRelationAnnotationValue> columnRelationAnnotationsAlternative) {
+		checkNotNull(columnRelationAnnotationsAlternative);
 
-  /**
-   * @param headerAnnotations the header annotations to set
-   */
-  public void setHeaderAnnotations(final List<HeaderAnnotationValue> headerAnnotations) {
-    Preconditions.checkNotNull(headerAnnotations, "The headerAnnotations cannot be null!");
+		this.columnRelationAnnotationsAlternative = ImmutableMap.copyOf(columnRelationAnnotationsAlternative);
+	}
 
-    this.headerAnnotations = ImmutableList.copyOf(headerAnnotations);
-  }
+	/**
+	 * @param headerAnnotations
+	 *            the header annotations to set
+	 */
+	public void setHeaderAnnotations(final List<HeaderAnnotationValue> headerAnnotations) {
+		Preconditions.checkNotNull(headerAnnotations, "The headerAnnotations cannot be null!");
 
-  /**
-   * @param statisticalAnnotations the statistical annotations to set
-   */
-  public void setStatisticalAnnotations(final List<StatisticalAnnotationValue> statisticalAnnotations) {
-    Preconditions.checkNotNull(statisticalAnnotations, "The statisticalAnnotations cannot be null!");
+		this.headerAnnotations = ImmutableList.copyOf(headerAnnotations);
+	}
 
-    this.statisticalAnnotations = ImmutableList.copyOf(statisticalAnnotations);
-  }
-  
-  /**
-   * @param subjectColumnsPositions the subject columns positions to set
-   */
-  public void setSubjectColumnsPositions(
-      final Map<? extends String, Set<ColumnPositionValue>> subjectColumnsPositions) {
-    Preconditions.checkNotNull(subjectColumnsPositions, "The subjectColumnsPositions cannot be null!");
-    
-    this.subjectColumnsPositions = ImmutableMap.copyOf(subjectColumnsPositions);
-  }
+	/**
+	 * @param statisticalAnnotations
+	 *            the statistical annotations to set
+	 */
+	public void setStatisticalAnnotations(final List<StatisticalAnnotationValue> statisticalAnnotations) {
+		Preconditions.checkNotNull(statisticalAnnotations, "The statisticalAnnotations cannot be null!");
 
-  /**
-   * @param warnings the warnings to set
-   */
-  public void setWarnings(final List<String> warnings) {
-    Preconditions.checkNotNull(warnings, "The warnings cannot be null!");
+		this.statisticalAnnotations = ImmutableList.copyOf(statisticalAnnotations);
+	}
 
-    this.warnings = ImmutableList.copyOf(warnings);
-  }
+	/**
+	 * @param subjectColumnsPositions
+	 *            the subject columns positions to set
+	 */
+	public void setSubjectColumnsPositions(
+			final Map<? extends String, Set<ColumnPositionValue>> subjectColumnsPositions) {
+		Preconditions.checkNotNull(subjectColumnsPositions, "The subjectColumnsPositions cannot be null!");
 
-  @Override
-  public String toString() {
-    return "ResultValue [subjectColumnsPositions=" + this.subjectColumnsPositions
-        + ", headerAnnotations=" + this.headerAnnotations + ", cellAnnotations="
-        + Arrays.toString(this.cellAnnotations) + ", columnRelationAnnotationsAlternative="
-        + this.columnRelationAnnotationsAlternative + ", statisticalAnnotations=" + this.statisticalAnnotations
-        + ", warnings=" + this.warnings + "]";
-  }
+		this.subjectColumnsPositions = ImmutableMap.copyOf(subjectColumnsPositions);
+	}
+
+	/**
+	 * @param warnings
+	 *            the warnings to set
+	 */
+	public void setWarnings(final List<String> warnings) {
+		Preconditions.checkNotNull(warnings, "The warnings cannot be null!");
+
+		this.warnings = ImmutableList.copyOf(warnings);
+	}
+
+	@Override
+	public String toString() {
+		return "ResultValue [subjectColumnsPositions=" + this.subjectColumnsPositions + ", headerAnnotations="
+				+ this.headerAnnotations + ", cellAnnotations=" + Arrays.toString(this.cellAnnotations)
+				+ ", columnRelationAnnotationsAlternative=" + this.columnRelationAnnotationsAlternative
+				+ ", statisticalAnnotations=" + this.statisticalAnnotations + ", warnings=" + this.warnings + "]";
+	}
 }

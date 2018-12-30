@@ -55,17 +55,27 @@ public final class DefaultAnnotator implements Annotator {
 	/**
 	 * Constructs the annotator.
 	 * 
-	 * @param propertyTreeBuilder builder used to build temporary property trees (which are not to become part of the graph) which are measured against the trees from the graph
-	 * @param topKNodesMatcher retrieves the top K nodes from the graph closest to input node
-	 * @param propertiesResultAggregator aggregates the top K nodes by their shared properties
-	 * @param labelsResultAggregator aggregates the top K nodes by their shared labels
-	 * @param pairsResultAggregator aggregates the top K nodes by their shared attribute-value pairs
-	 * @param defaultK default maximum number of the top properties, labels or other parts of each annotation returned in the result
+	 * @param propertyTreeBuilder
+	 *            builder used to build temporary property trees (which are not to
+	 *            become part of the graph) which are measured against the trees
+	 *            from the graph
+	 * @param topKNodesMatcher
+	 *            retrieves the top K nodes from the graph closest to input node
+	 * @param propertiesResultAggregator
+	 *            aggregates the top K nodes by their shared properties
+	 * @param labelsResultAggregator
+	 *            aggregates the top K nodes by their shared labels
+	 * @param pairsResultAggregator
+	 *            aggregates the top K nodes by their shared attribute-value pairs
+	 * @param defaultK
+	 *            default maximum number of the top properties, labels or other
+	 *            parts of each annotation returned in the result
 	 */
 	public DefaultAnnotator(final PropertyTreeBuilder propertyTreeBuilder, final TopKNodesMatcher topKNodesMatcher,
 			@Qualifier("PropertiesResultAggregator") final ResultAggregator<MeasuredNode> propertiesResultAggregator,
 			@Qualifier("LabelsResultAggregator") final ResultAggregator<MeasuredNode> labelsResultAggregator,
-			@Qualifier("PairsResultAggregator") final ResultAggregator<MeasuredNode> pairsResultAggregator, @Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
+			@Qualifier("PairsResultAggregator") final ResultAggregator<MeasuredNode> pairsResultAggregator,
+			@Value("${eu.odalic.extrarelatable.topKAggregatedResults:3}") final int defaultK) {
 		checkNotNull(propertyTreeBuilder);
 		checkNotNull(topKNodesMatcher);
 		checkNotNull(propertiesResultAggregator);
@@ -86,8 +96,7 @@ public final class DefaultAnnotator implements Annotator {
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
-			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses,
-			final boolean onlyDeclaredAsContext,
+			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses, final boolean onlyDeclaredAsContext,
 			final int k) {
 		checkNotNull(graph);
 		checkNotNull(slicedTable);
@@ -96,7 +105,8 @@ public final class DefaultAnnotator implements Annotator {
 		final ImmutableMap.Builder<Integer, Annotation> builder = ImmutableMap.builder();
 
 		slicedTable.getDataColumns().keySet().forEach(columnIndex -> {
-			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties, declaredClasses, contextProperties, contextClasses, false, onlyDeclaredAsContext);
+			final PropertyTree tree = this.propertyTreeBuilder.build(slicedTable, columnIndex, declaredProperties,
+					declaredClasses, contextProperties, contextClasses, false, onlyDeclaredAsContext);
 
 			final ImmutableMultiset.Builder<MeasuredNode> treeMatchingNodesBuilder = ImmutableMultiset.builder();
 
@@ -164,8 +174,8 @@ public final class DefaultAnnotator implements Annotator {
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredClasses,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> contextClasses,
-			final boolean onlyDeclaredAsContext
-			) {
-		return annotate(graph, slicedTable, declaredProperties, declaredClasses, contextProperties, contextClasses, onlyDeclaredAsContext, this.defaultK);
+			final boolean onlyDeclaredAsContext) {
+		return annotate(graph, slicedTable, declaredProperties, declaredClasses, contextProperties, contextClasses,
+				onlyDeclaredAsContext, this.defaultK);
 	}
 }

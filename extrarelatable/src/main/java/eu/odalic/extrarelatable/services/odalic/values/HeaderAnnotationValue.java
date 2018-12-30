@@ -28,55 +28,58 @@ import eu.odalic.extrarelatable.services.odalic.conversions.EntityCandidateValue
 @XmlRootElement(name = "headerAnnotation")
 public final class HeaderAnnotationValue {
 
-  private Map<String, NavigableSet<EntityCandidateValue>> candidates;
+	private Map<String, NavigableSet<EntityCandidateValue>> candidates;
 
-  private Map<String, Set<EntityCandidateValue>> chosen;
+	private Map<String, Set<EntityCandidateValue>> chosen;
 
-  public HeaderAnnotationValue() {
-    this.candidates = ImmutableMap.of();
-    this.chosen = ImmutableMap.of();
-  }
+	public HeaderAnnotationValue() {
+		this.candidates = ImmutableMap.of();
+		this.chosen = ImmutableMap.of();
+	}
 
-  /**
-   * @return the candidates
-   */
-  @XmlAnyElement
-  @JsonDeserialize(contentUsing = EntityCandidateValueNavigableSetDeserializer.class)
-  @JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
-  public Map<String, NavigableSet<EntityCandidateValue>> getCandidates() {
-    return this.candidates;
-  }
+	/**
+	 * @return the candidates
+	 */
+	@XmlAnyElement
+	@JsonDeserialize(contentUsing = EntityCandidateValueNavigableSetDeserializer.class)
+	@JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
+	public Map<String, NavigableSet<EntityCandidateValue>> getCandidates() {
+		return this.candidates;
+	}
 
-  /**
-   * @return the chosen
-   */
-  @XmlAnyElement
-  @JsonDeserialize(contentUsing = EntityCandidateValueSetDeserializer.class)
-  @JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
-  public Map<String, Set<EntityCandidateValue>> getChosen() {
-    return this.chosen;
-  }
+	/**
+	 * @return the chosen
+	 */
+	@XmlAnyElement
+	@JsonDeserialize(contentUsing = EntityCandidateValueSetDeserializer.class)
+	@JsonSerialize(contentUsing = EntityCandidateValueSetSerializer.class)
+	public Map<String, Set<EntityCandidateValue>> getChosen() {
+		return this.chosen;
+	}
 
-  /**
-   * @param candidates the candidates to set
-   */
-  public void setCandidates(
-      final Map<? extends String, ? extends NavigableSet<? extends EntityCandidateValue>> candidates) {
-    this.candidates = candidates.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> ImmutableSortedSet.copyOf(e.getValue())));
-  }
+	/**
+	 * @param candidates
+	 *            the candidates to set
+	 */
+	public void setCandidates(
+			final Map<? extends String, ? extends NavigableSet<? extends EntityCandidateValue>> candidates) {
+		this.candidates = candidates.entrySet().stream()
+				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> ImmutableSortedSet.copyOf(e.getValue())));
+	}
 
-  /**
-   * @param chosen the chosen to set
-   */
-  public void setChosen(
-      final Map<? extends String, ? extends Set<? extends EntityCandidateValue>> chosen) {
-	  checkNotNull(chosen);
-	  
-	  this.chosen = chosen.entrySet().stream().collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> ImmutableSet.copyOf(e.getValue())));
-  }
+	/**
+	 * @param chosen
+	 *            the chosen to set
+	 */
+	public void setChosen(final Map<? extends String, ? extends Set<? extends EntityCandidateValue>> chosen) {
+		checkNotNull(chosen);
 
-  @Override
-  public String toString() {
-    return "HeaderAnnotationValue [candidates=" + this.candidates + ", chosen=" + this.chosen + "]";
-  }
+		this.chosen = chosen.entrySet().stream()
+				.collect(ImmutableMap.toImmutableMap(e -> e.getKey(), e -> ImmutableSet.copyOf(e.getValue())));
+	}
+
+	@Override
+	public String toString() {
+		return "HeaderAnnotationValue [candidates=" + this.candidates + ", chosen=" + this.chosen + "]";
+	}
 }

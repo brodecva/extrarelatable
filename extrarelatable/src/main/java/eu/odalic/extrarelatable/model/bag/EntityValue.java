@@ -13,28 +13,29 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class EntityValue extends AbstractValue implements Serializable {
 	private static final long serialVersionUID = 1092664987967658783L;
-	
+
 	private final String entity;
 
 	/**
 	 * Creates the value.
 	 * 
-	 * @param entity name of the entity
+	 * @param entity
+	 *            name of the entity
 	 * @return the value
 	 */
 	public static EntityValue of(final String entity) {
 		return new EntityValue(entity);
 	}
-	
+
 	private EntityValue(final String entity) {
 		this.entity = entity;
-	}	
+	}
 
 	@Override
 	public String getText() {
 		return entity;
 	}
-	
+
 	@Override
 	public boolean isEntity() {
 		return true;
@@ -43,7 +44,7 @@ public final class EntityValue extends AbstractValue implements Serializable {
 	public String getEntity() {
 		return entity;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

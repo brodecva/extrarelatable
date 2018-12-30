@@ -15,22 +15,26 @@ public interface GraphsPersitingService {
 	/**
 	 * Saves the graph.
 	 * 
-	 * @param name name of the graph
-	 * @param graph the graph
+	 * @param name
+	 *            name of the graph
+	 * @param graph
+	 *            the graph
 	 */
 	void persist(String name, BackgroundKnowledgeGraph graph);
 
 	/**
 	 * Saves the graphs.
 	 * 
-	 * @param graphs map of graph names to graphs
+	 * @param graphs
+	 *            map of graph names to graphs
 	 */
 	void persist(Map<? extends String, ? extends BackgroundKnowledgeGraph> graphs);
 
 	/**
 	 * Deletes the persisted version of the graph.
 	 * 
-	 * @param name graph name
+	 * @param name
+	 *            graph name
 	 */
 	void delete(String name);
 

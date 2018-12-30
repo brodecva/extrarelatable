@@ -17,14 +17,13 @@ import eu.odalic.extrarelatable.services.odalic.values.ColumnPositionValue;
  * @author Václav Brodec
  *
  */
-public final class ColumnPositionValueSetDeserializer
-    extends JsonDeserializer<Set<ColumnPositionValue>> {
+public final class ColumnPositionValueSetDeserializer extends JsonDeserializer<Set<ColumnPositionValue>> {
 
-  @Override
-  public Set<ColumnPositionValue> deserialize(final JsonParser parser,
-      final DeserializationContext ctxt) throws IOException, JsonProcessingException {
-    final ColumnPositionValue[] array = ctxt.readValue(parser, ColumnPositionValue[].class);
+	@Override
+	public Set<ColumnPositionValue> deserialize(final JsonParser parser, final DeserializationContext ctxt)
+			throws IOException, JsonProcessingException {
+		final ColumnPositionValue[] array = ctxt.readValue(parser, ColumnPositionValue[].class);
 
-    return ImmutableSet.copyOf(array);
-  }
+		return ImmutableSet.copyOf(array);
+	}
 }

@@ -38,7 +38,8 @@ public class DefaultDwtcToCsvService implements DwtcToCsvService {
 
 		final List<List<String>> listBackedRelation = Arrays.stream(dataset.getRelation())
 				.map(row -> ImmutableList.copyOf(row)).collect(ImmutableList.toImmutableList());
-		final List<List<String>> transposedRelation = Matrix.transpose(listBackedRelation); // DWTC keeps the tables transposed.
+		final List<List<String>> transposedRelation = Matrix.transpose(listBackedRelation); // DWTC keeps the tables
+																							// transposed.
 
 		final CsvWriter writer = new CsvWriter(output.toFile(), new CsvWriterSettings());
 

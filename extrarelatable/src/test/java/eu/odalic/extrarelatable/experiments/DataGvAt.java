@@ -110,9 +110,15 @@ import eu.odalic.extrarelatable.model.table.Metadata;
 import eu.odalic.extrarelatable.model.table.ParsedTable;
 
 /**
- * <p>Part of the test framework for the raw tables format (as found in the data.gv.at and www.opendataportal.at datasets).</p>
+ * <p>
+ * Part of the test framework for the raw tables format (as found in the
+ * data.gv.at and www.opendataportal.at datasets).
+ * </p>
  * 
- * <p>Parameters, recommended means of execution and description of the output is described in the accompanying thesis.</p>
+ * <p>
+ * Parameters, recommended means of execution and description of the output is
+ * described in the accompanying thesis.
+ * </p>
  * 
  * @author Václav Brodec
  *
@@ -208,7 +214,7 @@ public class DataGvAt {
 	@Lazy
 	@Qualifier("UuidGenerator")
 	private UuidGenerator uuidGenerator;
-	
+
 	@Autowired
 	@Lazy
 	private TableAnalyzer tableAnalyzer;
@@ -250,7 +256,7 @@ public class DataGvAt {
 	@Autowired
 	@Lazy
 	private ContextCollectionService contextCollectionService;
-	
+
 	private TestStatistics.Builder testStatisticsBuilder;
 
 	@Before
@@ -288,7 +294,7 @@ public class DataGvAt {
 					if (testStatistics == null) {
 						break;
 					}
-	
+
 					results.add(testStatistics);
 					sampleSizeIndex++;
 				}
@@ -298,54 +304,54 @@ public class DataGvAt {
 		for (final TestStatistics testStatistics : results) {
 			csvWriter.writeRow("Weighted average precision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedPrecision().toArray());
-			
+
 			csvWriter.writeRow("Weighted average recall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedRecall().toArray());
-			
+
 			csvWriter.writeRow("Weighted average F-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageWeightedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("Average accuracy iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageAccuracy().toArray());
-			
+
 			csvWriter.writeRow("Average error rate iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageErrorRate().toArray());
-			
+
 			csvWriter.writeRow("Overall accuracy iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallAccuracy().toArray());
-			
+
 			csvWriter.writeRow("Overall error rate iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageOverallErrorRate().toArray());
-			
+
 			csvWriter.writeRow("uPrecision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedPrecision().toArray());
-			
+
 			csvWriter.writeRow("MPrecision iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedPrecision().toArray());
-			
+
 			csvWriter.writeRow("uRecall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedRecall().toArray());
-			
+
 			csvWriter.writeRow("MRecall iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedRecall().toArray());
-			
+
 			csvWriter.writeRow("uF-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMicroAveragedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("MF-measure iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsAverageMacroAveragedFMeasure().toArray());
-			
+
 			csvWriter.writeRow("Kappa iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsKappa().toArray());
-			
+
 			csvWriter.writeRow("Learning time iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsLearningTime().toArray());
-			
+
 			csvWriter.writeRow("Testing time iterations");
 			csvWriter.writeRow(testStatistics.getAllRepetitionsTestingTime().toArray());
-			
+
 			csvWriter.writeEmptyRow();
-			
+
 			csvWriter.writeRow("Files", "To learn", "To test", "Learnt", "Tested", "Irregular header", "Few rows",
 					"Few typed rows");
 			csvWriter.writeRow(testStatistics.getFilesCount(), testStatistics.getLearningFilesCount(),
@@ -395,21 +401,23 @@ public class DataGvAt {
 			csvWriter.writeRow("Weighted average precision", "Weighted average recall", "Weighted average F-measure");
 			csvWriter.writeRow(testStatistics.getAverageWeightedPrecision(), testStatistics.getAverageWeightedRecall(),
 					testStatistics.getAverageWeightedFMeasure());
-			
+
 			csvWriter.writeRow("Average accuracy", "Average error rate", "Overall accuracy", "Overall error rate");
 			csvWriter.writeRow(testStatistics.getAverageAccuracy(), testStatistics.getAverageErrorRate(),
 					testStatistics.getAverageOverallAccuracy(), testStatistics.getAverageOverallErrorRate());
-			
+
 			csvWriter.writeRow("uPrecision", "MPrecision", "uRecall", "MRecall");
 			csvWriter.writeRow(testStatistics.getAverageMicroAveragedPrecision(),
-					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(), testStatistics.getAverageMacroAveragedRecall());
-			
+					testStatistics.getAverageMacroAveragedPrecision(), testStatistics.getAverageMicroAveragedRecall(),
+					testStatistics.getAverageMacroAveragedRecall());
+
 			csvWriter.writeRow("uF-measure", "MF-measure", "Kappa");
-			csvWriter.writeRow(testStatistics.getAverageMicroAveragedFMeasure(), testStatistics.getAverageMacroAveragedFMeasure(), testStatistics.getAverageKappa());
-			
-			
+			csvWriter.writeRow(testStatistics.getAverageMicroAveragedFMeasure(),
+					testStatistics.getAverageMacroAveragedFMeasure(), testStatistics.getAverageKappa());
+
 			csvWriter.writeRow("Learning time (s)", "Testing time (s)");
-			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(), Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
+			csvWriter.writeRow(Duration.ofNanos((long) testStatistics.getLearningTime()).getSeconds(),
+					Duration.ofNanos((long) testStatistics.getTestingTime()).getSeconds());
 
 			csvWriter.writeEmptyRow();
 		}
@@ -417,11 +425,12 @@ public class DataGvAt {
 		csvWriter.flush();
 		csvWriter.close();
 	}
-	
-	private TestStatistics testFolding(final CsvWriter csvWriter, final double sampleSizeStepRatio, final int repetitions) throws IOException {
+
+	private TestStatistics testFolding(final CsvWriter csvWriter, final double sampleSizeStepRatio,
+			final int repetitions) throws IOException {
 		final Random random = new Random(SEED);
 		testStatisticsBuilder.setSeed(SEED);
-		
+
 		if (INSTANCE_SUBPATH == null) {
 			throw new IllegalArgumentException("No instance path provided!");
 		}
@@ -432,20 +441,20 @@ public class DataGvAt {
 		final Path declaredPropertiesPath = instancePath.resolve(DECLARED_PROPERTIES_SUBPATH);
 
 		final List<Path> files = getFiles(setPath, declaredPropertiesPath, FILES_ONLY_WITH_PROPERTIES);
-		
+
 		final int foldsCount = (int) Math.round(1d / sampleSizeStepRatio);
 		final int foldSize = (int) Math.round(files.size() * sampleSizeStepRatio);
-		
+
 		final int foldedRepetitions = foldsCount * repetitions;
 		testStatisticsBuilder.setRepetitions(foldedRepetitions);
-		
+
 		int foldedRepetition = 0;
 		for (int repetition = 0; repetition < repetitions; repetition++) {
 			final List<List<Path>> folds = getFolds(random, foldsCount, foldSize, files);
-			
+
 			for (int fold = 0; fold < foldsCount; fold++) {
 				testStatisticsBuilder.addFilesCount(files.size());
-				
+
 				testSample(csvWriter, fold, files, folds, random, foldedRepetition);
 				foldedRepetition++;
 			}
@@ -515,29 +524,29 @@ public class DataGvAt {
 		}
 
 		final long learningStart = System.nanoTime();
-		
+
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
 				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
 
 		final long learningStop = System.nanoTime();
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 
 		final long testStart = System.nanoTime();
-		
+
 		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath,
 				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition,
 				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		final long testStop = System.nanoTime();
-		
+
 		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
 		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
 
@@ -545,9 +554,9 @@ public class DataGvAt {
 
 		return true;
 	}
-	
-	private boolean testSample(final CsvWriter csvWriter, final int fold, final List<Path> files, final List<List<Path>> folds,
-			final Random random, final int repetition) throws IOException {
+
+	private boolean testSample(final CsvWriter csvWriter, final int fold, final List<Path> files,
+			final List<List<Path>> folds, final Random random, final int repetition) throws IOException {
 		final Path instancePath = Paths.get(INSTANCE_SUBPATH);
 
 		final Path setPath = instancePath;
@@ -573,29 +582,29 @@ public class DataGvAt {
 		}
 
 		final long learningStart = System.nanoTime();
-		
+
 		final BackgroundKnowledgeGraph graph = learn(csvWriter, learningPaths, cleanedInputFilesPath, profilesPath,
 				declaredPropertiesPath, collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES,
 				ONLY_DECLARED_AS_CONTEXT, repetition, random, MAXIMUM_COLUMN_SAMPLE_SIZE, testProperties);
 
 		final long learningStop = System.nanoTime();
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 		csvWriter.writeEmptyRow();
 
 		final long testStart = System.nanoTime();
-		
+
 		test(csvWriter, testPaths, graph, cleanedInputFilesPath, profilesPath, declaredPropertiesPath,
 				collectionResultsDirectory, NUMERIC_COLUMNS_ONLY_WITH_PROPERTIES, ONLY_DECLARED_AS_CONTEXT, repetition,
 				random, MAXIMUM_COLUMN_SAMPLE_SIZE);
 
 		final long testStop = System.nanoTime();
-		
+
 		testStatisticsBuilder.addLearningTime(repetition, learningStop - learningStart);
 		testStatisticsBuilder.addTestingTime(repetition, testStop - testStart);
-		
+
 		csvWriter.writeEmptyRow();
 		csvWriter.writeRow("Finished.");
 
@@ -613,7 +622,7 @@ public class DataGvAt {
 		if (DRY_RUN) {
 			return ImmutableList.of();
 		}
-		
+
 		final List<Path> filesCopy = new ArrayList<>(files);
 
 		final int allFilesSize = files.size();
@@ -633,10 +642,11 @@ public class DataGvAt {
 		final List<Path> testPaths = testPathsBuilder.build();
 		return testPaths;
 	}
-	
-	private static List<List<Path>> getFolds(final Random random, final int foldsCount, final int foldSize, final List<Path> files) {
+
+	private static List<List<Path>> getFolds(final Random random, final int foldsCount, final int foldSize,
+			final List<Path> files) {
 		final List<Path> filesCopy = new ArrayList<>(files);
-		
+
 		final List<List<Path>> folds = new ArrayList<>(foldsCount);
 		for (int fold = 0; fold < foldsCount - 1; fold++) {
 			final ImmutableList.Builder<Path> foldPathsBuilder = ImmutableList.builder();
@@ -646,11 +656,11 @@ public class DataGvAt {
 				foldPathsBuilder.add(filesCopy.remove(removedIndex));
 			}
 			final List<Path> foldPaths = foldPathsBuilder.build();
-			
+
 			folds.add(foldPaths);
 		}
 		folds.add(ImmutableList.copyOf(filesCopy));
-		
+
 		return folds;
 	}
 
@@ -670,7 +680,8 @@ public class DataGvAt {
 			final Path collectionResultsDirectory, final boolean onlyWithProperties,
 			final boolean onlyDeclaredAsContext, final int repetition, final Random random,
 			final int maxColumnSampleSize, final Set<? extends URI> whitelistedProperties) throws IOException {
-		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(), propertyTreesMergingStrategy);
+		final BackgroundKnowledgeGraph graph = new BackgroundKnowledgeGraph(this.uuidGenerator.generate(),
+				propertyTreesMergingStrategy);
 
 		paths.forEach(file -> {
 			final Set<PropertyTree> trees = learnFile(csvWriter, file, cleanedInputFilesDirectory, profilesDirectory,
@@ -783,7 +794,7 @@ public class DataGvAt {
 							testStatisticsBuilder.addTrue(repetition, columnSolution.getUri());
 						} else {
 							testStatisticsBuilder.addPropertyOccurence(repetition, annotatedProperties.get(0).getUri());
-							
+
 							testStatisticsBuilder.addFalse(repetition, annotatedProperties.get(0).getUri(),
 									columnSolution.getUri());
 						}
@@ -823,8 +834,8 @@ public class DataGvAt {
 			return false;
 		}
 
-		return first.equals(second)
-				|| (GROUP_DEPENDENT && IS_ACCEPTABLE_FOR_PAIRS.get(first) != null && IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
+		return first.equals(second) || (GROUP_DEPENDENT && IS_ACCEPTABLE_FOR_PAIRS.get(first) != null
+				&& IS_ACCEPTABLE_FOR_PAIRS.get(first).contains(second));
 	}
 
 	private static Map<Integer, DeclaredEntity> getSolution(final Path input, final Path declaredPropertiesPath) {
@@ -1225,7 +1236,8 @@ public class DataGvAt {
 					minimumPartitionRelativeSize, maximumPartitionRelativeSize, minimumPartitionSize);
 
 			final Value subvalue = partitionEntry.getKey();
-			final SharedPairNode subtree = new SharedPairNode(new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
+			final SharedPairNode subtree = new SharedPairNode(
+					new AttributeValuePair(this.uuidGenerator.generate(), subattribute, subvalue),
 					ImmutableMultiset.copyOf(subpartition.getValues()));
 			subtree.addChildren(subchildren);
 

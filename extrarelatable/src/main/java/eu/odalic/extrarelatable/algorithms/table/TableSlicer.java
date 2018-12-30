@@ -16,9 +16,9 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 public interface TableSlicer {
 	/**
 	 * Determines the predominant type in each column based on the threshold and
-	 * sorts that column according to the type as either numeric column or a
-	 * column providing row context. This information is added to the original
-	 * typed table and presented as {@link SlicedTable}.
+	 * sorts that column according to the type as either numeric column or a column
+	 * providing row context. This information is added to the original typed table
+	 * and presented as {@link SlicedTable}.
 	 * 
 	 * @param threshold
 	 *            number between 0 and 1 (both including) that serves as the
@@ -32,11 +32,10 @@ public interface TableSlicer {
 	SlicedTable slice(double threshold, TypedTable table);
 
 	/**
-	 * Determines the predominant type in each column based on the default
-	 * threshold and sorts that column according to the type as either
-	 * numeric column or a column providing row context. This information
-	 * is added to the original typed table and presented as
-	 * {@link SlicedTable}.
+	 * Determines the predominant type in each column based on the default threshold
+	 * and sorts that column according to the type as either numeric column or a
+	 * column providing row context. This information is added to the original typed
+	 * table and presented as {@link SlicedTable}.
 	 * 
 	 * @param table
 	 *            input table
@@ -46,9 +45,9 @@ public interface TableSlicer {
 
 	/**
 	 * Determines the predominant type in each column based on the threshold and
-	 * sorts that column according to the type as either numeric column or a
-	 * column providing row context. This information is added to the original
-	 * typed table and presented as {@link SlicedTable}.
+	 * sorts that column according to the type as either numeric column or a column
+	 * providing row context. This information is added to the original typed table
+	 * and presented as {@link SlicedTable}.
 	 * 
 	 * @param threshold
 	 *            number between 0 and 1 (both including) that serves as the
@@ -64,11 +63,10 @@ public interface TableSlicer {
 	SlicedTable slice(double threshold, TypedTable table, Map<? extends Integer, ? extends Type> columnTypeHints);
 
 	/**
-	 * Determines the predominant type in each column based on the default
-	 * threshold and sorts that column according to the type as either
-	 * numeric column or a column providing row context. This information
-	 * is added to the original typed table and presented as
-	 * {@link SlicedTable}.
+	 * Determines the predominant type in each column based on the default threshold
+	 * and sorts that column according to the type as either numeric column or a
+	 * column providing row context. This information is added to the original typed
+	 * table and presented as {@link SlicedTable}.
 	 * 
 	 * @param table
 	 *            input table

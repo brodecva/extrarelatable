@@ -55,9 +55,12 @@ public final class NestedListsParsedTable implements ParsedTable {
 		/**
 		 * Insert new cell.
 		 * 
-		 * @param value cell value
-		 * @param rowIndex row index
-		 * @param columnIndex column index
+		 * @param value
+		 *            cell value
+		 * @param rowIndex
+		 *            row index
+		 * @param columnIndex
+		 *            column index
 		 * @return the builder
 		 */
 		public Builder insertCell(final String value, final int rowIndex, final int columnIndex) {
@@ -66,15 +69,17 @@ public final class NestedListsParsedTable implements ParsedTable {
 			}
 
 			insertToList(rows.get(rowIndex), value, columnIndex);
-			
+
 			return this;
 		}
 
 		/**
 		 * Insert a header.
 		 * 
-		 * @param value header value
-		 * @param position position index
+		 * @param value
+		 *            header value
+		 * @param position
+		 *            position index
 		 * @return the builder
 		 */
 		public Builder insertHeader(final String value, final int position) {
@@ -94,7 +99,8 @@ public final class NestedListsParsedTable implements ParsedTable {
 		/**
 		 * Sets the table meta-data.
 		 * 
-		 * @param metadata the meta-data
+		 * @param metadata
+		 *            the meta-data
 		 * @return the builder
 		 */
 		public Builder setMetadata(final Metadata metadata) {
@@ -126,8 +132,10 @@ public final class NestedListsParsedTable implements ParsedTable {
 	/**
 	 * Builds table from columns. The first cell of each column becomes a header.
 	 * 
-	 * @param columns source columns
-	 * @param metadata table meta-data
+	 * @param columns
+	 *            source columns
+	 * @param metadata
+	 *            table meta-data
 	 * @return the table
 	 */
 	public static NestedListsParsedTable fromColumns(final List<? extends List<? extends String>> columns,
@@ -150,9 +158,12 @@ public final class NestedListsParsedTable implements ParsedTable {
 	/**
 	 * Builds a table from header row and other rows.
 	 * 
-	 * @param header headers
-	 * @param rows source rows
-	 * @param metadata table meta-data
+	 * @param header
+	 *            headers
+	 * @param rows
+	 *            source rows
+	 * @param metadata
+	 *            table meta-data
 	 * @return the table
 	 */
 	public static NestedListsParsedTable fromRows(final List<? extends String> header,

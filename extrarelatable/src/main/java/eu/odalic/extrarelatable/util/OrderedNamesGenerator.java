@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class OrderedNamesGenerator implements NamesGenerator {
 
 	private final AtomicLong counter = new AtomicLong();
-	
+
 	@Override
 	public String generate() {
 		return String.valueOf(counter.incrementAndGet());

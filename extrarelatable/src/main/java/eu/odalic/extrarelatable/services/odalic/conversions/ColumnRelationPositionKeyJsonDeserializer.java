@@ -16,17 +16,18 @@ import jersey.repackaged.com.google.common.base.Preconditions;
  */
 public final class ColumnRelationPositionKeyJsonDeserializer extends KeyDeserializer {
 
-  private static final int NUMBER_OF_INDICES = 2;
+	private static final int NUMBER_OF_INDICES = 2;
 
-@Override
-  public Object deserializeKey(final String key, final DeserializationContext ctxt) {
+	@Override
+	public Object deserializeKey(final String key, final DeserializationContext ctxt) {
 		final List<String> indices = Splitter.on(ColumnRelationPositionKeyJsonSerializer.DELIMITER).splitToList(key);
-		Preconditions.checkArgument(indices.size() == NUMBER_OF_INDICES, "Invalid column relation position key format!");
-    
-    try {
-      return new ColumnRelationPositionValue(Integer.valueOf(indices.get(0)), Integer.valueOf(indices.get(1)));
-    } catch (final NumberFormatException e) {
-      throw new IllegalArgumentException("Invalid column relation position key format!", e);
-    }
-  }
+		Preconditions.checkArgument(indices.size() == NUMBER_OF_INDICES,
+				"Invalid column relation position key format!");
+
+		try {
+			return new ColumnRelationPositionValue(Integer.valueOf(indices.get(0)), Integer.valueOf(indices.get(1)));
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid column relation position key format!", e);
+		}
+	}
 }

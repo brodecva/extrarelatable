@@ -15,23 +15,27 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum(String.class)
 @XmlRootElement(name = "processingType")
 public enum ColumnProcessingTypeValue {
-  /**
-   * processing type for column containing named entity
-   */
-  @XmlEnumValue("NAMED_ENTITY") NAMED_ENTITY,
+	/**
+	 * processing type for column containing named entity
+	 */
+	@XmlEnumValue("NAMED_ENTITY")
+	NAMED_ENTITY,
 
-  /**
-   * processing type for column containing other than named entity
-   */
-  @XmlEnumValue("NON_NAMED_ENTITY") NON_NAMED_ENTITY,
+	/**
+	 * processing type for column containing other than named entity
+	 */
+	@XmlEnumValue("NON_NAMED_ENTITY")
+	NON_NAMED_ENTITY,
 
-  /**
-   * processing type for ignored column
-   */
-  @XmlEnumValue("IGNORED") IGNORED,
+	/**
+	 * processing type for ignored column
+	 */
+	@XmlEnumValue("IGNORED")
+	IGNORED,
 
-  /**
-   * processing type for compulsory column
-   */
-  @XmlEnumValue("COMPULSORY") COMPULSORY
+	/**
+	 * processing type for compulsory column
+	 */
+	@XmlEnumValue("COMPULSORY")
+	COMPULSORY
 }

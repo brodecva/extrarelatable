@@ -13,8 +13,9 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Background knowledge graph groups all the individual present {@link Property}s
- * and facilitates merging of their instances in the learned files ({@link PropertyTree}s) into them.
+ * Background knowledge graph groups all the individual present
+ * {@link Property}s and facilitates merging of their instances in the learned
+ * files ({@link PropertyTree}s) into them.
  * 
  * @author Václav Brodec
  *
@@ -117,8 +118,8 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	}
 
 	/**
-	 * Allows to add a {@link Property} to the
-	 * knowledge base implemented by the background knowledge graph.
+	 * Allows to add a {@link Property} to the knowledge base implemented by the
+	 * background knowledge graph.
 	 * 
 	 * @param property
 	 *            newly present property
@@ -132,7 +133,8 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	/**
 	 * Executes {@link #add(Property)} in bulk.
 	 * 
-	 * @param properties collection of {@link Property} instances
+	 * @param properties
+	 *            collection of {@link Property} instances
 	 */
 	public synchronized void addAll(final Collection<? extends Property> properties) {
 		checkNotNull(properties);

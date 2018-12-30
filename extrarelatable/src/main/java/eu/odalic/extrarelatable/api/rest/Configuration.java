@@ -32,34 +32,34 @@ import eu.odalic.extrarelatable.api.rest.responses.ThrowableMapper;
  */
 public final class Configuration extends ResourceConfig {
 
-  public Configuration() throws JAXBException {
-    /*
-     * Jersey JSON exception mapping bug workaround.
-     *
-     * https://java.net/jira/browse/JERSEY-2722
-     *
-     */
-    register(JacksonJaxbJsonProvider.class, MessageBodyReader.class, MessageBodyWriter.class);
+	public Configuration() throws JAXBException {
+		/*
+		 * Jersey JSON exception mapping bug workaround.
+		 *
+		 * https://java.net/jira/browse/JERSEY-2722
+		 *
+		 */
+		register(JacksonJaxbJsonProvider.class, MessageBodyReader.class, MessageBodyWriter.class);
 
-    // Resources registration
-    register(WelcomeResource.class);
-    register(GraphResource.class);
+		// Resources registration
+		register(WelcomeResource.class);
+		register(GraphResource.class);
 
-    // Filters registration
-    register(RequestContextFilter.class);
-    register(LoggingResponseFilter.class);
-    register(CorsResponseFilter.class);
-    register(AuthenticationFilter.class);
-    register(AuthorizationFilter.class);
+		// Filters registration
+		register(RequestContextFilter.class);
+		register(LoggingResponseFilter.class);
+		register(CorsResponseFilter.class);
+		register(AuthenticationFilter.class);
+		register(AuthorizationFilter.class);
 
-    // Features registration
-    register(JacksonFeature.class);
-    register(MultiPartFeature.class);
+		// Features registration
+		register(JacksonFeature.class);
+		register(MultiPartFeature.class);
 
-    // Exception mappers registration
-    register(ThrowableMapper.class);
+		// Exception mappers registration
+		register(ThrowableMapper.class);
 
-    // Prevent the container to interfere with the error entities.
-    property(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, "true");
-  }
+		// Prevent the container to interfere with the error entities.
+		property(ServerProperties.RESPONSE_SET_STATUS_OVER_SEND_ERROR, "true");
+	}
 }

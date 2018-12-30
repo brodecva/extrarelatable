@@ -16,17 +16,16 @@ import eu.odalic.extrarelatable.services.odalic.values.EntityCandidateValue;
  * @author Václav Brodec
  *
  */
-public final class EntityCandidateValueSetSerializer
-    extends JsonSerializer<Set<EntityCandidateValue>> {
+public final class EntityCandidateValueSetSerializer extends JsonSerializer<Set<EntityCandidateValue>> {
 
-  @Override
-  public void serialize(final Set<EntityCandidateValue> value, final JsonGenerator jgen,
-      final SerializerProvider provider) throws IOException, JsonProcessingException {
-    jgen.writeStartArray();
-    for (final EntityCandidateValue entry : value) {
-      jgen.writeObject(entry);
-    }
-    jgen.writeEndArray();
-  }
+	@Override
+	public void serialize(final Set<EntityCandidateValue> value, final JsonGenerator jgen,
+			final SerializerProvider provider) throws IOException, JsonProcessingException {
+		jgen.writeStartArray();
+		for (final EntityCandidateValue entry : value) {
+			jgen.writeObject(entry);
+		}
+		jgen.writeEndArray();
+	}
 
 }

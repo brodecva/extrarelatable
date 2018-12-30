@@ -6,7 +6,8 @@ import eu.odalic.extrarelatable.model.bag.Label;
 import eu.odalic.extrarelatable.model.bag.Value;
 
 /**
- * The {@link ParsedTable} where each cell has been converted to a typed value ({@link Value})in best-effort manner. 
+ * The {@link ParsedTable} where each cell has been converted to a typed value
+ * ({@link Value})in best-effort manner.
  * 
  * @author Václav Brodec
  *
@@ -43,13 +44,15 @@ public interface TypedTable {
 	int getHeight();
 
 	/**
-	 * @param index zero-based index of the row
+	 * @param index
+	 *            zero-based index of the row
 	 * @return the indexed typed row
 	 */
 	List<Value> getRow(int index);
 
 	/**
-	 * @param index zero-based index of the column
+	 * @param index
+	 *            zero-based index of the column
 	 * @return the indexed typed column
 	 */
 	List<Value> getColumn(int index);

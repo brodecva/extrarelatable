@@ -40,9 +40,12 @@ public final class Context implements Serializable {
 	/**
 	 * Creates context object without any context entitites.
 	 * 
-	 * @param columnHeaders column labels collected from the original file
-	 * @param tableAuthor author of the table
-	 * @param tableTitle title of the table
+	 * @param columnHeaders
+	 *            column labels collected from the original file
+	 * @param tableAuthor
+	 *            author of the table
+	 * @param tableTitle
+	 *            title of the table
 	 */
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle) {
 		this(columnHeaders, tableAuthor, tableTitle, null, ImmutableMap.of(), ImmutableMap.of(), null,
@@ -52,17 +55,28 @@ public final class Context implements Serializable {
 	/**
 	 * Creates context object.
 	 * 
-	 * @param columnHeaders column labels collected from the original file
-	 * @param tableAuthor author of the table
-	 * @param tableTitle title of the table
-	 * @param declaredProperty property assigned manually to the column which the property tree models
-	 * @param declaredColumnProperties all declared properties for the columns in the original file
-	 * @param declaredColumnClasses all declared classes for the columns in the original file
-	 * @param columnIndex index of the original column
-	 * @param contextColumnIndices indices of columns which do not contain number-like data, but are only meant to provide row context
+	 * @param columnHeaders
+	 *            column labels collected from the original file
+	 * @param tableAuthor
+	 *            author of the table
+	 * @param tableTitle
+	 *            title of the table
+	 * @param declaredProperty
+	 *            property assigned manually to the column which the property tree
+	 *            models
+	 * @param declaredColumnProperties
+	 *            all declared properties for the columns in the original file
+	 * @param declaredColumnClasses
+	 *            all declared classes for the columns in the original file
+	 * @param columnIndex
+	 *            index of the original column
+	 * @param contextColumnIndices
+	 *            indices of columns which do not contain number-like data, but are
+	 *            only meant to provide row context
 	 */
 	public Context(final List<? extends Label> columnHeaders, final String tableAuthor, final String tableTitle,
-			final DeclaredEntity declaredProperty, final Map<? extends Integer, ? extends DeclaredEntity> declaredColumnProperties,
+			final DeclaredEntity declaredProperty,
+			final Map<? extends Integer, ? extends DeclaredEntity> declaredColumnProperties,
 			final Map<? extends Integer, ? extends DeclaredEntity> declaredColumnClasses, final Integer columnIndex,
 			final Set<? extends Integer> contextColumnIndices) {
 		checkNotNull(columnHeaders);
@@ -104,7 +118,8 @@ public final class Context implements Serializable {
 	}
 
 	/**
-	 * @return property assigned manually to the column which the property tree models
+	 * @return property assigned manually to the column which the property tree
+	 *         models
 	 */
 	@Nullable
 	public DeclaredEntity getDeclaredProperty() {
@@ -133,7 +148,8 @@ public final class Context implements Serializable {
 	}
 
 	/**
-	 * @return indices of columns which do not contain number-like data, but are only meant to provide row context
+	 * @return indices of columns which do not contain number-like data, but are
+	 *         only meant to provide row context
 	 */
 	public Set<Integer> getContextColumnIndices() {
 		return contextColumnIndices;

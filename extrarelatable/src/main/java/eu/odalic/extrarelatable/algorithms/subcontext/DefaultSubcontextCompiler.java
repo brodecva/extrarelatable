@@ -33,8 +33,8 @@ import eu.odalic.extrarelatable.model.table.TypedTable;
 public class DefaultSubcontextCompiler implements SubcontextCompiler {
 
 	@Override
-	public Set<Subcontext> compile(final Partition partition,
-			final Set<Integer> availableContextColumnIndices, final TypedTable table, final double minimumPartitionRelativeSize,
+	public Set<Subcontext> compile(final Partition partition, final Set<Integer> availableContextColumnIndices,
+			final TypedTable table, final double minimumPartitionRelativeSize,
 			final double maximumPartitionRelativeSize, final int minimumPartitionSize) {
 		checkNotNull(partition);
 		checkNotNull(availableContextColumnIndices);
@@ -45,27 +45,26 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 		checkArgument(minimumPartitionRelativeSize <= maximumPartitionRelativeSize);
 		checkArgument(minimumPartitionSize >= 0);
 		checkArgument(partition.size() >= minimumPartitionSize);
-		
+
 		final int parentalPartitionSize = partition.size();
-		
+
 		final ImmutableSet.Builder<Subcontext> subcontextsBuilder = ImmutableSet.builder();
 		for (final Integer availableContextColumnIndex : availableContextColumnIndices) {
-			final Subcontext candidateSubcontext = compile(availableContextColumnIndex, partition,
-					table);
+			final Subcontext candidateSubcontext = compile(availableContextColumnIndex, partition, table);
 			if (candidateSubcontext == null) {
 				continue;
 			}
-			
+
 			final int largestPartitionSize = candidateSubcontext.getLargestPartitionSize();
 			if (largestPartitionSize < minimumPartitionRelativeSize * parentalPartitionSize) {
 				continue;
 			}
-			
+
 			final int smallestPartitionSize = candidateSubcontext.getSmallestPartitionSize();
 			if (smallestPartitionSize > maximumPartitionRelativeSize * parentalPartitionSize) {
 				continue;
 			}
-			
+
 			if (largestPartitionSize < minimumPartitionSize) {
 				continue;
 			}
@@ -79,27 +78,26 @@ public class DefaultSubcontextCompiler implements SubcontextCompiler {
 	private Subcontext compile(int contextValuesColumnIndex, final Partition partition, TypedTable table) {
 		checkArgument(contextValuesColumnIndex >= 0);
 		checkArgument(contextValuesColumnIndex < table.getWidth());
-		
+
 		final Subcontext.Builder builder = Subcontext.builder();
 		final List<Value> contextColumn = table.getColumn(contextValuesColumnIndex);
 		boolean found = false;
 		for (final Entry<Integer, NumberLikeValue> entry : partition.getCells().entrySet()) {
 			final int rowIndex = entry.getKey();
 			checkArgument(rowIndex < contextColumn.size());
-			
+
 			final Value contextColumnValue = contextColumn.get(rowIndex);
-			
+
 			builder.put(contextColumnValue, new NumericCell(rowIndex, entry.getValue()));
 			found = true;
 		}
 		if (!found) {
 			return null;
 		}
-		
-		
+
 		builder.setAttribute(new Attribute(table.getHeaders().get(contextValuesColumnIndex).getText()));
 		builder.setColumnIndex(contextValuesColumnIndex);
-		
+
 		return builder.build();
 	}
 }

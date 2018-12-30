@@ -13,13 +13,13 @@ import eu.odalic.extrarelatable.model.bag.Label;
  */
 public final class LabelAdapter extends XmlAdapter<LabelValue, Label> {
 
-  @Override
-  public LabelValue marshal(final Label bound) throws Exception {
-	  return new LabelValue(bound);
-  }
+	@Override
+	public LabelValue marshal(final Label bound) throws Exception {
+		return new LabelValue(bound);
+	}
 
-  @Override
-  public Label unmarshal(final LabelValue value) throws Exception {
-	  throw new UnsupportedOperationException();
-  }
+	@Override
+	public Label unmarshal(final LabelValue value) throws Exception {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -36,7 +36,9 @@ public final class LabelTextPropertyTreesMergingStrategy implements PropertyTree
 	/**
 	 * Initializes the strategy.
 	 * 
-	 * @param uuidGenerator UUID generator used to create an identifier for newly created properties
+	 * @param uuidGenerator
+	 *            UUID generator used to create an identifier for newly created
+	 *            properties
 	 */
 	@Autowired
 	public LabelTextPropertyTreesMergingStrategy(@Qualifier("UuidGenerator") final UuidGenerator uuidGenerator) {

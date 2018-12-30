@@ -34,8 +34,10 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	private final Map<String, BackgroundKnowledgeGraph> persistedGraphs;
 
 	/**
-	 * @param db DB-managing instance
-	 * @param persistedGraphs DB-persisted map of names and graphs
+	 * @param db
+	 *            DB-managing instance
+	 * @param persistedGraphs
+	 *            DB-persisted map of names and graphs
 	 */
 	DbGraphsPersistingService(final DB db, final HTreeMap<String, BackgroundKnowledgeGraph> persistedGraphs) {
 		checkNotNull(db);
@@ -48,7 +50,8 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	/**
 	 * Initializes the DB from the provided path.
 	 * 
-	 * @param filePath path to the DB file
+	 * @param filePath
+	 *            path to the DB file
 	 */
 	@SuppressWarnings("unchecked")
 	public DbGraphsPersistingService(final Path filePath) {
@@ -61,7 +64,8 @@ public final class DbGraphsPersistingService implements GraphsPersitingService {
 	/**
 	 * Initializes the DB from the provided path string.
 	 * 
-	 * @param filePath path string to the DB file
+	 * @param filePath
+	 *            path string to the DB file
 	 */
 	@Autowired
 	public DbGraphsPersistingService(@Value("${eu.odalic.extrarelatable.db.filePath}") final String filePath) {

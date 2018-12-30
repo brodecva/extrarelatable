@@ -34,34 +34,38 @@ public final class Subcontext {
 		private ImmutableSetMultimap.Builder<Value, NumericCell> partitionsBuilder = ImmutableSetMultimap.builder();
 
 		/**
-		 * @param attribute of the context column associated with the subcontext
+		 * @param attribute
+		 *            of the context column associated with the subcontext
 		 * @return the builder
 		 */
 		public Builder setAttribute(final Attribute attribute) {
 			checkNotNull(attribute);
-			
+
 			this.attribute = attribute;
-			
+
 			return this;
 		}
-		
+
 		/**
-		 * @param columnIndex index of the context column associated with the subcontext
+		 * @param columnIndex
+		 *            index of the context column associated with the subcontext
 		 * @return the builder
 		 */
 		public Builder setColumnIndex(final int columnIndex) {
 			checkArgument(columnIndex >= 0);
-			
+
 			this.columnIndex = columnIndex;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Puts the numeric cell in row context of the value into the sub-context.
 		 * 
-		 * @param value context value
-		 * @param cell the numeric cell
+		 * @param value
+		 *            context value
+		 * @param cell
+		 *            the numeric cell
 		 * @return the builder
 		 */
 		public Builder put(final Value value, final NumericCell cell) {
@@ -102,11 +106,17 @@ public final class Subcontext {
 	/**
 	 * Creates a candidate subcontext.
 	 * 
-	 * @param attribute attribute of the column that is associated with this candidate subcontext
-	 * @param columnIndex index of the column associated with this candidate subcontext
-	 * @param partitions map of values from the context column to partitions from the partitioned column
+	 * @param attribute
+	 *            attribute of the column that is associated with this candidate
+	 *            subcontext
+	 * @param columnIndex
+	 *            index of the column associated with this candidate subcontext
+	 * @param partitions
+	 *            map of values from the context column to partitions from the
+	 *            partitioned column
 	 */
-	public Subcontext(final Attribute attribute, final int columnIndex, final Map<? extends Value, ? extends Partition> partitions) {
+	public Subcontext(final Attribute attribute, final int columnIndex,
+			final Map<? extends Value, ? extends Partition> partitions) {
 		checkNotNull(attribute);
 		checkArgument(columnIndex >= 0);
 		checkNotNull(partitions);
@@ -118,19 +128,21 @@ public final class Subcontext {
 	}
 
 	/**
-	 * @return attribute belonging to the column that is associated with this candidate subcontext
+	 * @return attribute belonging to the column that is associated with this
+	 *         candidate subcontext
 	 */
 	public Attribute getAttribute() {
 		return attribute;
 	}
 
 	/**
-	 * @return the index of the context column that is associated with this candidate subcontext
+	 * @return the index of the context column that is associated with this
+	 *         candidate subcontext
 	 */
 	public int getColumnIndex() {
 		return columnIndex;
 	}
-	
+
 	/**
 	 * @return map of context values to the formed partitions
 	 */
@@ -150,7 +162,7 @@ public final class Subcontext {
 			}
 		}).get().size();
 	}
-	
+
 	/**
 	 * @return the size of the largest partition in the candidate subcontext
 	 */

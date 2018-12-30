@@ -31,7 +31,7 @@ public class DefaultColumnTypeAnalyzer implements ColumnTypeAnalyzer {
 	public double isTextual(final int columnIndex, final TypedTable table) {
 		return test(v -> v.isTextual(), columnIndex, table);
 	}
-	
+
 	@Override
 	public double isInstant(int columnIndex, TypedTable table) {
 		return test(v -> v.isInstant(), columnIndex, table);

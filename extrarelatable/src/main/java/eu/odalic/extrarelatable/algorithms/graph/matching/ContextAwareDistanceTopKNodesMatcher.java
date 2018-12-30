@@ -31,7 +31,8 @@ import eu.odalic.extrarelatable.model.graph.PropertyTree.Node;
 import eu.odalic.extrarelatable.model.table.DeclaredEntity;
 
 /**
- * Implementation of {@link TopKNodesMatcher} that takes the the available additional context into account, along the distance of numeric values.
+ * Implementation of {@link TopKNodesMatcher} that takes the the available
+ * additional context into account, along the distance of numeric values.
  * 
  * @author Václav Brodec
  *
@@ -49,11 +50,13 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	 */
 	public static final double INITIAL_DEFAULT_VALUES_WEIGHT = 0.5d;
 	/**
-	 * Default weight of contribution of the property context distances for construction.
+	 * Default weight of contribution of the property context distances for
+	 * construction.
 	 */
 	public static final double INITIAL_DEFAULT_PROPERTIES_WEIGHT = 0.25d;
 	/**
-	 * Default weight of contribution of the class context distances for construction.
+	 * Default weight of contribution of the class context distances for
+	 * construction.
 	 */
 	public static final double INITIAL_DEFAULT_CLASSES_WEIGHT = 0.25d;
 
@@ -67,12 +70,21 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	/**
 	 * Constructs the matcher.
 	 * 
-	 * @param distance user distance measure
-	 * @param measuredNodeFactory factory for nodes associated with their distance
-	 * @param defaultValuesWeight default weight of the contribution of the distance of numeric values to the overall distance
-	 * @param defaultPropertiesWeight default weight of the contribution of the property context distance to the overall distance
-	 * @param defaultClassesWeight default weight of the contribution of the class context distance to the overall distance
-	 * @param defaultK default value of K (the maximum number of the best matching nodes)
+	 * @param distance
+	 *            user distance measure
+	 * @param measuredNodeFactory
+	 *            factory for nodes associated with their distance
+	 * @param defaultValuesWeight
+	 *            default weight of the contribution of the distance of numeric
+	 *            values to the overall distance
+	 * @param defaultPropertiesWeight
+	 *            default weight of the contribution of the property context
+	 *            distance to the overall distance
+	 * @param defaultClassesWeight
+	 *            default weight of the contribution of the class context distance
+	 *            to the overall distance
+	 * @param defaultK
+	 *            default value of K (the maximum number of the best matching nodes)
 	 */
 	@Autowired
 	ContextAwareDistanceTopKNodesMatcher(final Distance distance, final MeasuredNodeFactory measuredNodeFactory,
@@ -98,11 +110,15 @@ public final class ContextAwareDistanceTopKNodesMatcher implements TopKNodesMatc
 	/**
 	 * Constructs the matcher using the defaults.
 	 * 
-	 * @param distance used distance measure
-	 * @param measuredNodeFactory factory for nodes associated with their distance
+	 * @param distance
+	 *            used distance measure
+	 * @param measuredNodeFactory
+	 *            factory for nodes associated with their distance
 	 */
-	public ContextAwareDistanceTopKNodesMatcher(final Distance distance, final MeasuredNodeFactory measuredNodeFactory) {
-		this(distance, measuredNodeFactory, INITIAL_DEFAULT_VALUES_WEIGHT, INITIAL_DEFAULT_PROPERTIES_WEIGHT, INITIAL_DEFAULT_CLASSES_WEIGHT, INITIAL_DEFAULT_K);
+	public ContextAwareDistanceTopKNodesMatcher(final Distance distance,
+			final MeasuredNodeFactory measuredNodeFactory) {
+		this(distance, measuredNodeFactory, INITIAL_DEFAULT_VALUES_WEIGHT, INITIAL_DEFAULT_PROPERTIES_WEIGHT,
+				INITIAL_DEFAULT_CLASSES_WEIGHT, INITIAL_DEFAULT_K);
 	}
 
 	@Override

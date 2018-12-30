@@ -8,8 +8,8 @@ import eu.odalic.extrarelatable.api.rest.adapters.StatisticsAdapter;
 
 /**
  * Statistics taken from the algorithm run. Usually meant to be associated each
- * computed annotation. Contains various metrics which can be used to derive
- * a score for each returned annotation.
+ * computed annotation. Contains various metrics which can be used to derive a
+ * score for each returned annotation.
  * 
  * @author Václav Brodec
  *
@@ -26,10 +26,15 @@ public final class Statistics implements Serializable {
 	/**
 	 * Creates the statistics object.
 	 * 
-	 * @param average average distance of the associated annotation
-	 * @param median median distance of the associated annotation
-	 * @param occurrence absolute occurrence of the annotation within the top N nodes
-	 * @param relativeOccurence relative occurrence (ratio of the absolute occurrence and N of the top N closest nodes)
+	 * @param average
+	 *            average distance of the associated annotation
+	 * @param median
+	 *            median distance of the associated annotation
+	 * @param occurrence
+	 *            absolute occurrence of the annotation within the top N nodes
+	 * @param relativeOccurence
+	 *            relative occurrence (ratio of the absolute occurrence and N of the
+	 *            top N closest nodes)
 	 * @return the statistics object
 	 */
 	public static Statistics of(final Double average, final Double median, final Integer occurrence,
@@ -74,7 +79,8 @@ public final class Statistics implements Serializable {
 	}
 
 	/**
-	 * @return relative occurrence (ratio of the absolute occurrence and number N of the top N closest nodes)
+	 * @return relative occurrence (ratio of the absolute occurrence and number N of
+	 *         the top N closest nodes)
 	 */
 	public Double getRelativeOccurrence() {
 		return relativeOccurrence;

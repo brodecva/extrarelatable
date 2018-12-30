@@ -38,7 +38,8 @@ public final class Matrix {
 	 *            list of lists
 	 * @return true, if the list of lists is a matrix (up to second dimension)
 	 * 
-	 * @param <E> type of elements
+	 * @param <E>
+	 *            type of elements
 	 */
 	public static <E> boolean isMatrix(final List<? extends List<? extends E>> listOfLists) {
 		checkNotNull(listOfLists);
@@ -60,10 +61,12 @@ public final class Matrix {
 	/**
 	 * Array-of-arrays equivalent of {@link #isMatrix(List)}.
 	 * 
-	 * @param arrayOfarrays array of arrays
+	 * @param arrayOfarrays
+	 *            array of arrays
 	 * @return true, if the array of arrays is a matrix (up to second dimension)
 	 * 
-	 * @param <E> type of elements
+	 * @param <E>
+	 *            type of elements
 	 * 
 	 * @see #isMatrix(List)
 	 */
@@ -92,7 +95,8 @@ public final class Matrix {
 	 *            rectangular list of lists
 	 * @return translated matrix
 	 * 
-	 * @param <E> type of elements
+	 * @param <E>
+	 *            type of elements
 	 */
 	public static <E> List<List<E>> transpose(final List<? extends List<? extends E>> matrix) {
 		checkNotNull(matrix);
@@ -131,8 +135,9 @@ public final class Matrix {
 	 *            list of lists
 	 * @return immutable copy of the list of lists up to (but not including) the
 	 *         individual elements
-	 *         
-	 * @param <E> type of elements
+	 * 
+	 * @param <E>
+	 *            type of elements
 	 */
 	public static <E> List<List<E>> copy(final List<? extends List<? extends E>> listOfLists) {
 		final ImmutableList.Builder<List<E>> builder = ImmutableList.builder();
@@ -152,7 +157,8 @@ public final class Matrix {
 	 *            array of arrays
 	 * @return list of lists
 	 * 
-	 * @param <E> type of elements
+	 * @param <E>
+	 *            type of elements
 	 */
 	public static <E> List<List<E>> fromArray(final E[][] arrayOfarrays) {
 		checkArgument(isMatrix(arrayOfarrays));

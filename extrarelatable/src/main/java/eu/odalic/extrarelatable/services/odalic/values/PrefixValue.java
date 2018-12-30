@@ -18,50 +18,53 @@ import com.google.common.base.Preconditions;
 @XmlRootElement(name = "prefix")
 public final class PrefixValue {
 
-  private String with;
+	private String with;
 
-  private String what;
+	private String what;
 
-  public PrefixValue() {}
+	public PrefixValue() {
+	}
 
-  /**
-   * @return the substituted text
-   */
-  @XmlElement
-  @Nullable
-  public String getWhat() {
-    return this.what;
-  }
+	/**
+	 * @return the substituted text
+	 */
+	@XmlElement
+	@Nullable
+	public String getWhat() {
+		return this.what;
+	}
 
-  /**
-   * @return the substitution
-   */
-  @XmlElement
-  @Nullable
-  public String getWith() {
-    return this.with;
-  }
+	/**
+	 * @return the substitution
+	 */
+	@XmlElement
+	@Nullable
+	public String getWith() {
+		return this.with;
+	}
 
-  /**
-   * @param what the what to set
-   */
-  public void setWhat(final String what) {
-    Preconditions.checkNotNull(what, "The what cannot be null!");
+	/**
+	 * @param what
+	 *            the what to set
+	 */
+	public void setWhat(final String what) {
+		Preconditions.checkNotNull(what, "The what cannot be null!");
 
-    this.what = what;
-  }
+		this.what = what;
+	}
 
-  /**
-   * @param with the with to set
-   */
-  public void setWith(final String with) {
-    Preconditions.checkNotNull(with, "The with cannot be null!");
+	/**
+	 * @param with
+	 *            the with to set
+	 */
+	public void setWith(final String with) {
+		Preconditions.checkNotNull(with, "The with cannot be null!");
 
-    this.with = with;
-  }
+		this.with = with;
+	}
 
-  @Override
-  public String toString() {
-    return "PrefixValue [with=" + this.with + ", what=" + this.what + "]";
-  }
+	@Override
+	public String toString() {
+		return "PrefixValue [with=" + this.with + ", what=" + this.what + "]";
+	}
 }

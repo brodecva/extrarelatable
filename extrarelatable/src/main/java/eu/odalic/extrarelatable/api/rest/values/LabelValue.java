@@ -181,7 +181,8 @@ public final class LabelValue implements Serializable {
 	}
 
 	/**
-	 * Provides sample of first few rows (array of string arrays [[...,...],[...,...]]).
+	 * Provides sample of first few rows (array of string arrays
+	 * [[...,...],[...,...]]).
 	 * 
 	 * @return the array of string arrays representing rows
 	 */

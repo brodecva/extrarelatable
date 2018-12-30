@@ -24,8 +24,8 @@ import eu.odalic.extrarelatable.model.table.csv.Format;
 
 /**
  * <p>
- * An implementation of the {@link CsvTableParser} handling CSV files and employing
- * Apache Commons CSV library.
+ * An implementation of the {@link CsvTableParser} handling CSV files and
+ * employing Apache Commons CSV library.
  * </p>
  * 
  * <p>
@@ -97,7 +97,7 @@ public final class ApacheCsvTableParser implements CsvTableParser {
 		}
 
 		builder.setMetadata(metadata);
-		
+
 		return builder.build();
 	}
 
