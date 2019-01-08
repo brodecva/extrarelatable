@@ -2,6 +2,7 @@ package eu.odalic.extrarelatable.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Component;
  * @see UuidGenerator
  */
 @Component("nameBased")
-public class NameBasedUuidGenerator implements UuidGenerator {
+public class NameBasedUuidGenerator implements UuidGenerator, Serializable {
 
+	private static final long serialVersionUID = 7803213828098440984L;
+	
 	private final NamesGenerator namesGenerator;
 
 	/**

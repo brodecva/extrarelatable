@@ -1,5 +1,6 @@
 package eu.odalic.extrarelatable.util;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Service;
  * @see NamesGenerator
  */
 @Service
-public class OrderedNamesGenerator implements NamesGenerator {
+public class OrderedNamesGenerator implements NamesGenerator, Serializable {
 
+	private static final long serialVersionUID = 5643820338716484507L;
+	
 	private final AtomicLong counter = new AtomicLong();
 
 	@Override
