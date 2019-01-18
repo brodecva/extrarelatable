@@ -192,7 +192,6 @@ public final class Property implements Iterable<PropertyTree>, Comparable<Proper
 
 	@Override
 	public String toString() {
-		return "Property [uuid=" + uuid + ", uri=" + uri + ", declaredLabels=" + declaredLabels + ", instances="
-				+ instances + "]";
+		return "Property [uuid=" + uuid + ", uri=" + uri + ", declaredLabels=" + declaredLabels + "]";
 	}
 }

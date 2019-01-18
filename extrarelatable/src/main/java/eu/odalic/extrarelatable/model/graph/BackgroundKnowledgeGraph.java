@@ -190,6 +190,6 @@ public final class BackgroundKnowledgeGraph implements Iterable<Property>, Seria
 	@Override
 	public String toString() {
 		return "BackgroundKnowledgeGraph [name=" + name + ", propertyTreesMergingStrategy="
-				+ propertyTreesMergingStrategy + ", properties=" + properties + "]";
+				+ propertyTreesMergingStrategy + "]";
 	}
 }
